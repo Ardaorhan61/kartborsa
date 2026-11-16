@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KartBorsa – Pokémon Kartları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1220;--panel:#171b2e;--panel2:#1f2440;--line:#2a3052;--text:#eef0fa;--muted:#9aa1c3;--accent:#ffcb3d;--accent2:#4fd1c5;--danger:#ff6b6b;--ok:#5ee08a;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh}
+h1,h2,h3{font-family:"Space Grotesk",Inter,sans-serif;margin:0}
+a{color:var(--accent2)}
+header{position:sticky;top:0;z-index:5;background:rgba(15,18,32,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo .dot{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#ff8a3d);display:grid;place-items:center;color:#1a1300;font:700 16px "Space Grotesk"}
+nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;color:var(--muted);padding:8px 12px;border-radius:10px;cursor:pointer;font:600 14px Inter;position:relative}
+nav button.on{color:var(--text);background:var(--panel2);border-color:var(--line)}
+.cartcount{background:var(--accent);color:#1a1300;border-radius:99px;font-size:11px;padding:1px 6px;margin-left:4px}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 80px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.btn{background:var(--accent);color:#1a1300;border:0;padding:10px 16px;border-radius:10px;font:700 14px Inter;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.sec{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.btn.wa{background:#25d366;color:#04230f}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font:15px Inter}
+textarea{min-height:70px;resize:vertical}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+.hero{display:flex;gap:16px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.series{margin:26px 0 12px;font:700 17px "Space Grotesk";color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sets{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.settile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:8px}
+.settile:hover{border-color:var(--accent);transform:translateY(-2px)}
+.setlogo{height:70px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#2a3157,#1a1e35);border-radius:8px;padding:8px}
+.setlogo img{max-width:100%;max-height:100%;object-fit:contain}
+.setname{display:flex;align-items:center;gap:6px;font-weight:700}
+.setname img{width:18px;height:18px;object-fit:contain}
+.cgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.ctile{cursor:pointer;transition:transform .15s}.ctile:hover{transform:translateY(-3px)}
+.cimg{aspect-ratio:63/88;border-radius:8px;overflow:hidden;background:var(--panel2);position:relative;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.cimg img{width:100%;height:100%;object-fit:cover;display:block}
+.cimg .fb{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:10px;color:var(--muted);font-size:13px}
+.badge{position:absolute;left:6px;top:6px;background:var(--accent);color:#1a1300;font:700 12px Inter;padding:3px 8px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.cname{font-weight:600;margin-top:8px;line-height:1.25}
+.cset{font-size:12px;color:var(--muted)}
+.setsec h3{font-size:16px;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.setsec h3 .t{display:flex;align-items:center;gap:10px}
+.setsec h3 img{height:34px;max-width:110px;object-fit:contain}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600}
+.atk{border-top:1px solid var(--line);padding:8px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;place-items:center;z-index:20;padding:16px}
+.modal.on{display:grid}
+.modal>.card{max-width:820px;width:100%;max-height:92vh;overflow:auto}
+.detail{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:20px}
+@media(max-width:680px){.detail{grid-template-columns:1fr}}
+.price{font:700 20px "Space Grotesk";color:var(--accent)}
+.buybox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:500;font-size:13px}
+.qty{display:inline-flex;align-items:center;gap:6px}
+.qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+.mini{width:44px;border-radius:4px}
+.note{background:rgba(255,203,61,.08);border:1px solid rgba(255,203,61,.3);color:#ffe7a3;padding:10px 12px;border-radius:10px;font-size:13px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:10px 16px;border-radius:10px;display:none;z-index:30}
+.sug{position:absolute;left:0;right:0;top:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;z-index:8;max-height:320px;overflow:auto;display:none}
+.sug div{padding:6px 10px;cursor:pointer;display:flex;gap:10px;align-items:center}.sug div:hover{background:var(--line)}
+.sug img{width:32px;border-radius:3px}
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+@media(max-width:820px){.cols{grid-template-columns:1fr}}
+pre.order{white-space:pre-wrap;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;font:13px/1.5 ui-monospace,monospace}
+footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="logo" onclick="go('katalog')"><div class="dot">K</div><h1 style="font-size:20px" id="shopName">KartBorsa</h1></div>
+  <nav>
+    <button data-v="katalog" class="on">Kartlar</button>
+    <button data-v="magaza">Satın Al</button>
+    <button data-v="sepet">Sepet<span class="cartcount" id="cartCount" style="display:none"></span></button>
+    <button data-v="yonetim" id="navAdmin" style="display:none">Mağaza Yönetimi</button>
+  </nav>
+</div></header>
+
+<main>
+  <!-- KATALOG -->
+  <section class="view on" id="v-katalog">
+    <div class="hero">
+      <div><h2>Tüm Pokémon kartları</h2><div class="muted small" id="catInfo">Kart veritabanı yükleniyor…</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <input id="cq" placeholder="Kart adını yaz: ör. Charizard, Pikachu ex, Umbreon VMAX…" autocomplete="off" style="font-size:17px;padding:14px">
+      <div class="row" style="margin-top:10px">
+        <select id="cSet"><option value="">Tüm setler</option></select>
+        <select id="cRar"><option value="">Tüm nadirlikler</option></select>
+        <select id="cSup"><option value="">Tüm türler</option><option>Pokémon</option><option>Trainer</option><option>Energy</option></select>
+      </div>
+    </div>
+    <div id="catCrumb" style="margin-bottom:10px"></div>
+    <div id="catCount" class="muted small" style="margin-bottom:8px"></div>
+    <div id="catArea"></div>
+    <div style="text-align:center;margin-top:14px"><button class="btn sec" id="catMore" style="display:none">Daha fazla göster</button></div>
+  </section>
+
+  <!-- MAĞAZA -->
+  <section class="view" id="v-magaza">
+    <div class="hero">
+      <div><h2>Satın al</h2><div class="muted small">Stokta olan kartlar. Sepete ekle, siparişini gönder.</div></div>
+      <div class="row" style="flex:1;max-width:520px">
+        <input id="sq" placeholder="Stokta ara…">
+        <select id="sSort"><option value="new">En yeni eklenen</option><option value="asc">Fiyat: düşükten yükseğe</option><option value="desc">Fiyat: yüksekten düşüğe</option></select>
+      </div>
+    </div>
+    <div id="shopArea"></div>
+  </section>
+
+  <!-- SEPET -->
+  <section class="view" id="v-sepet">
+    <h2 style="margin-bottom:14px">Sepetim</h2>
+    <div class="cols">
+      <div class="card" style="padding:6px 14px" id="cartBox"></div>
+      <div class="card">
+        <h3 style="font-size:17px;margin-bottom:6px">Sipariş bilgileri</h3>
+        <form id="orderForm">
+          <label>Ad soyad *</label><input id="oName" required maxlength="80">
+          <label>Telefon *</label><input id="oPhone" required maxlength="30" inputmode="tel">
+          <div class="row">
+            <div><label>Şehir *</label><input id="oCity" required maxlength="40"></div>
+            <div><label>Teslimat</label><select id="oShip"><option>Kargo</option><option>Elden teslim</option></select></div>
+          </div>
+          <label>Adres</label><textarea id="oAddr" maxlength="300"></textarea>
+          <label>Not</label><input id="oNote" maxlength="200">
+          <div style="margin-top:14px"><button class="btn" type="submit" style="width:100%">Siparişi hazırla</button></div>
+        </form>
+        <div id="orderOut" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- YÖNETİM -->
+  <section class="view" id="v-yonetim">
+    <h2 style="margin-bottom:6px">Mağaza yönetimi</h2>
+    <p class="muted small" style="margin-top:0">Burada yaptığın değişiklikler önce sadece bu tarayıcıda kalır. Herkesin görmesi için <b>stok.json dosyasını indir</b> ve sitendeki eski stok.json'un yerine yükle.</p>
+    <div class="cols">
+      <div class="card">
+        <h3 style="font-size:17px">Stoğa kart ekle</h3>
+        <label>Kart ara</label>
+        <div style="position:relative"><input id="aq" placeholder="Kart adı yaz, listeden seç" autocomplete="off"><div class="sug" id="aSug"></div></div>
+        <div id="aPicked" class="muted small" style="margin-top:8px">Henüz kart seçilmedi.</div>
+        <div class="row">
+          <div><label>Fiyat (₺) *</label><input id="aPrice" type="number" min="1" step="1"></div>
+          <div><label>Adet</label><input id="aQty" type="number" min="1" value="1"></div>
+          <div><label>Durum</label><select id="aCond"><option>Mint</option><option selected>Near Mint</option><option>Excellent</option><option>Good</option><option>Played</option><option>Hasarlı</option></select></div>
+        </div>
+        <label>Not (isteğe bağlı)</label><input id="aNote" maxlength="120" placeholder="ör. PSA 9, Japonca, reverse holo">
+        <div style="margin-top:12px"><button class="btn" id="aAdd">Stoğa ekle</button></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px">Dosyalar</h3>
+        <p class="small muted">Stokta <b id="aCount">0</b> kalem var.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a class="btn" id="aExport" href="#">stok.json dosyasını indir</a>
+          <label class="btn sec" style="margin:0;text-align:center;color:var(--text)">stok.json yükle (düzenlemek için)<input type="file" id="aImport" accept=".json,application/json" hidden></label>
+          <button class="btn danger" id="aReset">Taslağı sil, sitedeki stoğa dön</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;padding:6px 14px;overflow-x:auto">
+      <table><thead><tr><th></th><th>Kart</th><th>Durum</th><th>Fiyat (₺)</th><th>Adet</th><th></th></tr></thead><tbody id="aBody"></tbody></table>
+    </div>
+  </section>
+</main>
+
+<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir.</footer>
+
+<div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========= MAĞAZA AYARLARI — burayı kendine göre doldur ========= */
+const SHOP = {
+  name: "KartBorsa",
+  whatsapp: "",      // ör. "905xxxxxxxxx" (başında + olmadan, ülke koduyla)
+  instagram: "Ardaorhan61", // @ olmadan
+  email: "",         // ör. "siparis@ornek.com"
+  shippingFee: 0     // kargo ücreti (₺). 0 = ücretsiz / sonra konuşulur
+};
+/* ================================================================ */
+
+const $=s=>document.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(v==null)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}kids.flat().forEach(k=>k!=null&&e.append(k.nodeType?k:document.createTextNode(k)));return e;};
+const tl=n=>(n==null||isNaN(n))?'—':Number(n).toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';
+const norm=s=>(s||'').toString().toLowerCase().trim().replace(/\s+/g,' ');
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display='none',2600);};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}};
+const fmtDate=d=>d?d.split('/').reverse().join('.'):'—';
+document.title=SHOP.name+' – Pokémon Kartları'; $('#shopName').textContent=SHOP.name;
+
+let CAT=null, BYID={}, STOCK=[], STOCK_SITE=[], CART=store.get('kb_cart',[]);
+const ADMIN = location.hash==='#yonetim' || new URLSearchParams(location.search).has('yonetim');
+if(ADMIN) $('#navAdmin').style.display='';
+
+/* ---------- navigation ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
+function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));window.scrollTo(0,0);if(v==='sepet')drawCart();if(v==='magaza')drawShop();if(v==='yonetim')drawAdmin();}
+
+/* ---------- images ---------- */
+const setOf=c=>CAT.sets[c[1]];
+function imgSmall(c){return c[13]||`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`;}
+function imgLarge(c){const s=imgSmall(c);return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
+function cardImg(c,large){
+  const box=el('div',{class:'cimg'});
+  const fb=el('div',{class:'fb',text:c[0]});
+  const im=el('img',{src:large?imgLarge(c):imgSmall(c),alt:`${c[0]} – ${setOf(c)[1]}`,loading:'lazy'});
+  im.addEventListener('error',()=>{im.remove();});
+  box.append(fb,im); return box;
+}
+
+/* ---------- stock helpers ---------- */
+const stockFor=id=>STOCK.filter(s=>s.id===id&&s.qty>0);
+const minStock=id=>{const a=stockFor(id);return a.length?Math.min(...a.map(s=>s.price)):null;};
+
+/* ---------- catalog ---------- */
+let catRes=[],catShown=60,catSet=null;
+const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2],m[3]]:[String(n),0,''];};
+async function loadAll(){
+  try{
+    const r=await fetch('cards.json'); if(!r.ok) throw new Error('cards.json bulunamadı ('+r.status+')');
+    CAT=await r.json(); CAT.keys=CAT.cards.map(c=>norm(c[0])); CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
+  }catch(e){
+    $('#catInfo').innerHTML=''; $('#catInfo').append(el('span',{style:'color:var(--danger)',text:'Kart veritabanı yüklenemedi: '+e.message+'. Siteyi bir sunucudan (ör. GitHub Pages) açtığından emin ol; dosyaya çift tıklayınca çalışmaz.'}));
+    return;
+  }
+  try{const r=await fetch('stok.json',{cache:'no-store'}); STOCK_SITE=r.ok?await r.json():[];}catch{STOCK_SITE=[];}
+  const draft=ADMIN?store.get('kb_stock_draft',null):null;
+  STOCK=(draft||STOCK_SITE).filter(s=>BYID[s.id]!=null);
+  [...new Set(CAT.cards.map(c=>c[3]).filter(Boolean))].sort().forEach(x=>$('#cRar').append(el('option',{value:x,text:x})));
+  CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>$('#cSet').append(el('option',{value:i,text:`${s[1]} (${(s[3]||'').slice(0,4)})`})));
+  const last=CAT.sets[CAT.sets.length-1];
+  $('#catInfo').textContent=`${CAT.cards.length.toLocaleString('tr-TR')} kart · ${CAT.sets.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · stokta ${STOCK.filter(s=>s.qty>0).length} kart`;
+  CART=CART.filter(x=>BYID[x.id]!=null);
+  runCat(); updateCartCount();
+  if(location.hash==='#yonetim'&&ADMIN) go('yonetim');
+}
+function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
+  b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
+    el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
+    s[5]?el('img',{src:s[5],alt:s[1],style:'height:56px;max-width:200px;object-fit:contain'}):null,
+    el('div',{},el('div',{style:'font:700 20px "Space Grotesk",Inter',text:s[1]}),el('div',{class:'muted small',text:`${s[2]} · ${fmtDate(s[3])}`}))));}
+function openSet(i){$('#cSet').value=String(i);$('#cq').value='';runCat();window.scrollTo(0,0);}
+function runCat(){
+  if(!CAT)return;
+  const q=norm($('#cq').value),st=$('#cSet').value,ra=$('#cRar').value,su=$('#cSup').value;
+  catSet=st===''?null:+st; const terms=q.split(' ').filter(Boolean); catRes=[];
+  for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];
+    if(catSet!==null&&c[1]!==catSet)continue; if(ra&&c[3]!==ra)continue; if(su&&c[4]!==su)continue;
+    if(terms.length&&!terms.every(t=>CAT.keys[i].includes(t)))continue; catRes.push(i);}
+  catRes.sort((a,b)=>{const A=CAT.cards[a],B=CAT.cards[b];if(A[1]!==B[1])return B[1]-A[1];const x=numKey(A[2]),y=numKey(B[2]);return x[0]<y[0]?-1:x[0]>y[0]?1:(x[1]-y[1])||(x[2]<y[2]?-1:1);});
+  catShown=catSet!==null?120:60; drawCat();
+}
+function tileFor(i){const c=CAT.cards[i],s=setOf(c),mp=minStock(c[14]);
+  const im=cardImg(c); if(mp!=null) im.append(el('span',{class:'badge',text:tl(mp)}));
+  return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}));}
+function drawCat(){
+  const area=$('#catArea');area.innerHTML='';crumb();
+  const filtering=catSet!==null||norm($('#cq').value)||$('#cRar').value||$('#cSup').value;
+  if(!filtering){
+    $('#catCount').textContent='Bir set seç ya da yukarıdan kart adı ara.';$('#catMore').style.display='none';
+    const by={},order=[],cnt={};CAT.cards.forEach(c=>cnt[c[1]]=(cnt[c[1]]||0)+1);
+    CAT.sets.forEach((s,i)=>{if(!by[s[2]]){by[s[2]]=[];order.push(s[2]);}by[s[2]].push(i);});
+    order.sort((a,b)=>Math.max(...by[b])-Math.max(...by[a]));
+    order.forEach(se=>{area.append(el('div',{class:'series',lang:'en',text:se}));const g=el('div',{class:'sets'});
+      by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i];
+        const logo=el('div',{class:'setlogo'});
+        if(s[5]){const im=el('img',{src:s[5],alt:s[1]+' logosu',loading:'lazy'});im.addEventListener('error',()=>{im.remove();});logo.append(im);}
+        g.append(el('div',{class:'settile',onclick:()=>openSet(i)},logo,
+          el('div',{class:'setname'},s[6]?el('img',{src:s[6],alt:'',loading:'lazy'}):null,el('span',{text:s[1]})),
+          el('span',{class:'muted small',text:`${fmtDate(s[3])} · ${cnt[i]||0} kart`})));});
+      area.append(g);});
+    return;
+  }
+  $('#catCount').textContent=catRes.length.toLocaleString('tr-TR')+' kart';
+  if(!catRes.length){area.append(el('div',{class:'card muted',text:'Eşleşen kart yok. Yazımı kontrol et (kart adları İngilizce).'}));$('#catMore').style.display='none';return;}
+  let cur=-1,grid=null;
+  catRes.slice(0,catShown).forEach(i=>{const c=CAT.cards[i];
+    if(c[1]!==cur){cur=c[1];const s=CAT.sets[cur],sec=el('div',{class:'setsec'});
+      if(catSet===null)sec.append(el('h3',{},el('span',{class:'t'},s[5]?el('img',{src:s[5],alt:s[1],loading:'lazy'}):null,el('span',{text:s[1]})),
+        el('a',{class:'small',href:'#',onclick:(sid=>e=>{e.preventDefault();openSet(sid);})(cur)},'Setin tamamı →')));
+      grid=el('div',{class:'cgrid'});sec.append(grid);area.append(sec);}
+    grid.append(tileFor(i));});
+  $('#catMore').style.display=catRes.length>catShown?'inline-block':'none';
+}
+let catT;$('#cq').addEventListener('input',()=>{clearTimeout(catT);catT=setTimeout(runCat,150);});
+['#cSet','#cRar','#cSup'].forEach(s=>$(s).addEventListener('change',runCat));
+$('#catMore').addEventListener('click',()=>{catShown+=catSet!==null?120:60;drawCat();});
+
+/* ---------- card detail ---------- */
+function priceLinks(c){const s=setOf(c),q=encodeURIComponent(`${c[0]} ${s[1]} ${c[2]}`);
+  return el('div',{style:'display:flex;gap:14px;flex-wrap:wrap;margin-top:4px'},
+    el('a',{href:`https://www.tcgplayer.com/search/pokemon/product?q=${q}`,target:'_blank',rel:'noopener'},'TCGplayer ↗'),
+    el('a',{href:`https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=${encodeURIComponent(c[0])}`,target:'_blank',rel:'noopener'},'Cardmarket ↗'),
+    el('a',{href:`https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`,target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));}
+function closeModal(){$('#modal').classList.remove('on');}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function openCard(i){
+  const c=CAT.cards[i],s=setOf(c),offers=stockFor(c[14]).sort((a,b)=>a.price-b.price);
+  const b=$('#modalBody');b.innerHTML='';
+  const buy=el('div',{class:'buybox'});
+  if(offers.length){
+    buy.append(el('div',{class:'muted small'},'Stokta'));
+    offers.forEach(o=>{const inCart=CART.find(x=>x.key===o.key);
+      buy.append(el('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap'},
+        el('div',{},el('span',{class:'price',text:tl(o.price)}),' ',el('span',{class:'tag',text:o.cond}),o.note?el('div',{class:'muted small',text:o.note}):null,el('div',{class:'muted small',text:`${o.qty} adet`})),
+        el('button',{class:'btn',onclick:()=>{addToCart(o);closeModal();}},inCart?'Bir tane daha ekle':'Sepete ekle')));});
+  }else{
+    buy.append(el('div',{class:'muted small'},'Bu kart şu an stokta yok.'),
+      el('button',{class:'btn sec',style:'margin-top:8px',onclick:()=>{addRequest(c);closeModal();}},'Talep et (fiyat sorulsun)'));
+  }
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:c[0]}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('div',{class:'detail'},el('div',{},cardImg(c,true)),
+      el('div',{},
+        el('dl',{class:'kv'},el('dt',{},'Set'),el('dd',{},el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();go('katalog');openSet(c[1]);}},s[1])),
+          el('dt',{},'Seri'),el('dd',{text:s[2]}),el('dt',{},'Kart no'),el('dd',{text:c[2]+(s[4]?' / '+s[4]:'')}),
+          el('dt',{},'Çıkış'),el('dd',{text:fmtDate(s[3])}),el('dt',{},'Nadirlik'),el('dd',{text:c[3]||'—'}),
+          el('dt',{},'Tür'),el('dd',{text:[c[4],c[5]].filter(Boolean).join(' · ')}),
+          c[6]?el('dt',{},'HP'):null,c[6]?el('dd',{text:c[6]}):null,c[7]?el('dt',{},'Enerji tipi'):null,c[7]?el('dd',{text:c[7]}):null,
+          c[12]?el('dt',{},'Evrimleştiği'):null,c[12]?el('dd',{text:c[12]}):null,c[8]?el('dt',{},'Çizer'):null,c[8]?el('dd',{text:c[8]}):null),
+        buy,
+        el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
+        ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
+        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)),
+        c[11]?el('div',{class:'atk small muted',text:c[11]}):null)));
+  $('#modal').classList.add('on');
+}
+
+/* ---------- shop ---------- */
+function drawShop(){
+  const area=$('#shopArea');area.innerHTML='';if(!CAT)return;
+  const q=norm($('#sq').value),sort=$('#sSort').value;
+  let items=STOCK.filter(s=>s.qty>0).map((s,ix)=>({s,ix,c:CAT.cards[BYID[s.id]],i:BYID[s.id]})).filter(x=>!q||norm(x.c[0]+' '+setOf(x.c)[1]).includes(q));
+  if(sort==='asc')items.sort((a,b)=>a.s.price-b.s.price);else if(sort==='desc')items.sort((a,b)=>b.s.price-a.s.price);else items.sort((a,b)=>(b.s.added||0)-(a.s.added||0));
+  if(!items.length){area.append(el('div',{class:'card muted'},STOCK.length?'Aramana uyan kart yok.':'Şu an stokta kart yok. Aradığın bir kart varsa Kartlar bölümünden bulup "Talep et" diyebilirsin.'));return;}
+  const g=el('div',{class:'cgrid'});
+  items.forEach(({s,c,i})=>{const im=cardImg(c);im.append(el('span',{class:'badge',text:tl(s.price)}));
+    g.append(el('div',{class:'ctile'},el('div',{onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${setOf(c)[1]} · #${c[2]} · ${s.cond}`})),
+      el('button',{class:'btn',style:'width:100%;margin-top:8px;padding:8px',onclick:()=>addToCart(s)},'Sepete ekle')));});
+  area.append(g);
+}
+$('#sq').addEventListener('input',drawShop);$('#sSort').addEventListener('change',drawShop);
+
+/* ---------- cart ---------- */
+function saveCart(){store.set('kb_cart',CART);updateCartCount();}
+function updateCartCount(){const n=CART.reduce((a,x)=>a+x.qty,0),e=$('#cartCount');e.textContent=n;e.style.display=n?'':'none';}
+function addToCart(o){const ex=CART.find(x=>x.key===o.key);
+  if(ex){if(ex.qty>=o.qty){toast('Stokta bu kadar var');return;}ex.qty++;}else CART.push({key:o.key,id:o.id,price:o.price,cond:o.cond,qty:1});
+  saveCart();toast('Sepete eklendi ✓');}
+function addRequest(c){const key='req-'+c[14];if(CART.find(x=>x.key===key)){toast('Zaten sepette');return;}CART.push({key,id:c[14],price:null,cond:'',qty:1,request:true});saveCart();toast('Talep sepete eklendi ✓');}
+function cartTotals(){const sub=CART.filter(x=>!x.request).reduce((a,x)=>a+x.price*x.qty,0);const ship=CART.some(x=>!x.request)?(+SHOP.shippingFee||0):0;return{sub,ship,total:sub+ship};}
+function drawCart(){
+  const box=$('#cartBox');box.innerHTML='';
+  if(!CART.length){box.append(el('div',{class:'muted',style:'padding:14px 0'},'Sepetin boş. ',el('a',{href:'#',onclick:e=>{e.preventDefault();go('magaza');}},'Satın al bölümüne git →')));return;}
+  const tb=el('tbody');
+  CART.forEach(x=>{const c=CAT.cards[BYID[x.id]],s=setOf(c),st=STOCK.find(o=>o.key===x.key);
+    tb.append(el('tr',{},el('td',{},el('img',{class:'mini',src:imgSmall(c),alt:''})),
+      el('td',{},el('div',{style:'font-weight:600',text:c[0]}),el('div',{class:'muted small',text:`${s[1]} · #${c[2]}${x.cond?' · '+x.cond:''}`}),x.request?el('span',{class:'tag',text:'Talep – fiyat sorulacak'}):null),
+      el('td',{},x.request?'—':el('span',{class:'qty'},el('button',{onclick:()=>{x.qty--;if(x.qty<1)CART=CART.filter(y=>y!==x);saveCart();drawCart();}},'−'),el('b',{text:x.qty}),el('button',{onclick:()=>{if(st&&x.qty>=st.qty){toast('Stokta bu kadar var');return;}x.qty++;saveCart();drawCart();}},'+'))),
+      el('td',{style:'text-align:right;font-weight:600',text:x.request?'—':tl(x.price*x.qty)}),
+      el('td',{},el('button',{class:'btn sec',style:'padding:4px 10px',onclick:()=>{CART=CART.filter(y=>y!==x);saveCart();drawCart();}},'Kaldır'))));});
+  const t=cartTotals();
+  box.append(el('table',{},tb),el('div',{style:'padding:12px 4px;text-align:right'},
+    el('div',{class:'muted small',text:`Ara toplam: ${tl(t.sub)}`}),t.ship?el('div',{class:'muted small',text:`Kargo: ${tl(t.ship)}`}):null,
+    el('div',{class:'price',style:'font-size:24px',text:'Toplam: '+tl(t.total)})));
+}
+function orderText(){
+  const t=cartTotals(),f=id=>$(id).value.trim();
+  const lines=CART.map(x=>{const c=CAT.cards[BYID[x.id]],s=setOf(c);return x.request?`• [TALEP] ${c[0]} – ${s[1]} #${c[2]}`:`• ${x.qty} x ${c[0]} – ${s[1]} #${c[2]} (${x.cond}) – ${tl(x.price*x.qty)}`;});
+  return `Merhaba, ${SHOP.name} üzerinden sipariş vermek istiyorum:\n\n${lines.join('\n')}\n\nAra toplam: ${tl(t.sub)}${t.ship?`\nKargo: ${tl(t.ship)}`:''}\nToplam: ${tl(t.total)}\n\nAd soyad: ${f('#oName')}\nTelefon: ${f('#oPhone')}\nŞehir: ${f('#oCity')}\nTeslimat: ${f('#oShip')}${f('#oAddr')?`\nAdres: ${f('#oAddr')}`:''}${f('#oNote')?`\nNot: ${f('#oNote')}`:''}`;
+}
+$('#orderForm').addEventListener('submit',e=>{e.preventDefault();const out=$('#orderOut');out.innerHTML='';
+  if(!CART.length){out.append(el('div',{class:'note',text:'Sepetin boş.'}));return;}
+  const txt=orderText(),enc=encodeURIComponent(txt);
+  const btns=el('div',{style:'display:flex;flex-direction:column;gap:8px;margin-top:10px'});
+  if(SHOP.whatsapp)btns.append(el('a',{class:'btn wa',href:`https://wa.me/${SHOP.whatsapp.replace(/\D/g,'')}?text=${enc}`,target:'_blank',rel:'noopener',style:'text-align:center'},'WhatsApp ile gönder'));
+  if(SHOP.email)btns.append(el('a',{class:'btn sec',href:`mailto:${SHOP.email}?subject=${encodeURIComponent(SHOP.name+' sipariş')}&body=${enc}`,style:'text-align:center'},'E-posta ile gönder ('+SHOP.email+')'));
+  if(SHOP.instagram)btns.append(el('a',{class:'btn sec',href:`https://ig.me/m/${SHOP.instagram}`,target:'_blank',rel:'noopener',style:'text-align:center'},'Instagram\'dan yaz (@'+SHOP.instagram+')'));
+  btns.append(el('button',{class:'btn sec',type:'button',onclick:async()=>{try{await navigator.clipboard.writeText(txt);toast('Sipariş metni kopyalandı');}catch{toast('Kopyalanamadı, metni elle seç');}}},'Sipariş metnini kopyala'));
+  out.append(el('div',{class:'muted small',text:'Siparişin hazır. Aşağıdan gönder; satıcı ödeme ve kargo için seninle iletişime geçecek.'}),el('pre',{class:'order',text:txt}),btns,
+    (!SHOP.whatsapp&&!SHOP.email&&!SHOP.instagram)?el('div',{class:'note',style:'margin-top:10px',text:'Mağaza sahibi henüz iletişim bilgisi eklememiş (index.html içindeki SHOP ayarları).'}):null);
+});
+
+/* ---------- admin ---------- */
+let picked=null;
+const saveDraft=()=>store.set('kb_stock_draft',STOCK);
+$('#aq').addEventListener('input',()=>{const box=$('#aSug'),q=norm($('#aq').value);box.innerHTML='';
+  if(!CAT||q.length<2){box.style.display='none';return;}
+  const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<20;i++)if(CAT.keys[i].includes(q))hits.push(i);
+  hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();picked=i;$('#aq').value=c[0];box.style.display='none';
+      const p=$('#aPicked');p.innerHTML='';p.append(el('img',{src:imgSmall(c),alt:'',style:'width:60px;border-radius:4px;vertical-align:middle;margin-right:10px'}),`${c[0]} · ${s[1]} · #${c[2]} · ${c[3]||''}`);}},
+    el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]}`}))));});
+  box.style.display=hits.length?'block':'none';});
+$('#aq').addEventListener('blur',()=>setTimeout(()=>$('#aSug').style.display='none',150));
+$('#aAdd').addEventListener('click',()=>{if(picked==null){toast('Önce bir kart seç');return;}const price=+$('#aPrice').value;if(!price){toast('Fiyat gir');return;}
+  const c=CAT.cards[picked];STOCK.push({key:c[14]+'-'+Date.now().toString(36),id:c[14],price,qty:Math.max(1,+$('#aQty').value||1),cond:$('#aCond').value,note:$('#aNote').value.trim(),added:Date.now()});
+  saveDraft();picked=null;$('#aq').value='';$('#aPrice').value='';$('#aQty').value=1;$('#aNote').value='';$('#aPicked').textContent='Henüz kart seçilmedi.';drawAdmin();toast('Stoğa eklendi (taslak)');});
+function drawAdmin(){if(!CAT)return;const tb=$('#aBody');tb.innerHTML='';$('#aCount').textContent=STOCK.length;
+  if(!STOCK.length)tb.append(el('tr',{},el('td',{colspan:6,class:'muted',text:'Stok boş.'})));
+  STOCK.forEach(s=>{const c=CAT.cards[BYID[s.id]];
+    const pr=el('input',{type:'number',value:s.price,min:1,style:'width:110px'}),q=el('input',{type:'number',value:s.qty,min:0,style:'width:80px'});
+    pr.addEventListener('change',()=>{s.price=+pr.value||s.price;saveDraft();});q.addEventListener('change',()=>{s.qty=Math.max(0,+q.value||0);saveDraft();});
+    tb.append(el('tr',{},el('td',{},el('img',{class:'mini',src:imgSmall(c),alt:''})),el('td',{},el('b',{text:c[0]}),el('div',{class:'muted small',text:`${setOf(c)[1]} · #${c[2]}${s.note?' · '+s.note:''}`})),
+      el('td',{text:s.cond}),el('td',{},pr),el('td',{},q),el('td',{},el('button',{class:'btn danger',style:'padding:4px 10px',onclick:()=>{STOCK=STOCK.filter(x=>x!==s);saveDraft();drawAdmin();}},'Sil'))));});}
+$('#aExport').addEventListener('click',e=>{const blob=new Blob([JSON.stringify(STOCK,null,1)],{type:'application/json'});const a=e.currentTarget;a.href=URL.createObjectURL(blob);a.download='stok.json';});
+$('#aImport').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d))throw 0;STOCK=d.filter(s=>BYID[s.id]!=null);saveDraft();drawAdmin();toast('Stok yüklendi');}catch{toast('Geçersiz dosya');}});
+$('#aReset').addEventListener('click',()=>{try{localStorage.removeItem('kb_stock_draft');}catch{}STOCK=STOCK_SITE.filter(s=>BYID[s.id]!=null);drawAdmin();toast('Sitedeki stoğa dönüldü');});
+
+loadAll();
+</script>
+</body>
+</html>

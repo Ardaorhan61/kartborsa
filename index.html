@@ -475,9 +475,12 @@ async function loadPrices(){
   try{
     const[o,k]=await Promise.all([fetch('fiyat/ozet.json').then(r=>r.ok?r.json():null),fetch('fiyat/kur.json').then(r=>r.ok?r.json():null)]);
     if(!o||!k||!k.USD)return;OZET=o;KUR=k;
-    $('#navPiyasa').style.display='';if(CAT){drawCat();}if($('#v-piyasa').classList.contains('on'))drawPiyasa();
+    $('#navPiyasa').style.display='';labelPriceSets();if(CAT){drawCat();}if($('#v-piyasa').classList.contains('on'))drawPiyasa();
   }catch(e){console.warn('fiyatlar yüklenemedi',e);}
 }
+let PRICED={};
+function labelPriceSets(){if(!CAT||!OZET)return;PRICED={};for(const id of Object.keys(OZET.c)){const i=BYID[id];if(i!=null){const s=CAT.cards[i][1];PRICED[s]=(PRICED[s]||0)+1;}}
+  [...$('#pzSet').options].forEach(o=>{if(o.value==='')return;const s=CAT.sets[+o.value],n=PRICED[+o.value]||0;o.textContent=`${s[1]} (${(s[3]||'').slice(0,4)})`+(n?` · ${n} kart`:' · fiyat yok');});}
 async function setPrices(sid){if(SETPRICE[sid])return SETPRICE[sid];const r=await fetch(`fiyat/set/${sid}.json`);if(!r.ok)throw new Error('yok');return SETPRICE[sid]=await r.json();}
 const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
@@ -506,9 +509,9 @@ function marketSection(c){
   const box=el('div',{class:'market'},el('h3',{text:'Piyasa değeri'}),el('div',{class:'muted small',text:'Yükleniyor…'}));
   if(!KUR){box.lastChild.textContent='Piyasa fiyatları henüz yüklenmedi.';return box;}
   (async()=>{
-    let rec=null;try{const sp=await setPrices(setOf(c)[0]);rec=sp.c[c[14]];}catch{}
+    let rec=null,noFile=false;try{const sp=await setPrices(setOf(c)[0]);rec=sp.c[c[14]];}catch{noFile=true;}
     box.lastChild.remove();
-    if(!rec||(!rec.t&&!rec.m)){box.append(el('div',{class:'muted small',text:'Bu kart için piyasa fiyatı bulunamadı (çok yeni ya da nadiren satılan bir kart olabilir).'}));return;}
+    if(!rec||(!rec.t&&!rec.m)){box.append(el('div',{class:'muted small',text:noFile?'Bu kartın setinin fiyatları henüz çekilemedi; her gün yeniden deneniyor.':'Fiyat kaynağında bu kart için henüz fiyat yok (çok yeni ya da nadiren satılan bir kart olabilir). Yayınlandığında burada kendiliğinden görünecek.'}));return;}
     const h=rec.h||[],prev=h.length>1?h[h.length-2]:null,cur=h[h.length-1];
     const kurDay=d=>(KUR.gecmis&&KUR.gecmis[d])||[KUR.USD,KUR.EUR];
     // üst özet
@@ -553,12 +556,21 @@ function drawPiyasa(){const area=$('#pzArea');area.innerHTML='';if(!CAT||!OZET){
   const key={val:'v',d1:'d1',d7:'d7',d30:'d30'}[sort.replace(/-(up|down)$/,'')]||'v',dir=sort.endsWith('-down')?1:-1;
   rows=rows.filter(r=>key==='v'||r[key]!=null);rows.sort((a,b)=>dir*((a[key]??-Infinity)-(b[key]??-Infinity)));
   $('#pzInfo').textContent=`${rows.length.toLocaleString('tr-TR')} kartın fiyatı · güncelleme ${OZET.u.split('-').reverse().join('.')} · 1 € = ${KUR.EUR.toLocaleString('tr-TR',{maximumFractionDigits:2})} ₺`;
+  if(!rows.length){const box=el('div',{class:'card'});area.append(box);
+    if(st!==''){const s=CAT.sets[+st];box.append(el('h3',{style:'font-size:17px',text:s[1]}));
+      const msg=el('p',{class:'muted',text:'Kontrol ediliyor…'});box.append(msg);
+      fetch(`fiyat/set/${s[0]}.json`).then(r=>r.ok?r.json():null).then(d=>{
+        msg.textContent=!d?'Bu setin fiyatları henüz çekilemedi (fiyat sunucusu hata verdi). Her gün yeniden deneniyor; birkaç gün içinde burada görünecek.'
+          :(q?'Bu sette aramana uyan fiyatlı kart yok.':'Fiyat kaynağında (TCGplayer / Cardmarket) bu setin kartları için henüz fiyat yayınlanmamış. Çok yeni setlerde ve bazı promo / koleksiyon setlerinde bu olabiliyor; fiyatlar yayınlandığında burada kendiliğinden görünecek.');}).catch(()=>{msg.textContent='Fiyatlar yüklenemedi.';});
+      box.append(el('button',{class:'btn sec',onclick:()=>{$('#pzSet').value='';$('#pzq').value='';drawPiyasa();}},'Tüm setlere dön'));}
+    else box.append(el('p',{class:'muted',text:'Aramana uyan fiyatlı kart yok. Kart adlarını İngilizce yaz (ör. Charizard).'}));
+    return;}
   const tb=el('tbody');rows.slice(0,pzShown).forEach((r,n)=>{const s=setOf(r.c);
     tb.append(el('tr',{class:'click',onclick:()=>openCard(r.i)},el('td',{class:'muted',text:n+1}),el('td',{},el('img',{class:'mini',src:imgSmall(r.c),alt:'',loading:'lazy'})),
       el('td',{},el('b',{text:r.c[0]}),el('div',{class:'muted small',text:`${s[1]} · #${r.c[2]} · ${r.c[3]||''}`})),
       el('td',{style:'font-weight:700;white-space:nowrap',text:tlx(r.v)}),el('td',{},chg(r.d1,true)),el('td',{},chg(r.d7,true)),el('td',{},chg(r.d30,true))));});
   area.append(el('div',{class:'card',style:'padding:4px 12px;overflow-x:auto'},el('table',{},el('thead',{},el('tr',{},el('th',{},'#'),el('th',{}),el('th',{},'Kart'),el('th',{},'Piyasa değeri'),el('th',{},'Dünden'),el('th',{},'7 gün ort.'),el('th',{},'30 gün ort.'))),tb)),
-    rows.length>pzShown?el('div',{style:'text-align:center;margin-top:12px'},el('button',{class:'btn sec',onclick:()=>{pzShown+=100;drawPiyasa();}},'Daha fazla göster')):null,
+    rows.length>pzShown?el('div',{style:'text-align:center;margin-top:12px'},el('button',{class:'btn sec',onclick:()=>{pzShown+=100;drawPiyasa();}},'Daha fazla göster')):'',
     el('p',{class:'muted small',text:'Piyasa değeri: varsa TCGplayer (ABD) piyasa fiyatı, yoksa Cardmarket (Avrupa) trend fiyatı, günlük kurla TL. "Dünden" bir önceki günün fiyatına göre değişimdir. "7 gün ort." ve "30 gün ort." Cardmarket trend fiyatının o dönemin ortalama satış fiyatına göre farkıdır.'}));}
 
 let pzT;$('#pzq').addEventListener('input',()=>{clearTimeout(pzT);pzT=setTimeout(()=>{pzShown=100;drawPiyasa();},200);});

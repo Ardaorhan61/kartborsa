@@ -482,8 +482,8 @@ async function setPrices(sid){if(SETPRICE[sid])return SETPRICE[sid];const r=awai
 const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
 function mainValue(o){if(!o||!KUR)return null;
-  if(o[1]!=null)return{tl:eurTL(o[1]),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};
-  if(o[0]!=null)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};return null;}
+  if(o[0]!=null)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
+  if(o[1]!=null)return{tl:eurTL(o[1]),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
 const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
 function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
   const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});
@@ -517,7 +517,7 @@ function marketSection(c){
       tiles.append(el('div',{class:'mtile'},el('div',{class:'muted small',text:'Cardmarket (Avrupa) trend'}),el('div',{class:'big',text:tlx(eurTL(rec.m[2]))}),
         el('div',{class:'small'},el('span',{class:'muted',text:`€${rec.m[2].toLocaleString('tr-TR')} · dünden `}),chg(p))));}
     if(rec.t&&rec.v&&rec.t[rec.v]){const t=rec.t[rec.v],usd=t[3]??t[1],p=prev&&prev[1]!=null&&usd!=null?pct(usd,prev[1]):null;
-      tiles.append(el('div',{class:'mtile'},el('div',{class:'muted small',text:`TCGplayer (ABD) piyasa · ${VAR_TR[rec.v]||rec.v}`}),el('div',{class:'big',text:tlx(usdTL(usd))}),
+      tiles.prepend(el('div',{class:'mtile'},el('div',{class:'muted small',text:`TCGplayer (ABD) piyasa · ${VAR_TR[rec.v]||rec.v}`}),el('div',{class:'big',text:tlx(usdTL(usd))}),
         el('div',{class:'small'},el('span',{class:'muted',text:`$${(usd??0).toLocaleString('tr-TR')} · dünden `}),chg(p))));}
     box.append(tiles);
     // Cardmarket ortalamaları → eğilim
@@ -559,7 +559,7 @@ function drawPiyasa(){const area=$('#pzArea');area.innerHTML='';if(!CAT||!OZET){
       el('td',{style:'font-weight:700;white-space:nowrap',text:tlx(r.v)}),el('td',{},chg(r.d1,true)),el('td',{},chg(r.d7,true)),el('td',{},chg(r.d30,true))));});
   area.append(el('div',{class:'card',style:'padding:4px 12px;overflow-x:auto'},el('table',{},el('thead',{},el('tr',{},el('th',{},'#'),el('th',{}),el('th',{},'Kart'),el('th',{},'Piyasa değeri'),el('th',{},'Dünden'),el('th',{},'7 gün ort.'),el('th',{},'30 gün ort.'))),tb)),
     rows.length>pzShown?el('div',{style:'text-align:center;margin-top:12px'},el('button',{class:'btn sec',onclick:()=>{pzShown+=100;drawPiyasa();}},'Daha fazla göster')):null,
-    el('p',{class:'muted small',text:'Piyasa değeri: varsa Cardmarket (Avrupa) trend fiyatı, yoksa TCGplayer (ABD) piyasa fiyatı, günlük kurla TL. "7 gün ort." ve "30 gün ort." bugünkü fiyatın o dönemin ortalamasına göre farkıdır.'}));}
+    el('p',{class:'muted small',text:'Piyasa değeri: varsa TCGplayer (ABD) piyasa fiyatı, yoksa Cardmarket (Avrupa) trend fiyatı, günlük kurla TL. "Dünden" bir önceki günün fiyatına göre değişimdir. "7 gün ort." ve "30 gün ort." Cardmarket trend fiyatının o dönemin ortalama satış fiyatına göre farkıdır.'}));}
 
 let pzT;$('#pzq').addEventListener('input',()=>{clearTimeout(pzT);pzT=setTimeout(()=>{pzShown=100;drawPiyasa();},200);});
 ['#pzSet','#pzSort'].forEach(s=>$(s).addEventListener('change',()=>{pzShown=100;drawPiyasa();}));

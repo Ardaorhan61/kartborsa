@@ -19,14 +19,19 @@ if os.environ.get("POKEMONTCG_API_KEY"):
 VARIANT_ORDER = ["holofoil", "normal", "reverseHolofoil", "1stEditionHolofoil", "1stEditionNormal", "unlimitedHolofoil", "1stEdition", "unlimited"]
 
 
+DEADLINE = time.time() + float(os.environ.get("FIYAT_SURE_DK", "45")) * 60
+
+
 def fetch(url, tries=6):
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=120) as r:
+            with urllib.request.urlopen(req, timeout=40) as r:
                 return json.loads(r.read())
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            wait = 8 * (i + 1)
+        except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as e:
+            if time.time() > DEADLINE:
+                break
+            wait = 5 * (i + 1)
             print(f"  hata ({e}); {wait} sn sonra tekrar", flush=True)
             time.sleep(wait)
     raise RuntimeError("API'ye ulaşılamadı: " + url)
@@ -58,11 +63,17 @@ kur["gecmis"] = dict(sorted(kur["gecmis"].items())[-KEEP_DAYS:])
 SITE_CARDS = sys.argv[2] if len(sys.argv) > 2 else None
 set_ids = [x[0] for x in json.load(open(SITE_CARDS))["sets"]] if SITE_CARDS else []
 cards, failed = [], []
+# önce hiç/en uzun süredir güncellenmemiş setler, aralarında en yeniler önce
+order = {sid: i for i, sid in enumerate(set_ids)}
+set_ids.sort(key=lambda sid: (load(f"{OUT}/set/{sid}.json", {}).get("u", ""), -order[sid]))
 for n, sid in enumerate(set_ids, 1):
+    if time.time() > DEADLINE:
+        failed.append(sid)
+        continue
     got, page = [], 1
     try:
         while True:
-            d = fetch(f"{API}?q=set.id:{sid}&page={page}&pageSize=250&select=id,set,tcgplayer,cardmarket", tries=5)
+            d = fetch(f"{API}?q=set.id:{sid}&page={page}&pageSize=250&select=id,set,tcgplayer,cardmarket", tries=3)
             got += d.get("data", [])
             if not d.get("data") or len(got) >= d.get("totalCount", 0):
                 break
@@ -74,8 +85,9 @@ for n, sid in enumerate(set_ids, 1):
         print(f"[{n}/{len(set_ids)}] {sid}: ALINAMADI ({e})", flush=True)
     time.sleep(1)
 
-if len(cards) < 1000:
-    raise SystemExit(f"Çok az kart geldi ({len(cards)}), veriler güncellenmedi.")
+if not cards:
+    raise SystemExit("Hiç fiyat alınamadı, veriler güncellenmedi.")
+print(f"Gelen: {len(cards)} kart, {len(set_ids) - len(failed)} set. ", end="")
 print(f"Alınamayan setler ({len(failed)}): {', '.join(failed)}")
 
 by_set = {}

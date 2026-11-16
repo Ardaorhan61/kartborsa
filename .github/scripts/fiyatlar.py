@@ -26,7 +26,7 @@ def fetch(url, tries=6):
             with urllib.request.urlopen(req, timeout=120) as r:
                 return json.loads(r.read())
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            wait = 10 * (i + 1)
+            wait = 8 * (i + 1)
             print(f"  hata ({e}); {wait} sn sonra tekrar", flush=True)
             time.sleep(wait)
     raise RuntimeError("API'ye ulaşılamadı: " + url)
@@ -54,21 +54,29 @@ except Exception as e:
     print("Kur alınamadı, eski kur kullanılıyor:", e)
 kur["gecmis"] = dict(sorted(kur["gecmis"].items())[-KEEP_DAYS:])
 
-# ---- fiyatlar ----
-cards, page = [], 1
-while True:
-    url = f"{API}?page={page}&pageSize=250&orderBy=id&select=id,set,tcgplayer,cardmarket"
-    d = fetch(url)
-    cards += d.get("data", [])
-    total = d.get("totalCount", 0)
-    print(f"sayfa {page}: {len(cards)}/{total}", flush=True)
-    if not d.get("data") or len(cards) >= total:
-        break
-    page += 1
-    time.sleep(1.5)
+# ---- fiyatlar (set set; alınamayan setin eski verisi korunur) ----
+SITE_CARDS = sys.argv[2] if len(sys.argv) > 2 else None
+set_ids = [x[0] for x in json.load(open(SITE_CARDS))["sets"]] if SITE_CARDS else []
+cards, failed = [], []
+for n, sid in enumerate(set_ids, 1):
+    got, page = [], 1
+    try:
+        while True:
+            d = fetch(f"{API}?q=set.id:{sid}&page={page}&pageSize=250&select=id,set,tcgplayer,cardmarket", tries=5)
+            got += d.get("data", [])
+            if not d.get("data") or len(got) >= d.get("totalCount", 0):
+                break
+            page += 1
+        cards += got
+        print(f"[{n}/{len(set_ids)}] {sid}: {len(got)} kart", flush=True)
+    except Exception as e:
+        failed.append(sid)
+        print(f"[{n}/{len(set_ids)}] {sid}: ALINAMADI ({e})", flush=True)
+    time.sleep(1)
 
 if len(cards) < 1000:
     raise SystemExit(f"Çok az kart geldi ({len(cards)}), veriler güncellenmedi.")
+print(f"Alınamayan setler ({len(failed)}): {', '.join(failed)}")
 
 by_set = {}
 for c in cards:
@@ -110,6 +118,10 @@ for sid, lst in by_set.items():
             ozet[cid] = [usd_main, eur_trend, m[4] if m else None, m[5] if m else None, before[1], before[2], before[0]]
     json.dump(out, open(path, "w"), separators=(",", ":"))
 
+old_ozet = load(f"{OUT}/ozet.json", {"c": {}})["c"]
+for cid, v in old_ozet.items():
+    if cid.rsplit("-", 1)[0] in failed and cid not in ozet:
+        ozet[cid] = v
 json.dump({"u": TODAY, "c": ozet}, open(f"{OUT}/ozet.json", "w"), separators=(",", ":"))
 json.dump(kur, open(f"{OUT}/kur.json", "w"), separators=(",", ":"))
 print(f"Bitti: {len(cards)} kart, {len(ozet)} fiyatlı, {len(by_set)} set. Kur: {kur.get('USD')} / {kur.get('EUR')}")

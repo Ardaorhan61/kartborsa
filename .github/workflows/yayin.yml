@@ -19,7 +19,7 @@ concurrency:
 jobs:
   yayin:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -35,10 +35,12 @@ jobs:
 
       - name: Fiyatları güncelle
         if: github.event_name != 'push' || hashFiles('veri/ozet.json') == ''
-        run: python3 site/.github/scripts/fiyatlar.py veri
+        continue-on-error: true
+        id: fiyat
+        run: python3 site/.github/scripts/fiyatlar.py veri site/cards.json
 
       - name: Fiyat verisini kaydet
-        if: github.event_name != 'push' || hashFiles('veri/ozet.json') == ''
+        if: steps.fiyat.outcome == 'success'
         run: |
           cd veri
           rm -rf .git

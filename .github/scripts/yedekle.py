@@ -19,12 +19,22 @@ while True:
         break
     start += 1000
 
+profiles = json.loads(get(f"{URL}/rest/v1/profiles?select=*&order=created_at.asc&limit=10000", H))
+
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3)))
 os.makedirs(f"{OUT}/ilanlar", exist_ok=True)
 os.makedirs(f"{OUT}/fotograflar", exist_ok=True)
 data = json.dumps(rows, ensure_ascii=False, indent=1)
 open(f"{OUT}/ilanlar/son.json", "w").write(data)
 open(f"{OUT}/ilanlar/{now:%Y-%m-%d}.json", "w").write(data)
+os.makedirs(f"{OUT}/profiller", exist_ok=True)
+pdata = json.dumps(profiles, ensure_ascii=False, indent=1)
+open(f"{OUT}/profiller/son.json", "w").write(pdata)
+open(f"{OUT}/profiller/{now:%Y-%m-%d}.json", "w").write(pdata)
+for pr in profiles:
+    u = pr.get("avatar_url") or ""
+    if "/photos/" in u:
+        rows.append({"photo_url": u})
 
 saved = 0
 for r in rows:
@@ -42,8 +52,10 @@ for r in rows:
         print("Fotoğraf indirilemedi:", u, e)
 
 active = [r for r in rows if r.get("status") == "active"]
+rows_l = [r for r in rows if 'id' in r]
 summary = (f"Yedek: {now:%d.%m.%Y %H:%M}\n"
-           f"Toplam ilan: {len(rows)} (yayında {len(active)}, satıldı {len(rows)-len(active)})\n"
+           f"Profil: {len(profiles)}\n"
+           f"Toplam ilan: {len([r for r in rows if 'id' in r])} (yayında {len(active)}, satıldı {len(rows_l)-len(active)})\n"
            f"Satıştaki kart adedi: {sum(r.get('qty', 0) for r in active)}\n"
            f"Bu yedekte yeni indirilen fotoğraf: {saved}\n")
 open(f"{OUT}/SON-YEDEK.txt", "w").write(summary)

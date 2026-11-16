@@ -79,21 +79,25 @@ th{color:var(--muted);font-weight:500;font-size:13px}
 @media(max-width:820px){.cols{grid-template-columns:1fr}}
 pre.order{white-space:pre-wrap;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;font:13px/1.5 ui-monospace,monospace}
 footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);font-size:12px}
+.lrow{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line)}
+.card.lrow{border-top:1px solid var(--line);padding:14px}
+.badge.qtyb{left:auto;right:6px;top:auto;bottom:6px;background:rgba(15,18,32,.85);color:#fff}
+.tag.sold{color:var(--danger);border-color:var(--danger)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <header><div class="bar">
-  <div class="logo" onclick="go('katalog')"><div class="dot">K</div><h1 style="font-size:20px" id="shopName">KartBorsa</h1></div>
+  <div class="logo" onclick="go('katalog')"><div class="dot">K</div><h1 style="font-size:20px">KartBorsa</h1></div>
   <nav>
     <button data-v="katalog" class="on">Kartlar</button>
-    <button data-v="magaza">Satın Al</button>
-    <button data-v="sepet">Sepet<span class="cartcount" id="cartCount" style="display:none"></span></button>
-    <button data-v="yonetim" id="navAdmin" style="display:none">Mağaza Yönetimi</button>
+    <button data-v="al">Kart Al</button>
+    <button data-v="ver">İlan Ver</button>
+    <button data-v="benim">İlanlarım</button>
   </nav>
 </div></header>
 
 <main>
-  <!-- KATALOG -->
   <section class="view on" id="v-katalog">
     <div class="hero">
       <div><h2>Tüm Pokémon kartları</h2><div class="muted small" id="catInfo">Kart veritabanı yükleniyor…</div></div>
@@ -104,6 +108,7 @@ footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);
         <select id="cSet"><option value="">Tüm setler</option></select>
         <select id="cRar"><option value="">Tüm nadirlikler</option></select>
         <select id="cSup"><option value="">Tüm türler</option><option>Pokémon</option><option>Trainer</option><option>Energy</option></select>
+        <label style="display:flex;align-items:center;gap:8px;margin:0;color:var(--text);flex:0 0 auto"><input type="checkbox" id="cStock" style="width:auto"> Sadece satışta olanlar</label>
       </div>
     </div>
     <div id="catCrumb" style="margin-bottom:10px"></div>
@@ -112,185 +117,156 @@ footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);
     <div style="text-align:center;margin-top:14px"><button class="btn sec" id="catMore" style="display:none">Daha fazla göster</button></div>
   </section>
 
-  <!-- MAĞAZA -->
-  <section class="view" id="v-magaza">
+  <section class="view" id="v-al">
     <div class="hero">
-      <div><h2>Satın al</h2><div class="muted small">Stokta olan kartlar. Sepete ekle, siparişini gönder.</div></div>
-      <div class="row" style="flex:1;max-width:520px">
-        <input id="sq" placeholder="Stokta ara…">
-        <select id="sSort"><option value="new">En yeni eklenen</option><option value="asc">Fiyat: düşükten yükseğe</option><option value="desc">Fiyat: yüksekten düşüğe</option></select>
+      <div><h2>Kart al</h2><div class="muted small" id="alInfo">Satıcıların açtığı ilanlar.</div></div>
+      <div class="row" style="flex:1;max-width:620px">
+        <input id="sq" placeholder="Kart, set ya da şehir ara…">
+        <select id="sSort"><option value="new">En yeni</option><option value="asc">Fiyat: düşükten yükseğe</option><option value="desc">Fiyat: yüksekten düşüğe</option></select>
       </div>
     </div>
-    <div id="shopArea"></div>
+    <div id="alArea"></div>
   </section>
 
-  <!-- SEPET -->
-  <section class="view" id="v-sepet">
-    <h2 style="margin-bottom:14px">Sepetim</h2>
+  <section class="view" id="v-ver">
+    <h2 style="margin-bottom:6px">İlan ver</h2>
+    <p class="muted small" style="margin-top:0">Kartını katalogdan seç, fiyatını ve adedini yaz. İlanın hemen herkese görünür.</p>
     <div class="cols">
-      <div class="card" style="padding:6px 14px" id="cartBox"></div>
       <div class="card">
-        <h3 style="font-size:17px;margin-bottom:6px">Sipariş bilgileri</h3>
-        <form id="orderForm">
-          <label>Ad soyad *</label><input id="oName" required maxlength="80">
-          <label>Telefon *</label><input id="oPhone" required maxlength="30" inputmode="tel">
+        <form id="lForm" autocomplete="off">
+          <label>Kart *</label>
+          <div style="position:relative"><input id="lq" placeholder="Kart adı yaz, listeden seç (ör. Charizard)"><div class="sug" id="lSug"></div></div>
+          <div id="lPicked" class="muted small" style="margin-top:8px">Henüz kart seçilmedi.</div>
           <div class="row">
-            <div><label>Şehir *</label><input id="oCity" required maxlength="40"></div>
-            <div><label>Teslimat</label><select id="oShip"><option>Kargo</option><option>Elden teslim</option></select></div>
+            <div><label>Fiyat (₺) *</label><input id="lPrice" type="number" min="1" step="1" required></div>
+            <div><label>Adet *</label><input id="lQty" type="number" min="1" max="999" value="1" required></div>
           </div>
-          <label>Adres</label><textarea id="oAddr" maxlength="300"></textarea>
-          <label>Not</label><input id="oNote" maxlength="200">
-          <div style="margin-top:14px"><button class="btn" type="submit" style="width:100%">Siparişi hazırla</button></div>
+          <div class="row">
+            <div><label>Durum</label><select id="lCond"><option>Mint</option><option selected>Near Mint</option><option>Excellent</option><option>Good</option><option>Played</option><option>Hasarlı</option></select></div>
+            <div><label>Dil</label><select id="lLang"><option>İngilizce</option><option>Japonca</option><option>Türkçe</option><option>Diğer</option></select></div>
+          </div>
+          <label>Açıklama</label><textarea id="lNote" maxlength="300" placeholder="ör. Kılıflı saklandı, PSA'ya uygun, takas da olur"></textarea>
+          <label>Kendi fotoğrafın (isteğe bağlı)</label>
+          <input type="file" id="lPhoto" accept="image/*">
+          <div id="lPhotoPrev" style="margin-top:8px"></div>
+          <h3 style="font-size:16px;margin-top:18px">Satıcı bilgilerin</h3>
+          <div class="row">
+            <div><label>Adın / takma adın *</label><input id="lSeller" maxlength="40" required></div>
+            <div><label>Şehir</label><input id="lCity" maxlength="40"></div>
+          </div>
+          <div class="row">
+            <div><label>Instagram kullanıcı adı</label><input id="lIg" maxlength="40" placeholder="@ olmadan"></div>
+            <div><label>WhatsApp numarası</label><input id="lWa" maxlength="20" inputmode="tel" placeholder="05xx xxx xx xx"></div>
+          </div>
+          <div class="muted small" style="margin-top:6px">En az birini yaz; alıcılar sana buradan ulaşır. Numaran ilanında herkese görünür.</div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+            <button class="btn" type="submit" id="lSubmit">İlanı yayınla</button><span id="lMsg" class="small"></span>
+          </div>
         </form>
-        <div id="orderOut" style="margin-top:14px"></div>
       </div>
+      <div class="card" id="lCardPrev"><div class="muted">Seçtiğin kart burada görünecek.</div></div>
     </div>
   </section>
 
-  <!-- YÖNETİM -->
-  <section class="view" id="v-yonetim">
-    <h2 style="margin-bottom:6px">Mağaza yönetimi</h2>
-    <p class="muted small" style="margin-top:0">Burada yaptığın değişiklikler önce sadece bu tarayıcıda kalır. Herkesin görmesi için <b>stok.json dosyasını indir</b> ve sitendeki eski stok.json'un yerine yükle.</p>
-    <div class="cols">
-      <div class="card">
-        <h3 style="font-size:17px">Stoğa kart ekle</h3>
-        <label>Kart ara</label>
-        <div style="position:relative"><input id="aq" placeholder="Kart adı yaz, listeden seç" autocomplete="off"><div class="sug" id="aSug"></div></div>
-        <div id="aPicked" class="muted small" style="margin-top:8px">Henüz kart seçilmedi.</div>
-        <div class="row">
-          <div><label>Fiyat (₺) *</label><input id="aPrice" type="number" min="1" step="1"></div>
-          <div><label>Adet</label><input id="aQty" type="number" min="1" value="1"></div>
-          <div><label>Durum</label><select id="aCond"><option>Mint</option><option selected>Near Mint</option><option>Excellent</option><option>Good</option><option>Played</option><option>Hasarlı</option></select></div>
-        </div>
-        <label>Not (isteğe bağlı)</label><input id="aNote" maxlength="120" placeholder="ör. PSA 9, Japonca, reverse holo">
-        <div style="margin-top:12px"><button class="btn" id="aAdd">Stoğa ekle</button></div>
-      </div>
-      <div class="card">
-        <h3 style="font-size:17px">Dosyalar</h3>
-        <p class="small muted">Stokta <b id="aCount">0</b> kalem var.</p>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <a class="btn" id="aExport" href="#">stok.json dosyasını indir</a>
-          <label class="btn sec" style="margin:0;text-align:center;color:var(--text)">stok.json yükle (düzenlemek için)<input type="file" id="aImport" accept=".json,application/json" hidden></label>
-          <button class="btn danger" id="aReset">Taslağı sil, sitedeki stoğa dön</button>
-        </div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:16px;padding:6px 14px;overflow-x:auto">
-      <table><thead><tr><th></th><th>Kart</th><th>Durum</th><th>Fiyat (₺)</th><th>Adet</th><th></th></tr></thead><tbody id="aBody"></tbody></table>
-    </div>
+  <section class="view" id="v-benim">
+    <h2 style="margin-bottom:6px">İlanlarım</h2>
+    <p class="muted small" style="margin-top:0">Bu tarayıcıdan açtığın ilanlar. Fiyatı ve adedi buradan değiştirebilir, satıldı olarak işaretleyebilir ya da silebilirsin.</p>
+    <div id="myArea"></div>
   </section>
 </main>
 
-<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir.</footer>
+<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır.</footer>
 
 <div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========= MAĞAZA AYARLARI — burayı kendine göre doldur ========= */
-const SHOP = {
-  name: "KartBorsa",
-  whatsapp: "",      // ör. "905xxxxxxxxx" (başında + olmadan, ülke koduyla)
-  instagram: "Ardaorhan61", // @ olmadan
-  email: "",         // ör. "siparis@ornek.com"
-  shippingFee: 0     // kargo ücreti (₺). 0 = ücretsiz / sonra konuşulur
-};
-/* ================================================================ */
+/* ========= AYARLAR ========= */
+const SUPABASE_URL = "https://nhftbsguwnpknksqmqni.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ODVKFrVJrw94RBakGxiDgg_QcqMG_ZW";   // herkese açık (publishable) anahtar
+/* =========================== */
 
 const $=s=>document.querySelector(s);
 const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(v==null)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}kids.flat().forEach(k=>k!=null&&e.append(k.nodeType?k:document.createTextNode(k)));return e;};
 const tl=n=>(n==null||isNaN(n))?'—':Number(n).toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';
-const norm=s=>(s||'').toString().toLowerCase().trim().replace(/\s+/g,' ');
-const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display='none',2600);};
+const norm=s=>(s||'').toString().toLocaleLowerCase('tr').trim().replace(/\s+/g,' ');
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display='none',3000);};
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}};
 const fmtDate=d=>d?d.split('/').reverse().join('.'):'—';
-document.title=SHOP.name+' – Pokémon Kartları'; $('#shopName').textContent=SHOP.name;
+const ago=t=>{const s=(Date.now()-new Date(t))/1000;if(s<3600)return Math.max(1,Math.round(s/60))+' dk önce';if(s<86400)return Math.round(s/3600)+' saat önce';return Math.round(s/86400)+' gün önce';};
 
-let CAT=null, BYID={}, STOCK=[], STOCK_SITE=[], CART=store.get('kb_cart',[]);
-const ADMIN = location.hash==='#yonetim' || new URLSearchParams(location.search).has('yonetim');
-if(ADMIN) $('#navAdmin').style.display='';
+let CAT=null,BYID={},LIST=[],SB=null,ME=null;
 
 /* ---------- navigation ---------- */
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
-function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));window.scrollTo(0,0);if(v==='sepet')drawCart();if(v==='magaza')drawShop();if(v==='yonetim')drawAdmin();}
+function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));window.scrollTo(0,0);
+  if(v==='al')drawAl();if(v==='benim')drawMine();}
 
 /* ---------- images ---------- */
 const setOf=c=>CAT.sets[c[1]];
 function imgSmall(c){return c[13]||`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`;}
 function imgLarge(c){const s=imgSmall(c);return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
-function cardImg(c,large){
-  const box=el('div',{class:'cimg'});
-  const fb=el('div',{class:'fb',text:c[0]});
-  const im=el('img',{src:large?imgLarge(c):imgSmall(c),alt:`${c[0]} – ${setOf(c)[1]}`,loading:'lazy'});
-  im.addEventListener('error',()=>{im.remove();});
-  box.append(fb,im); return box;
-}
+function cardImg(c,large,src){
+  const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
+  const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy'});
+  im.addEventListener('error',()=>im.remove());box.append(fb,im);return box;}
 
-/* ---------- stock helpers ---------- */
-const stockFor=id=>STOCK.filter(s=>s.id===id&&s.qty>0);
-const minStock=id=>{const a=stockFor(id);return a.length?Math.min(...a.map(s=>s.price)):null;};
+/* ---------- listings helpers ---------- */
+const active=()=>LIST.filter(l=>l.status==='active'&&l.qty>0);
+function stockOf(cardId){const a=active().filter(l=>l.card_id===cardId);return{list:a.sort((x,y)=>x.price-y.price),qty:a.reduce((s,l)=>s+l.qty,0),min:a.length?Math.min(...a.map(l=>l.price)):null};}
+let STOCKMAP={};
+function rebuildStock(){STOCKMAP={};active().forEach(l=>{const s=(STOCKMAP[l.card_id]||={qty:0,min:Infinity,n:0});s.qty+=l.qty;s.n++;s.min=Math.min(s.min,l.price);});}
 
 /* ---------- catalog ---------- */
 let catRes=[],catShown=60,catSet=null;
 const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2],m[3]]:[String(n),0,''];};
-async function loadAll(){
-  try{
-    const r=await fetch('cards.json'); if(!r.ok) throw new Error('cards.json bulunamadı ('+r.status+')');
-    CAT=await r.json(); CAT.keys=CAT.cards.map(c=>norm(c[0])); CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
-  }catch(e){
-    $('#catInfo').innerHTML=''; $('#catInfo').append(el('span',{style:'color:var(--danger)',text:'Kart veritabanı yüklenemedi: '+e.message+'. Siteyi bir sunucudan (ör. GitHub Pages) açtığından emin ol; dosyaya çift tıklayınca çalışmaz.'}));
-    return;
-  }
-  try{const r=await fetch('stok.json',{cache:'no-store'}); STOCK_SITE=r.ok?await r.json():[];}catch{STOCK_SITE=[];}
-  const draft=ADMIN?store.get('kb_stock_draft',null):null;
-  STOCK=(draft||STOCK_SITE).filter(s=>BYID[s.id]!=null);
+async function loadCatalog(){
+  const r=await fetch('cards.json');if(!r.ok)throw new Error('cards.json bulunamadı');
+  CAT=await r.json();CAT.keys=CAT.cards.map(c=>c[0].toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
   [...new Set(CAT.cards.map(c=>c[3]).filter(Boolean))].sort().forEach(x=>$('#cRar').append(el('option',{value:x,text:x})));
   CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>$('#cSet').append(el('option',{value:i,text:`${s[1]} (${(s[3]||'').slice(0,4)})`})));
-  const last=CAT.sets[CAT.sets.length-1];
-  $('#catInfo').textContent=`${CAT.cards.length.toLocaleString('tr-TR')} kart · ${CAT.sets.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · stokta ${STOCK.filter(s=>s.qty>0).length} kart`;
-  CART=CART.filter(x=>BYID[x.id]!=null);
-  runCat(); updateCartCount();
-  if(location.hash==='#yonetim'&&ADMIN) go('yonetim');
+  infoLine();runCat();
 }
+function infoLine(){if(!CAT)return;const last=CAT.sets[CAT.sets.length-1],a=active();
+  $('#catInfo').textContent=`${CAT.cards.length.toLocaleString('tr-TR')} kart · ${CAT.sets.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`;}
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
     el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
     s[5]?el('img',{src:s[5],alt:s[1],style:'height:56px;max-width:200px;object-fit:contain'}):null,
     el('div',{},el('div',{style:'font:700 20px "Space Grotesk",Inter',text:s[1]}),el('div',{class:'muted small',text:`${s[2]} · ${fmtDate(s[3])}`}))));}
-function openSet(i){$('#cSet').value=String(i);$('#cq').value='';runCat();window.scrollTo(0,0);}
+function openSet(i){$('#cSet').value=String(i);$('#cq').value='';go('katalog');runCat();window.scrollTo(0,0);}
 function runCat(){
   if(!CAT)return;
-  const q=norm($('#cq').value),st=$('#cSet').value,ra=$('#cRar').value,su=$('#cSup').value;
-  catSet=st===''?null:+st; const terms=q.split(' ').filter(Boolean); catRes=[];
+  const q=$('#cq').value.toLowerCase().trim().replace(/\s+/g,' '),st=$('#cSet').value,ra=$('#cRar').value,su=$('#cSup').value,onlyStock=$('#cStock').checked;
+  catSet=st===''?null:+st;const terms=q.split(' ').filter(Boolean);catRes=[];
   for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];
-    if(catSet!==null&&c[1]!==catSet)continue; if(ra&&c[3]!==ra)continue; if(su&&c[4]!==su)continue;
-    if(terms.length&&!terms.every(t=>CAT.keys[i].includes(t)))continue; catRes.push(i);}
+    if(catSet!==null&&c[1]!==catSet)continue;if(ra&&c[3]!==ra)continue;if(su&&c[4]!==su)continue;
+    if(onlyStock&&!STOCKMAP[c[14]])continue;
+    if(terms.length&&!terms.every(t=>CAT.keys[i].includes(t)))continue;catRes.push(i);}
   catRes.sort((a,b)=>{const A=CAT.cards[a],B=CAT.cards[b];if(A[1]!==B[1])return B[1]-A[1];const x=numKey(A[2]),y=numKey(B[2]);return x[0]<y[0]?-1:x[0]>y[0]?1:(x[1]-y[1])||(x[2]<y[2]?-1:1);});
-  catShown=catSet!==null?120:60; drawCat();
+  catShown=catSet!==null?120:60;drawCat();
 }
-function tileFor(i){const c=CAT.cards[i],s=setOf(c),mp=minStock(c[14]);
-  const im=cardImg(c); if(mp!=null) im.append(el('span',{class:'badge',text:tl(mp)}));
+function tileFor(i){const c=CAT.cards[i],s=setOf(c),st=STOCKMAP[c[14]];
+  const im=cardImg(c);if(st){im.append(el('span',{class:'badge',text:tl(st.min)}),el('span',{class:'badge qtyb',text:st.qty+' adet'}));}
   return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}));}
 function drawCat(){
   const area=$('#catArea');area.innerHTML='';crumb();
-  const filtering=catSet!==null||norm($('#cq').value)||$('#cRar').value||$('#cSup').value;
+  const filtering=catSet!==null||$('#cq').value.trim()||$('#cRar').value||$('#cSup').value||$('#cStock').checked;
   if(!filtering){
     $('#catCount').textContent='Bir set seç ya da yukarıdan kart adı ara.';$('#catMore').style.display='none';
     const by={},order=[],cnt={};CAT.cards.forEach(c=>cnt[c[1]]=(cnt[c[1]]||0)+1);
     CAT.sets.forEach((s,i)=>{if(!by[s[2]]){by[s[2]]=[];order.push(s[2]);}by[s[2]].push(i);});
     order.sort((a,b)=>Math.max(...by[b])-Math.max(...by[a]));
     order.forEach(se=>{area.append(el('div',{class:'series',lang:'en',text:se}));const g=el('div',{class:'sets'});
-      by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i];
-        const logo=el('div',{class:'setlogo'});
-        if(s[5]){const im=el('img',{src:s[5],alt:s[1]+' logosu',loading:'lazy'});im.addEventListener('error',()=>{im.remove();});logo.append(im);}
+      by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i],logo=el('div',{class:'setlogo'});
+        if(s[5]){const im=el('img',{src:s[5],alt:s[1]+' logosu',loading:'lazy'});im.addEventListener('error',()=>im.remove());logo.append(im);}
         g.append(el('div',{class:'settile',onclick:()=>openSet(i)},logo,
           el('div',{class:'setname'},s[6]?el('img',{src:s[6],alt:'',loading:'lazy'}):null,el('span',{text:s[1]})),
           el('span',{class:'muted small',text:`${fmtDate(s[3])} · ${cnt[i]||0} kart`})));});
       area.append(g);});
-    return;
-  }
+    return;}
   $('#catCount').textContent=catRes.length.toLocaleString('tr-TR')+' kart';
-  if(!catRes.length){area.append(el('div',{class:'card muted',text:'Eşleşen kart yok. Yazımı kontrol et (kart adları İngilizce).'}));$('#catMore').style.display='none';return;}
+  if(!catRes.length){area.append(el('div',{class:'card muted',text:$('#cStock').checked?'Bu filtrede satışta kart yok.':'Eşleşen kart yok. Yazımı kontrol et (kart adları İngilizce).'}));$('#catMore').style.display='none';return;}
   let cur=-1,grid=null;
   catRes.slice(0,catShown).forEach(i=>{const c=CAT.cards[i];
     if(c[1]!==cur){cur=c[1];const s=CAT.sets[cur],sec=el('div',{class:'setsec'});
@@ -301,8 +277,30 @@ function drawCat(){
   $('#catMore').style.display=catRes.length>catShown?'inline-block':'none';
 }
 let catT;$('#cq').addEventListener('input',()=>{clearTimeout(catT);catT=setTimeout(runCat,150);});
-['#cSet','#cRar','#cSup'].forEach(s=>$(s).addEventListener('change',runCat));
+['#cSet','#cRar','#cSup','#cStock'].forEach(s=>$(s).addEventListener('change',runCat));
 $('#catMore').addEventListener('click',()=>{catShown+=catSet!==null?120:60;drawCat();});
+
+/* ---------- contact ---------- */
+function contactBtns(l,c){
+  const msg=encodeURIComponent(`Merhaba, KartBorsa'daki ilanın için yazıyorum: ${l.card_name} (${l.set_name||''}) – ${tl(l.price)}. Hâlâ satışta mı?`);
+  const wrap=el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px'});
+  if(l.whatsapp){let n=l.whatsapp.replace(/\D/g,'');if(n.startsWith('0'))n='90'+n.slice(1);else if(n.length===10)n='90'+n;
+    wrap.append(el('a',{class:'btn wa',href:`https://wa.me/${n}?text=${msg}`,target:'_blank',rel:'noopener'},'WhatsApp\'tan yaz'));}
+  if(l.instagram){const u=l.instagram.replace(/^@/,'').trim();
+    wrap.append(el('a',{class:'btn sec',href:`https://ig.me/m/${encodeURIComponent(u)}`,target:'_blank',rel:'noopener'},'Instagram: @'+u));}
+  return wrap;}
+function listingRow(l,showCard){
+  const c=CAT.cards[BYID[l.card_id]];
+  return el('div',{class:'lrow'},
+    showCard&&c?el('div',{style:'width:70px;flex:0 0 70px;cursor:pointer',onclick:()=>openCard(BYID[l.card_id])},cardImg(c,false,l.photo_url||null)):
+      (l.photo_url?el('a',{href:l.photo_url,target:'_blank',rel:'noopener',style:'width:70px;flex:0 0 70px'},cardImg(c,false,l.photo_url)):null),
+    el('div',{style:'flex:1;min-width:180px'},
+      showCard?el('div',{style:'font-weight:700',text:l.card_name}):null,
+      showCard?el('div',{class:'muted small',text:`${l.set_name||''}${c?' · #'+c[2]:''}`}):null,
+      el('div',{},el('span',{class:'price',text:tl(l.price)}),' ',el('span',{class:'tag',text:l.cond}),' ',el('span',{class:'tag',text:l.lang}),' ',el('span',{class:'tag',text:l.qty+' adet'})),
+      el('div',{class:'muted small',text:`Satıcı: ${l.seller_name}${l.city?' · '+l.city:''} · ${ago(l.created_at)}`}),
+      l.note?el('div',{class:'small',style:'margin-top:4px',text:l.note}):null,
+      contactBtns(l,c)));}
 
 /* ---------- card detail ---------- */
 function priceLinks(c){const s=setOf(c),q=encodeURIComponent(`${c[0]} ${s[1]} ${c[2]}`);
@@ -314,117 +312,142 @@ function closeModal(){$('#modal').classList.remove('on');}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 function openCard(i){
-  const c=CAT.cards[i],s=setOf(c),offers=stockFor(c[14]).sort((a,b)=>a.price-b.price);
+  const c=CAT.cards[i],s=setOf(c),st=stockOf(c[14]);
   const b=$('#modalBody');b.innerHTML='';
-  const buy=el('div',{class:'buybox'});
-  if(offers.length){
-    buy.append(el('div',{class:'muted small'},'Stokta'));
-    offers.forEach(o=>{const inCart=CART.find(x=>x.key===o.key);
-      buy.append(el('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap'},
-        el('div',{},el('span',{class:'price',text:tl(o.price)}),' ',el('span',{class:'tag',text:o.cond}),o.note?el('div',{class:'muted small',text:o.note}):null,el('div',{class:'muted small',text:`${o.qty} adet`})),
-        el('button',{class:'btn',onclick:()=>{addToCart(o);closeModal();}},inCart?'Bir tane daha ekle':'Sepete ekle')));});
-  }else{
-    buy.append(el('div',{class:'muted small'},'Bu kart şu an stokta yok.'),
-      el('button',{class:'btn sec',style:'margin-top:8px',onclick:()=>{addRequest(c);closeModal();}},'Talep et (fiyat sorulsun)'));
-  }
+  const box=el('div',{class:'buybox'},
+    el('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'},
+      el('div',{},el('div',{class:'muted small'},'Sitedeki stok'),
+        el('div',{style:'font:700 22px "Space Grotesk",Inter',text: st.qty?`${st.qty} adet · ${st.list.length} ilan`:'Satışta yok'}),
+        st.qty?el('div',{class:'muted small',text:`En düşük fiyat ${tl(st.min)}`}):null),
+      el('button',{class:'btn',onclick:()=>{closeModal();pickForListing(i);go('ver');}},'Bu karttan ilan ver')),
+    ...st.list.map(l=>listingRow(l,false)));
   b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:c[0]}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
     el('div',{class:'detail'},el('div',{},cardImg(c,true)),
       el('div',{},
-        el('dl',{class:'kv'},el('dt',{},'Set'),el('dd',{},el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();go('katalog');openSet(c[1]);}},s[1])),
+        el('dl',{class:'kv'},el('dt',{},'Set'),el('dd',{},el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();openSet(c[1]);}},s[1])),
           el('dt',{},'Seri'),el('dd',{text:s[2]}),el('dt',{},'Kart no'),el('dd',{text:c[2]+(s[4]?' / '+s[4]:'')}),
           el('dt',{},'Çıkış'),el('dd',{text:fmtDate(s[3])}),el('dt',{},'Nadirlik'),el('dd',{text:c[3]||'—'}),
           el('dt',{},'Tür'),el('dd',{text:[c[4],c[5]].filter(Boolean).join(' · ')}),
           c[6]?el('dt',{},'HP'):null,c[6]?el('dd',{text:c[6]}):null,c[7]?el('dt',{},'Enerji tipi'):null,c[7]?el('dd',{text:c[7]}):null,
-          c[12]?el('dt',{},'Evrimleştiği'):null,c[12]?el('dd',{text:c[12]}):null,c[8]?el('dt',{},'Çizer'):null,c[8]?el('dd',{text:c[8]}):null),
-        buy,
+          c[8]?el('dt',{},'Çizer'):null,c[8]?el('dd',{text:c[8]}):null),
+        box,
         el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
         ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
-        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)),
-        c[11]?el('div',{class:'atk small muted',text:c[11]}):null)));
+        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))));
   $('#modal').classList.add('on');
 }
 
-/* ---------- shop ---------- */
-function drawShop(){
-  const area=$('#shopArea');area.innerHTML='';if(!CAT)return;
+/* ---------- Kart Al ---------- */
+function drawAl(){
+  const area=$('#alArea');area.innerHTML='';if(!CAT)return;
+  if(!SB){area.append(el('div',{class:'card muted',text:'İlanlar yüklenemedi.'}));return;}
   const q=norm($('#sq').value),sort=$('#sSort').value;
-  let items=STOCK.filter(s=>s.qty>0).map((s,ix)=>({s,ix,c:CAT.cards[BYID[s.id]],i:BYID[s.id]})).filter(x=>!q||norm(x.c[0]+' '+setOf(x.c)[1]).includes(q));
-  if(sort==='asc')items.sort((a,b)=>a.s.price-b.s.price);else if(sort==='desc')items.sort((a,b)=>b.s.price-a.s.price);else items.sort((a,b)=>(b.s.added||0)-(a.s.added||0));
-  if(!items.length){area.append(el('div',{class:'card muted'},STOCK.length?'Aramana uyan kart yok.':'Şu an stokta kart yok. Aradığın bir kart varsa Kartlar bölümünden bulup "Talep et" diyebilirsin.'));return;}
+  let a=active().filter(l=>BYID[l.card_id]!=null).filter(l=>!q||norm(`${l.card_name} ${l.set_name} ${l.city} ${l.seller_name}`).includes(q));
+  if(sort==='asc')a.sort((x,y)=>x.price-y.price);else if(sort==='desc')a.sort((x,y)=>y.price-x.price);else a.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
+  $('#alInfo').textContent=`${active().length} ilan · toplam ${active().reduce((s,l)=>s+l.qty,0)} kart satışta`;
+  if(!a.length){area.append(el('div',{class:'card muted'},LIST.length?'Aramana uyan ilan yok.':'Henüz ilan yok. İlk ilanı sen ver! ',el('a',{href:'#',onclick:e=>{e.preventDefault();go('ver');}},'İlan ver →')));return;}
   const g=el('div',{class:'cgrid'});
-  items.forEach(({s,c,i})=>{const im=cardImg(c);im.append(el('span',{class:'badge',text:tl(s.price)}));
-    g.append(el('div',{class:'ctile'},el('div',{onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${setOf(c)[1]} · #${c[2]} · ${s.cond}`})),
-      el('button',{class:'btn',style:'width:100%;margin-top:8px;padding:8px',onclick:()=>addToCart(s)},'Sepete ekle')));});
+  a.forEach(l=>{const i=BYID[l.card_id],c=CAT.cards[i],im=cardImg(c,false,l.photo_url||null);im.append(el('span',{class:'badge',text:tl(l.price)}));
+    g.append(el('div',{class:'ctile',onclick:()=>openListing(l)},im,el('div',{class:'cname',text:l.card_name}),
+      el('div',{class:'cset',text:`${l.set_name||''} · ${l.cond} · ${l.qty} adet`}),el('div',{class:'cset',text:`${l.seller_name}${l.city?' · '+l.city:''}`})));});
   area.append(g);
 }
-$('#sq').addEventListener('input',drawShop);$('#sSort').addEventListener('change',drawShop);
+$('#sq').addEventListener('input',drawAl);$('#sSort').addEventListener('change',drawAl);
+function openListing(l){const b=$('#modalBody');b.innerHTML='';const i=BYID[l.card_id],c=CAT.cards[i];
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:l.card_name}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('div',{class:'detail'},el('div',{},cardImg(c,true,l.photo_url||null),l.photo_url?el('div',{class:'muted small',style:'margin-top:6px',text:'Satıcının kendi fotoğrafı'}):null),
+      el('div',{},listingRow(l,false),
+        el('button',{class:'btn sec',style:'margin-top:14px',onclick:()=>openCard(i)},'Kart bilgileri ve diğer ilanlar'),
+        el('div',{class:'note',style:'margin-top:14px',text:'Ödemeyi ve kargoyu satıcıyla sen ayarlarsın. Kartı görmeden ya da güvenmediğin birine peşin ödeme yapma.'}))));
+  $('#modal').classList.add('on');}
 
-/* ---------- cart ---------- */
-function saveCart(){store.set('kb_cart',CART);updateCartCount();}
-function updateCartCount(){const n=CART.reduce((a,x)=>a+x.qty,0),e=$('#cartCount');e.textContent=n;e.style.display=n?'':'none';}
-function addToCart(o){const ex=CART.find(x=>x.key===o.key);
-  if(ex){if(ex.qty>=o.qty){toast('Stokta bu kadar var');return;}ex.qty++;}else CART.push({key:o.key,id:o.id,price:o.price,cond:o.cond,qty:1});
-  saveCart();toast('Sepete eklendi ✓');}
-function addRequest(c){const key='req-'+c[14];if(CART.find(x=>x.key===key)){toast('Zaten sepette');return;}CART.push({key,id:c[14],price:null,cond:'',qty:1,request:true});saveCart();toast('Talep sepete eklendi ✓');}
-function cartTotals(){const sub=CART.filter(x=>!x.request).reduce((a,x)=>a+x.price*x.qty,0);const ship=CART.some(x=>!x.request)?(+SHOP.shippingFee||0):0;return{sub,ship,total:sub+ship};}
-function drawCart(){
-  const box=$('#cartBox');box.innerHTML='';
-  if(!CART.length){box.append(el('div',{class:'muted',style:'padding:14px 0'},'Sepetin boş. ',el('a',{href:'#',onclick:e=>{e.preventDefault();go('magaza');}},'Satın al bölümüne git →')));return;}
-  const tb=el('tbody');
-  CART.forEach(x=>{const c=CAT.cards[BYID[x.id]],s=setOf(c),st=STOCK.find(o=>o.key===x.key);
-    tb.append(el('tr',{},el('td',{},el('img',{class:'mini',src:imgSmall(c),alt:''})),
-      el('td',{},el('div',{style:'font-weight:600',text:c[0]}),el('div',{class:'muted small',text:`${s[1]} · #${c[2]}${x.cond?' · '+x.cond:''}`}),x.request?el('span',{class:'tag',text:'Talep – fiyat sorulacak'}):null),
-      el('td',{},x.request?'—':el('span',{class:'qty'},el('button',{onclick:()=>{x.qty--;if(x.qty<1)CART=CART.filter(y=>y!==x);saveCart();drawCart();}},'−'),el('b',{text:x.qty}),el('button',{onclick:()=>{if(st&&x.qty>=st.qty){toast('Stokta bu kadar var');return;}x.qty++;saveCart();drawCart();}},'+'))),
-      el('td',{style:'text-align:right;font-weight:600',text:x.request?'—':tl(x.price*x.qty)}),
-      el('td',{},el('button',{class:'btn sec',style:'padding:4px 10px',onclick:()=>{CART=CART.filter(y=>y!==x);saveCart();drawCart();}},'Kaldır'))));});
-  const t=cartTotals();
-  box.append(el('table',{},tb),el('div',{style:'padding:12px 4px;text-align:right'},
-    el('div',{class:'muted small',text:`Ara toplam: ${tl(t.sub)}`}),t.ship?el('div',{class:'muted small',text:`Kargo: ${tl(t.ship)}`}):null,
-    el('div',{class:'price',style:'font-size:24px',text:'Toplam: '+tl(t.total)})));
-}
-function orderText(){
-  const t=cartTotals(),f=id=>$(id).value.trim();
-  const lines=CART.map(x=>{const c=CAT.cards[BYID[x.id]],s=setOf(c);return x.request?`• [TALEP] ${c[0]} – ${s[1]} #${c[2]}`:`• ${x.qty} x ${c[0]} – ${s[1]} #${c[2]} (${x.cond}) – ${tl(x.price*x.qty)}`;});
-  return `Merhaba, ${SHOP.name} üzerinden sipariş vermek istiyorum:\n\n${lines.join('\n')}\n\nAra toplam: ${tl(t.sub)}${t.ship?`\nKargo: ${tl(t.ship)}`:''}\nToplam: ${tl(t.total)}\n\nAd soyad: ${f('#oName')}\nTelefon: ${f('#oPhone')}\nŞehir: ${f('#oCity')}\nTeslimat: ${f('#oShip')}${f('#oAddr')?`\nAdres: ${f('#oAddr')}`:''}${f('#oNote')?`\nNot: ${f('#oNote')}`:''}`;
-}
-$('#orderForm').addEventListener('submit',e=>{e.preventDefault();const out=$('#orderOut');out.innerHTML='';
-  if(!CART.length){out.append(el('div',{class:'note',text:'Sepetin boş.'}));return;}
-  const txt=orderText(),enc=encodeURIComponent(txt);
-  const btns=el('div',{style:'display:flex;flex-direction:column;gap:8px;margin-top:10px'});
-  if(SHOP.whatsapp)btns.append(el('a',{class:'btn wa',href:`https://wa.me/${SHOP.whatsapp.replace(/\D/g,'')}?text=${enc}`,target:'_blank',rel:'noopener',style:'text-align:center'},'WhatsApp ile gönder'));
-  if(SHOP.email)btns.append(el('a',{class:'btn sec',href:`mailto:${SHOP.email}?subject=${encodeURIComponent(SHOP.name+' sipariş')}&body=${enc}`,style:'text-align:center'},'E-posta ile gönder ('+SHOP.email+')'));
-  if(SHOP.instagram)btns.append(el('a',{class:'btn sec',href:`https://ig.me/m/${SHOP.instagram}`,target:'_blank',rel:'noopener',style:'text-align:center'},'Instagram\'dan yaz (@'+SHOP.instagram+')'));
-  btns.append(el('button',{class:'btn sec',type:'button',onclick:async()=>{try{await navigator.clipboard.writeText(txt);toast('Sipariş metni kopyalandı');}catch{toast('Kopyalanamadı, metni elle seç');}}},'Sipariş metnini kopyala'));
-  out.append(el('div',{class:'muted small',text:'Siparişin hazır. Aşağıdan gönder; satıcı ödeme ve kargo için seninle iletişime geçecek.'}),el('pre',{class:'order',text:txt}),btns,
-    (!SHOP.whatsapp&&!SHOP.email&&!SHOP.instagram)?el('div',{class:'note',style:'margin-top:10px',text:'Mağaza sahibi henüz iletişim bilgisi eklememiş (index.html içindeki SHOP ayarları).'}):null);
-});
-
-/* ---------- admin ---------- */
-let picked=null;
-const saveDraft=()=>store.set('kb_stock_draft',STOCK);
-$('#aq').addEventListener('input',()=>{const box=$('#aSug'),q=norm($('#aq').value);box.innerHTML='';
+/* ---------- İlan Ver ---------- */
+let picked=null,photoBlob=null;
+const sellerInfo=store.get('kb_seller',{});
+['lSeller','lCity','lIg','lWa'].forEach(k=>{const m={lSeller:'name',lCity:'city',lIg:'ig',lWa:'wa'}[k];if(sellerInfo[m])$('#'+k).value=sellerInfo[m];});
+function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);$('#lq').value=c[0];
+  $('#lPicked').textContent=`${c[0]} · ${s[1]} · #${c[2]} · ${c[3]||''}`;
+  const p=$('#lCardPrev');p.innerHTML='';const st=stockOf(c[14]);
+  p.append(cardImg(c,true),el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}),
+    el('div',{class:'muted small',style:'margin-top:8px',text:st.qty?`Sitede şu an ${st.qty} adet var, en düşük ${tl(st.min)}.`:'Sitede bu karttan başka ilan yok.'}),
+    el('div',{class:'small',style:'margin-top:4px'},priceLinks(c)));}
+$('#lq').addEventListener('input',()=>{const box=$('#lSug'),q=$('#lq').value.toLowerCase().trim();box.innerHTML='';picked=null;
   if(!CAT||q.length<2){box.style.display='none';return;}
-  const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<20;i++)if(CAT.keys[i].includes(q))hits.push(i);
-  hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();picked=i;$('#aq').value=c[0];box.style.display='none';
-      const p=$('#aPicked');p.innerHTML='';p.append(el('img',{src:imgSmall(c),alt:'',style:'width:60px;border-radius:4px;vertical-align:middle;margin-right:10px'}),`${c[0]} · ${s[1]} · #${c[2]} · ${c[3]||''}`);}},
-    el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]}`}))));});
+  const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q))hits.push(i);
+  hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();box.style.display='none';pickForListing(i);}},
+    el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
   box.style.display=hits.length?'block':'none';});
-$('#aq').addEventListener('blur',()=>setTimeout(()=>$('#aSug').style.display='none',150));
-$('#aAdd').addEventListener('click',()=>{if(picked==null){toast('Önce bir kart seç');return;}const price=+$('#aPrice').value;if(!price){toast('Fiyat gir');return;}
-  const c=CAT.cards[picked];STOCK.push({key:c[14]+'-'+Date.now().toString(36),id:c[14],price,qty:Math.max(1,+$('#aQty').value||1),cond:$('#aCond').value,note:$('#aNote').value.trim(),added:Date.now()});
-  saveDraft();picked=null;$('#aq').value='';$('#aPrice').value='';$('#aQty').value=1;$('#aNote').value='';$('#aPicked').textContent='Henüz kart seçilmedi.';drawAdmin();toast('Stoğa eklendi (taslak)');});
-function drawAdmin(){if(!CAT)return;const tb=$('#aBody');tb.innerHTML='';$('#aCount').textContent=STOCK.length;
-  if(!STOCK.length)tb.append(el('tr',{},el('td',{colspan:6,class:'muted',text:'Stok boş.'})));
-  STOCK.forEach(s=>{const c=CAT.cards[BYID[s.id]];
-    const pr=el('input',{type:'number',value:s.price,min:1,style:'width:110px'}),q=el('input',{type:'number',value:s.qty,min:0,style:'width:80px'});
-    pr.addEventListener('change',()=>{s.price=+pr.value||s.price;saveDraft();});q.addEventListener('change',()=>{s.qty=Math.max(0,+q.value||0);saveDraft();});
-    tb.append(el('tr',{},el('td',{},el('img',{class:'mini',src:imgSmall(c),alt:''})),el('td',{},el('b',{text:c[0]}),el('div',{class:'muted small',text:`${setOf(c)[1]} · #${c[2]}${s.note?' · '+s.note:''}`})),
-      el('td',{text:s.cond}),el('td',{},pr),el('td',{},q),el('td',{},el('button',{class:'btn danger',style:'padding:4px 10px',onclick:()=>{STOCK=STOCK.filter(x=>x!==s);saveDraft();drawAdmin();}},'Sil'))));});}
-$('#aExport').addEventListener('click',e=>{const blob=new Blob([JSON.stringify(STOCK,null,1)],{type:'application/json'});const a=e.currentTarget;a.href=URL.createObjectURL(blob);a.download='stok.json';});
-$('#aImport').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d))throw 0;STOCK=d.filter(s=>BYID[s.id]!=null);saveDraft();drawAdmin();toast('Stok yüklendi');}catch{toast('Geçersiz dosya');}});
-$('#aReset').addEventListener('click',()=>{try{localStorage.removeItem('kb_stock_draft');}catch{}STOCK=STOCK_SITE.filter(s=>BYID[s.id]!=null);drawAdmin();toast('Sitedeki stoğa dönüldü');});
+$('#lq').addEventListener('blur',()=>setTimeout(()=>$('#lSug').style.display='none',150));
+function shrink(file,max=900,q=0.8){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height)),cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(url);cv.toBlob(b=>b?res(b):rej(new Error('Fotoğraf işlenemedi')),'image/jpeg',q);};
+  img.onerror=()=>rej(new Error('Fotoğraf okunamadı'));img.src=url;});}
+$('#lPhoto').addEventListener('change',async e=>{const f=e.target.files[0];const p=$('#lPhotoPrev');p.innerHTML='';photoBlob=null;if(!f)return;
+  try{photoBlob=await shrink(f);p.append(el('img',{src:URL.createObjectURL(photoBlob),alt:'',style:'max-width:140px;border-radius:8px'}));}catch(err){toast(err.message);}});
+async function ensureUser(){if(ME)return ME;const{data}=await SB.auth.getSession();if(data.session){ME=data.session.user.id;return ME;}
+  const r=await SB.auth.signInAnonymously();if(r.error)throw r.error;ME=r.data.user.id;return ME;}
+$('#lForm').addEventListener('submit',async e=>{e.preventDefault();const msg=$('#lMsg');msg.className='small';msg.style.color='';
+  const fail=t=>{msg.textContent=t;msg.style.color='var(--danger)';};
+  if(!SB)return fail('İlan sistemi şu an çalışmıyor.');
+  if(picked==null)return fail('Önce listeden bir kart seç.');
+  const price=Math.round(+$('#lPrice').value),qty=Math.round(+$('#lQty').value);
+  if(!(price>0))return fail('Geçerli bir fiyat yaz.');if(!(qty>0&&qty<1000))return fail('Adet 1-999 arası olmalı.');
+  const seller=$('#lSeller').value.trim(),ig=$('#lIg').value.trim().replace(/^@/,''),wa=$('#lWa').value.trim(),city=$('#lCity').value.trim();
+  if(!seller)return fail('Adını yaz.');if(!ig&&!wa)return fail('Instagram ya da WhatsApp bilgisi gerekli.');
+  store.set('kb_seller',{name:seller,city,ig,wa});
+  $('#lSubmit').disabled=true;msg.textContent='Yayınlanıyor…';
+  try{
+    const uid=await ensureUser();const c=CAT.cards[picked];let photo_url=null;
+    if(photoBlob){const path=`${uid}/${Date.now().toString(36)}.jpg`;const up=await SB.storage.from('photos').upload(path,photoBlob,{contentType:'image/jpeg'});
+      if(up.error)throw up.error;photo_url=SB.storage.from('photos').getPublicUrl(path).data.publicUrl;}
+    const row={card_id:c[14],card_name:c[0],set_name:setOf(c)[1],price,qty,cond:$('#lCond').value,lang:$('#lLang').value,note:$('#lNote').value.trim()||null,
+      seller_name:seller,instagram:ig||null,whatsapp:wa||null,city:city||null,photo_url};
+    const r=await SB.from('listings').insert(row).select().single();if(r.error)throw r.error;
+    LIST.unshift(r.data);refreshAll();
+    $('#lPrice').value='';$('#lQty').value=1;$('#lNote').value='';$('#lPhoto').value='';$('#lPhotoPrev').innerHTML='';photoBlob=null;
+    msg.textContent='';toast('İlanın yayında ✓');go('benim');
+  }catch(err){fail('Yayınlanamadı: '+(err.message||err));}
+  $('#lSubmit').disabled=false;});
 
-loadAll();
+/* ---------- İlanlarım ---------- */
+async function drawMine(){const area=$('#myArea');area.innerHTML='';if(!CAT||!SB)return;
+  if(!ME){const{data}=await SB.auth.getSession();if(data.session)ME=data.session.user.id;}
+  const mine=LIST.filter(l=>ME&&l.owner===ME).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(!mine.length){area.append(el('div',{class:'card muted'},'Bu tarayıcıdan açılmış ilan yok. ',el('a',{href:'#',onclick:e=>{e.preventDefault();go('ver');}},'İlan ver →')));return;}
+  mine.forEach(l=>{const c=CAT.cards[BYID[l.card_id]];
+    const pr=el('input',{type:'number',min:1,value:l.price,style:'width:120px'}),q=el('input',{type:'number',min:0,max:999,value:l.qty,style:'width:90px'});
+    area.append(el('div',{class:'card lrow',style:'margin-bottom:12px'},
+      el('div',{style:'width:80px;flex:0 0 80px'},cardImg(c,false,l.photo_url||null)),
+      el('div',{style:'flex:1;min-width:200px'},el('div',{style:'font-weight:700',text:l.card_name}),el('div',{class:'muted small',text:`${l.set_name||''} · ${l.cond} · ${ago(l.created_at)}`}),
+        l.status==='sold'?el('span',{class:'tag sold',text:'Satıldı'}):el('span',{class:'tag',text:'Yayında'}),
+        el('div',{class:'row',style:'margin-top:8px;align-items:end'},el('div',{style:'flex:0'},el('label',{},'Fiyat (₺)'),pr),el('div',{style:'flex:0'},el('label',{},'Adet'),q),
+          el('div',{style:'flex:0'},el('button',{class:'btn sec',onclick:()=>updateListing(l,{price:Math.round(+pr.value),qty:Math.round(+q.value),status:(+q.value>0&&l.status!=='sold')?'active':l.status})},'Kaydet')))),
+      el('div',{style:'display:flex;flex-direction:column;gap:8px'},
+        l.status!=='sold'?el('button',{class:'btn',onclick:()=>updateListing(l,{status:'sold',qty:0})},'Satıldı'):el('button',{class:'btn sec',onclick:()=>updateListing(l,{status:'active',qty:Math.max(1,l.qty)})},'Tekrar yayınla'),
+        el('button',{class:'btn danger',onclick:()=>confirmDelete(l)},'Sil'))));});}
+async function updateListing(l,patch){if(!(patch.price>0||patch.price===undefined)){toast('Geçerli fiyat gir');return;}
+  const r=await SB.from('listings').update(patch).eq('id',l.id).select().single();
+  if(r.error){toast('Kaydedilemedi: '+r.error.message);return;}Object.assign(l,r.data);refreshAll();drawMine();toast('Kaydedildi ✓');}
+function confirmDelete(l){const b=$('#modalBody');b.innerHTML='';
+  b.append(el('h3',{text:'İlan silinsin mi?'}),el('p',{class:'muted',text:`${l.card_name} – ${tl(l.price)}`}),
+    el('div',{style:'display:flex;gap:10px'},el('button',{class:'btn danger',onclick:async()=>{const r=await SB.from('listings').delete().eq('id',l.id);
+      if(r.error)toast('Silinemedi: '+r.error.message);else{LIST=LIST.filter(x=>x!==l);if(l.photo_url){const p=l.photo_url.split('/photos/')[1];if(p)SB.storage.from('photos').remove([p]);}refreshAll();drawMine();toast('İlan silindi');}closeModal();}},'Sil'),
+      el('button',{class:'btn sec',onclick:closeModal},'Vazgeç')));$('#modal').classList.add('on');}
+
+/* ---------- boot ---------- */
+function refreshAll(){rebuildStock();infoLine();if(CAT)drawCat();if($('#v-al').classList.contains('on'))drawAl();}
+async function loadListings(){
+  if(!window.supabase){throw new Error('Supabase kütüphanesi yüklenemedi');}
+  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,storageKey:'kb_auth'}});
+  const{data:sess}=await SB.auth.getSession();if(sess.session)ME=sess.session.user.id;
+  let all=[],from=0;for(;;){const r=await SB.from('listings').select('*').order('created_at',{ascending:false}).range(from,from+999);if(r.error)throw r.error;all=all.concat(r.data);if(r.data.length<1000)break;from+=1000;}
+  LIST=all;refreshAll();
+}
+(async()=>{
+  try{await loadCatalog();}catch(e){$('#catInfo').textContent='Kart veritabanı yüklenemedi: '+e.message;return;}
+  try{await loadListings();}catch(e){SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);}
+})();
+
 </script>
 </body>
 </html>

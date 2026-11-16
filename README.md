@@ -1,9 +1,10 @@
 # KartBorsa
 
-Pokémon kart kataloğu ve mağaza. Site: https://ardaorhan61.github.io/kartborsa/
+Pokémon kart kataloğu ve ilan pazarı. Site: https://ardaorhan61.github.io/kartborsa/
 
-- `index.html` – site
+- `index.html` – site (katalog, Kart Al, İlan Ver, İlanlarım)
 - `cards.json` – kart veritabanı (pokemon-tcg-data, Kasım 2026)
-- `stok.json` – satıştaki kartlar. Düzenlemek için siteyi `?yonetim` ile aç, "stok.json dosyasını indir", bu dosyanın yerine yükle.
+- `supabase.sql` – ilan veritabanının kurulumu (Supabase projesi: kartborsa)
 
-Mağaza ayarları (iletişim, kargo ücreti) `index.html` içindeki `SHOP` bölümünde.
+İlanlar Supabase'de `listings` tablosunda, satıcı fotoğrafları `photos` deposunda durur.
+Uygunsuz bir ilanı silmek için: Supabase → Table Editor → listings → satırı sil.

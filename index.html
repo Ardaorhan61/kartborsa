@@ -83,6 +83,16 @@ footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);
 .card.lrow{border-top:1px solid var(--line);padding:14px}
 .badge.qtyb{left:auto;right:6px;top:auto;bottom:6px;background:rgba(15,18,32,.85);color:#fff}
 .tag.sold{color:var(--danger);border-color:var(--danger)}
+.chg{font-weight:700;font-size:12px;white-space:nowrap}.chg.up{color:var(--ok)}.chg.down{color:var(--danger)}.chg.flat{color:var(--muted)}
+.cval{font-size:12px;margin-top:2px}
+.market{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.market h3{font-size:18px;margin-bottom:8px}
+.mtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.mtile{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.mtile .big{font:700 26px "Space Grotesk",Inter,sans-serif;color:var(--accent)}
+table.mt{margin-top:4px}table.mt td,table.mt th{padding:6px 8px;font-size:13px}
+.spark{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -91,6 +101,7 @@ footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);
   <div class="logo" onclick="go('katalog')"><div class="dot">K</div><h1 style="font-size:20px">KartBorsa</h1></div>
   <nav>
     <button data-v="katalog" class="on">Kartlar</button>
+    <button data-v="piyasa" id="navPiyasa" style="display:none">Piyasa</button>
     <button data-v="al">Kart Al</button>
     <button data-v="ver">İlan Ver</button>
     <button data-v="benim">İlanlarım</button>
@@ -115,6 +126,27 @@ footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);
     <div id="catCount" class="muted small" style="margin-bottom:8px"></div>
     <div id="catArea"></div>
     <div style="text-align:center;margin-top:14px"><button class="btn sec" id="catMore" style="display:none">Daha fazla göster</button></div>
+  </section>
+
+  <section class="view" id="v-piyasa">
+    <div class="hero">
+      <div><h2>Piyasa</h2><div class="muted small" id="pzInfo">Günlük güncellenen kart fiyatları.</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><div class="row">
+      <input id="pzq" placeholder="Kart ara…" autocomplete="off">
+      <select id="pzSet"><option value="">Tüm setler</option></select>
+      <select id="pzSort">
+        <option value="val-up">En değerli kartlar</option>
+        <option value="d1-up">Bugün en çok artanlar</option>
+        <option value="d1-down">Bugün en çok düşenler</option>
+        <option value="d7-up">7 güne göre en çok artanlar</option>
+        <option value="d7-down">7 güne göre en çok düşenler</option>
+        <option value="d30-up">30 güne göre en çok artanlar</option>
+        <option value="d30-down">30 güne göre en çok düşenler</option>
+        <option value="val-down">En ucuz kartlar</option>
+      </select>
+    </div></div>
+    <div id="pzArea"></div>
   </section>
 
   <section class="view" id="v-al">
@@ -200,7 +232,7 @@ let CAT=null,BYID={},LIST=[],SB=null,ME=null;
 /* ---------- navigation ---------- */
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
 function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));window.scrollTo(0,0);
-  if(v==='al')drawAl();if(v==='benim')drawMine();}
+  if(v==='al')drawAl();if(v==='benim')drawMine();if(v==='piyasa'){pzShown=100;drawPiyasa();}}
 
 /* ---------- images ---------- */
 const setOf=c=>CAT.sets[c[1]];
@@ -224,7 +256,7 @@ async function loadCatalog(){
   const r=await fetch('cards.json');if(!r.ok)throw new Error('cards.json bulunamadı');
   CAT=await r.json();CAT.keys=CAT.cards.map(c=>c[0].toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
   [...new Set(CAT.cards.map(c=>c[3]).filter(Boolean))].sort().forEach(x=>$('#cRar').append(el('option',{value:x,text:x})));
-  CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>$('#cSet').append(el('option',{value:i,text:`${s[1]} (${(s[3]||'').slice(0,4)})`})));
+  CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>{const t=`${s[1]} (${(s[3]||'').slice(0,4)})`;$('#cSet').append(el('option',{value:i,text:t}));$('#pzSet').append(el('option',{value:i,text:t}));});
   infoLine();runCat();
 }
 function infoLine(){if(!CAT)return;const last=CAT.sets[CAT.sets.length-1],a=active();
@@ -248,7 +280,8 @@ function runCat(){
 }
 function tileFor(i){const c=CAT.cards[i],s=setOf(c),st=STOCKMAP[c[14]];
   const im=cardImg(c);if(st){im.append(el('span',{class:'badge',text:tl(st.min)}),el('span',{class:'badge qtyb',text:st.qty+' adet'}));}
-  return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}));}
+  const mv=OZET?mainValue(OZET.c[c[14]]):null;
+  return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}),mv?el('div',{class:'cval'},el('span',{text:'Piyasa ≈ '+tlx(mv.tl)+' '}),chg(pct(mv.tl,mv.prev),true)):null);}
 function drawCat(){
   const area=$('#catArea');area.innerHTML='';crumb();
   const filtering=catSet!==null||$('#cq').value.trim()||$('#cRar').value||$('#cSup').value||$('#cStock').checked;
@@ -333,7 +366,8 @@ function openCard(i){
         box,
         el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
         ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
-        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))));
+        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))),
+    marketSection(c));
   $('#modal').classList.add('on');
 }
 
@@ -434,6 +468,102 @@ function confirmDelete(l){const b=$('#modalBody');b.innerHTML='';
       if(r.error)toast('Silinemedi: '+r.error.message);else{LIST=LIST.filter(x=>x!==l);if(l.photo_url){const p=l.photo_url.split('/photos/')[1];if(p)SB.storage.from('photos').remove([p]);}refreshAll();drawMine();toast('İlan silindi');}closeModal();}},'Sil'),
       el('button',{class:'btn sec',onclick:closeModal},'Vazgeç')));$('#modal').classList.add('on');}
 
+
+/* ---------- piyasa fiyatları ---------- */
+let OZET=null,KUR=null;const SETPRICE={};
+async function loadPrices(){
+  try{
+    const[o,k]=await Promise.all([fetch('fiyat/ozet.json').then(r=>r.ok?r.json():null),fetch('fiyat/kur.json').then(r=>r.ok?r.json():null)]);
+    if(!o||!k||!k.USD)return;OZET=o;KUR=k;
+    $('#navPiyasa').style.display='';if(CAT){drawCat();}if($('#v-piyasa').classList.contains('on'))drawPiyasa();
+  }catch(e){console.warn('fiyatlar yüklenemedi',e);}
+}
+async function setPrices(sid){if(SETPRICE[sid])return SETPRICE[sid];const r=await fetch(`fiyat/set/${sid}.json`);if(!r.ok)throw new Error('yok');return SETPRICE[sid]=await r.json();}
+const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
+// özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
+function mainValue(o){if(!o||!KUR)return null;
+  if(o[1]!=null)return{tl:eurTL(o[1]),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};
+  if(o[0]!=null)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};return null;}
+const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
+function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
+  const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});
+  return el('span',{class:'chg '+(r>0?'up':'down'),text:(r>0?'▲ %':'▼ %')+Math.abs(r).toLocaleString('tr-TR',{maximumFractionDigits:1})});}
+function tlx(n){if(n==null||isNaN(n))return'—';return n<10?n.toLocaleString('tr-TR',{maximumFractionDigits:2,minimumFractionDigits:2})+' ₺':tl(n);}
+const VAR_TR={holofoil:'Holo',normal:'Normal',reverseHolofoil:'Reverse Holo','1stEditionHolofoil':'1. Baskı Holo','1stEditionNormal':'1. Baskı Normal',unlimitedHolofoil:'Unlimited Holo','1stEdition':'1. Baskı',unlimited:'Unlimited'};
+
+function sparkSVG(points,w=560,h=150){ // points: [{d, a(tl), b(tl)}]
+  const vals=points.flatMap(p=>[p.a,p.b]).filter(v=>v!=null);if(vals.length<2)return null;
+  let lo=Math.min(...vals),hi=Math.max(...vals);if(hi-lo<1e-9){hi+=1;lo=Math.max(0,lo-1);}
+  const pad=8,X=i=>pad+i*(w-2*pad)/Math.max(1,points.length-1),Y=v=>h-pad-(v-lo)/(hi-lo)*(h-2*pad);
+  const line=(k,col)=>{const pts=points.map((p,i)=>p[k]==null?null:`${X(i).toFixed(1)},${Y(p[k]).toFixed(1)}`).filter(Boolean);
+    return pts.length>1?`<polyline fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.join(' ')}"/>`:'';};
+  const svg=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="Fiyat grafiği"><line x1="${pad}" x2="${w-pad}" y1="${Y(hi)}" y2="${Y(hi)}" stroke="#2a3052"/><line x1="${pad}" x2="${w-pad}" y1="${Y(lo)}" y2="${Y(lo)}" stroke="#2a3052"/>${line('b','#4fd1c5')}${line('a','#ffcb3d')}</svg>`;
+  const box=el('div',{class:'spark'});box.innerHTML=svg;
+  box.append(el('div',{class:'muted small',style:'display:flex;justify-content:space-between'},el('span',{text:`${points[0].d.split('-').reverse().join('.')}`}),el('span',{text:`en düşük ${tlx(lo)} · en yüksek ${tlx(hi)}`}),el('span',{text:points[points.length-1].d.split('-').reverse().join('.')})));
+  return box;}
+
+function marketSection(c){
+  const box=el('div',{class:'market'},el('h3',{text:'Piyasa değeri'}),el('div',{class:'muted small',text:'Yükleniyor…'}));
+  if(!KUR){box.lastChild.textContent='Piyasa fiyatları henüz yüklenmedi.';return box;}
+  (async()=>{
+    let rec=null;try{const sp=await setPrices(setOf(c)[0]);rec=sp.c[c[14]];}catch{}
+    box.lastChild.remove();
+    if(!rec||(!rec.t&&!rec.m)){box.append(el('div',{class:'muted small',text:'Bu kart için piyasa fiyatı bulunamadı (çok yeni ya da nadiren satılan bir kart olabilir).'}));return;}
+    const h=rec.h||[],prev=h.length>1?h[h.length-2]:null,cur=h[h.length-1];
+    const kurDay=d=>(KUR.gecmis&&KUR.gecmis[d])||[KUR.USD,KUR.EUR];
+    // üst özet
+    const tiles=el('div',{class:'mtiles'});
+    if(rec.m&&rec.m[2]!=null){const p=prev&&prev[2]!=null?pct(rec.m[2],prev[2]):null;
+      tiles.append(el('div',{class:'mtile'},el('div',{class:'muted small',text:'Cardmarket (Avrupa) trend'}),el('div',{class:'big',text:tlx(eurTL(rec.m[2]))}),
+        el('div',{class:'small'},el('span',{class:'muted',text:`€${rec.m[2].toLocaleString('tr-TR')} · dünden `}),chg(p))));}
+    if(rec.t&&rec.v&&rec.t[rec.v]){const t=rec.t[rec.v],usd=t[3]??t[1],p=prev&&prev[1]!=null&&usd!=null?pct(usd,prev[1]):null;
+      tiles.append(el('div',{class:'mtile'},el('div',{class:'muted small',text:`TCGplayer (ABD) piyasa · ${VAR_TR[rec.v]||rec.v}`}),el('div',{class:'big',text:tlx(usdTL(usd))}),
+        el('div',{class:'small'},el('span',{class:'muted',text:`$${(usd??0).toLocaleString('tr-TR')} · dünden `}),chg(p))));}
+    box.append(tiles);
+    // Cardmarket ortalamaları → eğilim
+    if(rec.m){const[avgSell,low,trend,a1,a7,a30]=rec.m;
+      box.append(el('div',{class:'muted small',style:'margin-top:12px'},'Cardmarket ortalama satış fiyatları'),
+        el('table',{class:'mt'},el('thead',{},el('tr',{},el('th',{},'Dönem'),el('th',{},'Ortalama'),el('th',{},'Bugünkü trende göre'))),
+          el('tbody',{},...[['Son 1 gün',a1],['Son 7 gün',a7],['Son 30 gün',a30]].map(([n,v])=>el('tr',{},el('td',{text:n}),el('td',{text:v!=null?`${tlx(eurTL(v))} (€${v.toLocaleString('tr-TR')})`:'—'}),el('td',{},chg(trend!=null&&v!=null?pct(trend,v):null)))),
+            low!=null?el('tr',{},el('td',{text:'En düşük ilan'}),el('td',{text:`${tlx(eurTL(low))} (€${low.toLocaleString('tr-TR')})`}),el('td',{})):null)));}
+    // TCGplayer varyantları
+    if(rec.t){box.append(el('div',{class:'muted small',style:'margin-top:12px'},'TCGplayer fiyatları (varyantlara göre)'),
+      el('table',{class:'mt'},el('thead',{},el('tr',{},el('th',{},'Varyant'),el('th',{},'Düşük'),el('th',{},'Orta'),el('th',{},'Yüksek'),el('th',{},'Piyasa'))),
+        el('tbody',{},...Object.entries(rec.t).map(([v,a])=>el('tr',{},el('td',{text:VAR_TR[v]||v}),...a.map(x=>el('td',{text:tlx(usdTL(x))})))))));}
+    // günlük geçmiş
+    if(h.length){
+      const pts=h.map(r=>{const k=kurDay(r[0]);return{d:r[0],a:r[1]!=null?r[1]*k[0]:null,b:r[2]!=null?r[2]*k[1]:null};});
+      box.append(el('div',{class:'muted small',style:'margin-top:14px'},'Günlük fiyat geçmişi ',el('span',{style:'color:#4fd1c5',text:'■ Cardmarket'}),' ',el('span',{style:'color:#ffcb3d',text:'■ TCGplayer'})));
+      const sv=sparkSVG(pts);box.append(sv||el('div',{class:'muted small',text:`Fiyat takibi ${h[0][0].split('-').reverse().join('.')} tarihinde başladı; grafik birkaç gün sonra oluşacak. O zamana kadar yukarıdaki Cardmarket ortalamaları eğilimi gösteriyor.`}));
+      const rows=pts.slice(-14).reverse();
+      box.append(el('table',{class:'mt'},el('thead',{},el('tr',{},el('th',{},'Tarih'),el('th',{},'Cardmarket'),el('th',{},'Değişim'),el('th',{},'TCGplayer'),el('th',{},'Değişim'))),
+        el('tbody',{},...rows.map((p,i)=>{const q=pts[pts.length-1-i-1];return el('tr',{},el('td',{text:p.d.split('-').reverse().join('.')}),
+          el('td',{text:tlx(p.b)}),el('td',{},chg(q?pct(p.b,q.b):null,true)),el('td',{text:tlx(p.a)}),el('td',{},chg(q?pct(p.a,q.a):null,true)));}))));}
+    box.append(el('div',{class:'muted small',style:'margin-top:10px',text:`Son güncelleme: ${(OZET&&OZET.u||'').split('-').reverse().join('.')} · Kur: 1 $ = ${KUR.USD.toLocaleString('tr-TR',{maximumFractionDigits:2})} ₺, 1 € = ${KUR.EUR.toLocaleString('tr-TR',{maximumFractionDigits:2})} ₺. Fiyatlar ABD ve Avrupa pazarlarından alınıp TL'ye çevrilmiştir; Türkiye'deki satış fiyatları farklı olabilir.`}));
+  })();
+  return box;}
+
+/* ---------- Piyasa tablosu ---------- */
+let pzShown=100;
+function drawPiyasa(){const area=$('#pzArea');area.innerHTML='';if(!CAT||!OZET){area.append(el('div',{class:'card muted',text:'Piyasa verileri yükleniyor…'}));return;}
+  const q=$('#pzq').value.toLowerCase().trim(),st=$('#pzSet').value,sort=$('#pzSort').value;
+  let rows=[];for(const[id,o]of Object.entries(OZET.c)){const i=BYID[id];if(i==null)continue;const c=CAT.cards[i];
+    if(st!==''&&c[1]!==+st)continue;if(q&&!CAT.keys[i].includes(q))continue;const mv=mainValue(o);if(!mv)continue;
+    rows.push({i,c,o,v:mv.tl,d1:pct(mv.tl,mv.prev),d7:o[1]!=null&&o[2]!=null?pct(o[1],o[2]):null,d30:o[1]!=null&&o[3]!=null?pct(o[1],o[3]):null,src:mv.src});}
+  const key={val:'v',d1:'d1',d7:'d7',d30:'d30'}[sort.replace(/-(up|down)$/,'')]||'v',dir=sort.endsWith('-down')?1:-1;
+  rows=rows.filter(r=>key==='v'||r[key]!=null);rows.sort((a,b)=>dir*((a[key]??-Infinity)-(b[key]??-Infinity)));
+  $('#pzInfo').textContent=`${rows.length.toLocaleString('tr-TR')} kartın fiyatı · güncelleme ${OZET.u.split('-').reverse().join('.')} · 1 € = ${KUR.EUR.toLocaleString('tr-TR',{maximumFractionDigits:2})} ₺`;
+  const tb=el('tbody');rows.slice(0,pzShown).forEach((r,n)=>{const s=setOf(r.c);
+    tb.append(el('tr',{class:'click',onclick:()=>openCard(r.i)},el('td',{class:'muted',text:n+1}),el('td',{},el('img',{class:'mini',src:imgSmall(r.c),alt:'',loading:'lazy'})),
+      el('td',{},el('b',{text:r.c[0]}),el('div',{class:'muted small',text:`${s[1]} · #${r.c[2]} · ${r.c[3]||''}`})),
+      el('td',{style:'font-weight:700;white-space:nowrap',text:tlx(r.v)}),el('td',{},chg(r.d1,true)),el('td',{},chg(r.d7,true)),el('td',{},chg(r.d30,true))));});
+  area.append(el('div',{class:'card',style:'padding:4px 12px;overflow-x:auto'},el('table',{},el('thead',{},el('tr',{},el('th',{},'#'),el('th',{}),el('th',{},'Kart'),el('th',{},'Piyasa değeri'),el('th',{},'Dünden'),el('th',{},'7 gün ort.'),el('th',{},'30 gün ort.'))),tb)),
+    rows.length>pzShown?el('div',{style:'text-align:center;margin-top:12px'},el('button',{class:'btn sec',onclick:()=>{pzShown+=100;drawPiyasa();}},'Daha fazla göster')):null,
+    el('p',{class:'muted small',text:'Piyasa değeri: varsa Cardmarket (Avrupa) trend fiyatı, yoksa TCGplayer (ABD) piyasa fiyatı, günlük kurla TL. "7 gün ort." ve "30 gün ort." bugünkü fiyatın o dönemin ortalamasına göre farkıdır.'}));}
+
+let pzT;$('#pzq').addEventListener('input',()=>{clearTimeout(pzT);pzT=setTimeout(()=>{pzShown=100;drawPiyasa();},200);});
+['#pzSet','#pzSort'].forEach(s=>$(s).addEventListener('change',()=>{pzShown=100;drawPiyasa();}));
+
 /* ---------- boot ---------- */
 function refreshAll(){rebuildStock();infoLine();if(CAT)drawCat();if($('#v-al').classList.contains('on'))drawAl();}
 async function loadListings(){
@@ -445,6 +575,7 @@ async function loadListings(){
 }
 (async()=>{
   try{await loadCatalog();}catch(e){$('#catInfo').textContent='Kart veritabanı yüklenemedi: '+e.message;return;}
+  loadPrices();
   try{await loadListings();}catch(e){SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);}
 })();
 

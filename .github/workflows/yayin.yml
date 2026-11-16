@@ -1,0 +1,65 @@
+name: Fiyatları güncelle ve siteyi yayınla
+
+on:
+  schedule:
+    - cron: "41 3 * * *"   # her gün 06:41 (Türkiye saati), fiyatlar güncellendikten sonra
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: yayin
+  cancel-in-progress: false
+
+jobs:
+  yayin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+
+      - name: Fiyat verisini al
+        run: |
+          git clone --depth 1 --branch fiyat-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" veri \
+            || mkdir -p veri
+
+      - name: Fiyatları güncelle
+        if: github.event_name != 'push' || hashFiles('veri/ozet.json') == ''
+        run: python3 site/.github/scripts/fiyatlar.py veri
+
+      - name: Fiyat verisini kaydet
+        if: github.event_name != 'push' || hashFiles('veri/ozet.json') == ''
+        run: |
+          cd veri
+          rm -rf .git
+          git init -q -b fiyat-verisi
+          git config user.name "KartBorsa fiyat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Fiyatlar $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
+
+      - name: Siteyi hazırla
+        run: |
+          mkdir -p _site/fiyat
+          cp site/index.html site/cards.json _site/
+          touch _site/.nojekyll
+          cp -r veri/set veri/ozet.json veri/kur.json _site/fiyat/ 2>/dev/null || true
+          ls -la _site _site/fiyat | head -20
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,26 @@
+[
+ {
+  "id": "aba2be08-b2c6-4f6c-9396-d21890a3709a",
+  "display_name": "Silinmiş hesap",
+  "city": null,
+  "bio": null,
+  "avatar_url": null,
+  "instagram": null,
+  "whatsapp": null,
+  "show_collection": false,
+  "created_at": "2026-11-16T21:32:03.792274+00:00",
+  "updated_at": "2026-11-16T21:33:39.619844+00:00"
+ },
+ {
+  "id": "3ce1d5d7-d228-41fd-829a-e3ac58c08d26",
+  "display_name": "ArdaOrhan61",
+  "city": "İstanbul",
+  "bio": null,
+  "avatar_url": null,
+  "instagram": "ardaorhaann",
+  "whatsapp": null,
+  "show_collection": true,
+  "created_at": "2026-11-16T21:34:43.990404+00:00",
+  "updated_at": "2026-11-16T21:48:26.042982+00:00"
+ }
+]

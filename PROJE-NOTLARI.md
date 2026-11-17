@@ -45,3 +45,11 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Şifremi unuttum yok (ücretsiz Supabase e-postası sadece proje sahibine gider). Çözüm: özel SMTP (ör. Brevo) bağlamak.
 - Koleksiyon ve takip listesi günlük yedekte yok (gizli veri); Supabase gizli anahtarı GitHub Secrets'a eklenirse yedeklenebilir.
 - `cards.json` yeni setler çıktıkça yeniden üretilmeli (pokemon-tcg-data deposundan).
+
+## Alan adı (17 Kasım 2026)
+- Site adresi: **https://www.kartborsa.com** (kartborsa.com ve eski ardaorhan61.github.io/kartborsa adresleri buraya yönlenir).
+- Alan adı Porkbun'dan alındı (hesap: Argonotum), 17 Kasım 2027'ye kadar; otomatik yenileme Porkbun hesabındaki karttan.
+- Porkbun DNS: kök (ALIAS) ve www (CNAME) → ardaorhan61.github.io. MX/SPF kayıtları Porkbun e-posta yönlendirmesi için duruyor.
+- GitHub Pages ayarında özel alan adı www.kartborsa.com, "Enforce HTTPS" açık.
+- Supabase Site URL: https://www.kartborsa.com/ ; izinli yönlendirmeler: www.kartborsa.com/** ve ardaorhan61.github.io/kartborsa/**.
+- Şifremi unuttum: hatalı şifreden sonra görünür, e-postayla sıfırlama bağlantısı gider. Herkese e-posta gitmesi için Brevo SMTP bağlanacak (yapılacak).

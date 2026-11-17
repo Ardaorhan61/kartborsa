@@ -255,7 +255,7 @@ function rebuildStock(){STOCKMAP={};active().forEach(l=>{const s=(STOCKMAP[l.car
 let catRes=[],catShown=60,catSet=null;
 const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2],m[3]]:[String(n),0,''];};
 async function loadCatalog(){
-  const r=await fetch('cards.json');if(!r.ok)throw new Error('cards.json bulunamadı');
+  const r=await fetch('cards.json',{cache:'no-cache'});if(!r.ok)throw new Error('cards.json bulunamadı');
   CAT=await r.json();CAT.keys=CAT.cards.map(c=>c[0].toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
   [...new Set(CAT.cards.map(c=>c[3]).filter(Boolean))].sort().forEach(x=>$('#cRar').append(el('option',{value:x,text:x})));
   CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>{const t=`${s[1]} (${(s[3]||'').slice(0,4)})`;$('#cSet').append(el('option',{value:i,text:t}));$('#pzSet').append(el('option',{value:i,text:t}));});

@@ -55,6 +55,7 @@ jobs:
         run: |
           mkdir -p _site/fiyat
           cp site/index.html site/cards.json _site/
+          cp site/*.html _site/ 2>/dev/null || true
           touch _site/.nojekyll
           cp -r veri/set veri/ozet.json veri/kur.json _site/fiyat/ 2>/dev/null || true
           ls -la _site _site/fiyat | head -20

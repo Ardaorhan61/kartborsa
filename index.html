@@ -339,6 +339,30 @@ function priceLinks(c){const s=setOf(c),q=encodeURIComponent(`${c[0]} ${s[1]} ${
     el('a',{href:`https://www.tcgplayer.com/search/pokemon/product?q=${q}`,target:'_blank',rel:'noopener'},'TCGplayer ↗'),
     el('a',{href:`https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=${encodeURIComponent(c[0])}`,target:'_blank',rel:'noopener'},'Cardmarket ↗'),
     el('a',{href:`https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`,target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));}
+function openSifre(){
+  if(!USER)return needLogin();
+  const p1=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifre (en az 6 karakter)'}),
+    p2=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifreyi tekrar yaz'}),
+    show=el('input',{type:'checkbox'}),msg=el('div',{class:'small',style:'margin-top:8px'});
+  show.addEventListener('change',()=>{p1.type=p2.type=show.checked?'text':'password';});
+  const save=async e=>{e.preventDefault();msg.style.color='var(--danger)';
+    if(p1.value.length<6)return msg.textContent='Şifre en az 6 karakter olmalı.';
+    if(p1.value!==p2.value)return msg.textContent='İki şifre aynı değil.';
+    msg.style.color='';msg.textContent='Kaydediliyor…';
+    const r=await SB.auth.updateUser({password:p1.value});
+    if(r.error){const m=r.error.message||'';msg.style.color='var(--danger)';
+      msg.textContent=/different from the old/i.test(m)?'Yeni şifre eskisiyle aynı olamaz.':/reauth|nonce/i.test(m)?'Güvenlik için çıkış yapıp tekrar giriş yaptıktan sonra dene.':'Değiştirilemedi: '+m;return;}
+    closeModal();toast('Şifren değişti ✓ Bir dahaki girişte yeni şifreni kullan.');};
+  const b=$('#modalBody');b.innerHTML='';
+  b.append(el('form',{onsubmit:save,style:'max-width:380px;margin:0 auto'},
+    el('h3',{style:'font-size:18px',text:'🔑 Şifremi değiştir'}),
+    el('div',{class:'muted small',text:'Hesap: '+(USER.email||'—')+'. Kolay hatırlayacağın yeni bir şifre seç.'}),
+    el('label',{},'Yeni şifre'),p1,el('label',{},'Yeni şifre (tekrar)'),p2,
+    el('label',{style:'display:flex;gap:8px;align-items:center;color:var(--text);margin-top:10px'},show,'Şifreyi göster'),
+    el('div',{style:'margin-top:14px;display:flex;gap:10px;align-items:center'},
+      el('button',{class:'btn',type:'submit'},'Kaydet'),el('button',{class:'btn sec',type:'button',onclick:closeModal},'Vazgeç')),msg));
+  $('#modal').classList.add('on');setTimeout(()=>p1.focus(),50);
+}
 function closeModal(){$('#modal').classList.remove('on');}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
@@ -627,6 +651,7 @@ async function drawProfil(){
       el('div',{class:'pstats'},stat(act.length,'aktif ilan'),stat(sold.length,'satış'),stat(cv.qty,'koleksiyon kartı'),stat(cv.value?tl(cv.value):'—','koleksiyon değeri'),stat(WATCH.size,'takip'))),
     el('div',{style:'display:flex;flex-direction:column;gap:8px'},
       PROFILE?el('button',{class:'btn sec',onclick:()=>openSeller(USER.id)},'Herkese açık profilim'):null,
+      el('button',{class:'btn sec',onclick:openSifre},'🔑 Şifremi değiştir'),
       el('button',{class:'btn sec',onclick:async()=>{await SB.auth.signOut();USER=null;ME=null;PROFILE=null;COLL=[];WATCH=new Set();updateNav();refreshAll();drawProfil();toast('Çıkış yapıldı');}},'Çıkış yap'))));
   const tabs=[['ilanlar','İlanlarım'],['koleksiyon','Koleksiyonum'],['takip','Takip Listem'],['ayarlar','Profil Ayarları']];
   area.append(el('div',{class:'subtabs',style:'margin:16px 0'},...tabs.map(([k,t])=>el('button',{class:profTab===k?'on':'',onclick:()=>{profTab=k;drawProfil();}},t))));

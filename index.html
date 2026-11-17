@@ -339,7 +339,7 @@ function priceLinks(c){const s=setOf(c),q=encodeURIComponent(`${c[0]} ${s[1]} ${
     el('a',{href:`https://www.tcgplayer.com/search/pokemon/product?q=${q}`,target:'_blank',rel:'noopener'},'TCGplayer ↗'),
     el('a',{href:`https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=${encodeURIComponent(c[0])}`,target:'_blank',rel:'noopener'},'Cardmarket ↗'),
     el('a',{href:`https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`,target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));}
-function openSifre(){
+function openSifre(rec){
   if(!USER)return needLogin();
   const p1=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifre (en az 6 karakter)'}),
     p2=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifreyi tekrar yaz'}),
@@ -355,7 +355,7 @@ function openSifre(){
     closeModal();toast('Şifren değişti ✓ Bir dahaki girişte yeni şifreni kullan.');};
   const b=$('#modalBody');b.innerHTML='';
   b.append(el('form',{onsubmit:save,style:'max-width:380px;margin:0 auto'},
-    el('h3',{style:'font-size:18px',text:'🔑 Şifremi değiştir'}),
+    el('h3',{style:'font-size:18px',text:rec===true?'🔑 Yeni şifreni belirle':'🔑 Şifremi değiştir'}),
     el('div',{class:'muted small',text:'Hesap: '+(USER.email||'—')+'. Kolay hatırlayacağın yeni bir şifre seç.'}),
     el('label',{},'Yeni şifre'),p1,el('label',{},'Yeni şifre (tekrar)'),p2,
     el('label',{style:'display:flex;gap:8px;align-items:center;color:var(--text);margin-top:10px'},show,'Şifreyi göster'),
@@ -602,11 +602,22 @@ function updateNav(){const b=$('#navProfil');b.textContent=PROFILE?PROFILE.displ
 
 /* ---------- giriş / kayıt ---------- */
 function authForm(area){
-  let mode='giris';
+  let mode='giris',fails=0,lastEmail='';
   const box=el('div',{class:'card',style:'max-width:440px;margin:0 auto'});
   const draw=()=>{box.innerHTML='';
     const email=el('input',{type:'email',autocomplete:'email',placeholder:'ornek@gmail.com'}),pw=el('input',{type:'password',autocomplete:mode==='giris'?'current-password':'new-password',placeholder:'En az 6 karakter'}),
-      name=el('input',{maxlength:'40',placeholder:'Sitede görünecek adın'}),msg=el('div',{class:'small',style:'margin-top:8px'});
+      name=el('input',{maxlength:'40',placeholder:'Sitede görünecek adın'}),msg=el('div',{class:'small',style:'margin-top:8px'}),
+      fmsg=el('div',{class:'small',style:'margin-top:6px'});
+    email.value=lastEmail;email.addEventListener('input',()=>{lastEmail=email.value;});
+    const forgot=async()=>{const em=email.value.trim();fmsg.style.color='var(--danger)';
+      if(!em.includes('@'))return fmsg.textContent='Önce yukarıya e-postanı yaz.';
+      fmsg.style.color='';fmsg.textContent='Gönderiliyor…';
+      const r=await SB.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});
+      if(r.error){fmsg.style.color='var(--danger)';fmsg.textContent=/rate|seconds|many/i.test(r.error.message||'')?'Çok sık denedin, biraz bekleyip tekrar dene.':'Gönderilemedi: '+r.error.message;return;}
+      fmsg.style.color='var(--accent)';fmsg.textContent='Şifre sıfırlama bağlantısı '+em+' adresine gönderildi. E-postandaki bağlantıya tıkla (gelmezse spam klasörüne bak).';};
+    const fbox=el('div',{style:'margin-top:12px;text-align:center;display:'+(mode==='giris'&&fails>0?'block':'none')},
+      el('button',{class:'btn sec',type:'button',onclick:forgot},'🔑 Şifremi unuttum'),fmsg,
+      el('div',{class:'muted small',style:'margin-top:6px',text:'E-posta gelmezse Instagram\'dan (@Ardaorhan61) yaz.'}));
     const tabs=el('div',{class:'subtabs'},
       el('button',{class:mode==='giris'?'on':'',onclick:()=>{mode='giris';draw();}},'Giriş yap'),
       el('button',{class:mode==='kayit'?'on':'',onclick:()=>{mode='kayit';draw();}},'Kayıt ol'));
@@ -626,13 +637,14 @@ function authForm(area){
         await loadMine();updateNav();refreshAll();toast(mode==='kayit'?'Hoş geldin! Profilini tamamla.':'Giriş yapıldı ✓');
         profTab=mode==='kayit'?'ayarlar':'ilanlar';drawProfil();
       }catch(err){msg.style.color='var(--danger)';const m=err.message||String(err);
+        if(mode==='giris'&&/Invalid login/i.test(m)){fails++;fbox.style.display='block';const fl=box.querySelector('.flink');if(fl)fl.remove();}
         msg.textContent=/Invalid login/i.test(m)?'E-posta ya da şifre hatalı.':/already registered|already exists/i.test(m)?'Bu e-postayla zaten bir hesap var, giriş yap.':m;}};
     box.append(el('h2',{style:'margin-bottom:4px',text:mode==='giris'?'Giriş yap':'Kayıt ol'}),
       el('p',{class:'muted small',style:'margin-top:0',text:'Hesabınla ilan verebilir, koleksiyonunu ve takip listeni her cihazdan görebilirsin.'}),tabs,
       el('form',{onsubmit:submit},mode==='kayit'?el('div',{},el('label',{},'Adın / takma adın'),name):null,
         el('label',{},'E-posta'),email,el('label',{},'Şifre'),pw,
         el('button',{class:'btn',type:'submit',style:'width:100%;margin-top:14px'},mode==='giris'?'Giriş yap':'Kayıt ol'),msg),
-      mode==='giris'?el('p',{class:'muted small',text:'Şifreni unutursan site yöneticisine Instagram\'dan (@Ardaorhan61) yaz.'}):el('p',{class:'muted small',text:'E-postan kimseye gösterilmez.'}));};
+      fbox,mode==='giris'?(fails>0?null:el('p',{class:'muted small flink',style:'text-align:center'},el('a',{href:'#',onclick:e=>{e.preventDefault();fails=1;fbox.style.display='block';e.target.parentNode.remove();}},'Şifremi unuttum'))):el('p',{class:'muted small',text:'E-postan kimseye gösterilmez.'}));};
   draw();area.append(box);
 }
 
@@ -825,8 +837,11 @@ function sellerBox(){const box=$('#lSellerBox');if(!box)return;box.innerHTML='';
 function refreshAll(){rebuildStock();infoLine();if(CAT)drawCat();if($('#v-al').classList.contains('on'))drawAl();}
 async function loadListings(){
   if(!window.supabase){throw new Error('Supabase kütüphanesi yüklenemedi');}
+  const RECOVERY=/type=recovery/.test(location.hash),LINKERR=/error_code=/.test(location.hash);
   SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,storageKey:'kb_auth'}});
   await loadSession();loadProfiles();
+  if(LINKERR){history.replaceState(null,'',location.pathname);toast('Şifre bağlantısının süresi dolmuş ya da kullanılmış. Girişte "Şifremi unuttum" ile yenisini iste.');}
+  if(RECOVERY&&USER){history.replaceState(null,'',location.pathname);go('profil');openSifre(true);}
   let all=[],from=0;for(;;){const r=await SB.from('listings').select('*').order('created_at',{ascending:false}).range(from,from+999);if(r.error)throw r.error;all=all.concat(r.data);if(r.data.length<1000)break;from+=1000;}
   LIST=all;refreshAll();
 }

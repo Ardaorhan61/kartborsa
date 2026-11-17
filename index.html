@@ -432,9 +432,121 @@ function openListing(l){const b=$('#modalBody');b.innerHTML='';const i=BYID[l.ca
   b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:l.card_name}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
     el('div',{class:'detail'},el('div',{},cardImg(c,true,l.photo_url||null),l.photo_url?el('div',{class:'muted small',style:'margin-top:6px',text:'Satıcının kendi fotoğrafı'}):null),
       el('div',{},listingRow(l,false),
+        kartAlKutu(l),
         el('button',{class:'btn sec',style:'margin-top:14px',onclick:()=>openCard(i)},'Kart bilgileri ve diğer ilanlar'),
         el('div',{class:'note',style:'margin-top:14px',text:'Ödemeyi ve kargoyu satıcıyla sen ayarlarsın. Kartı görmeden ya da güvenmediğin birine peşin ödeme yapma.'}))));
   $('#modal').classList.add('on');}
+
+/* ---------- kartla satın alma (TEST modu) ---------- */
+const DURUM={odeme_bekliyor:['Ödeme bekleniyor','#d29922'],odendi:['Ödendi · kargo bekleniyor','var(--accent)'],kargoda:['Kargoda','var(--accent)'],teslim_alindi:['Teslim alındı','var(--accent)'],aktarildi:['Tamamlandı','#3fb950'],iptal:['İptal edildi','#8b93a7'],itiraz:['Sorun bildirildi','var(--danger)']};
+const testNot=()=>el('div',{class:'note',style:'margin-top:12px',text:'TEST MODU: Kartla ödeme şu an deneme aşamasında; gerçek para çekilmez ve gönderilmez.'});
+function durumEt(d){const x=DURUM[d]||[d,''];return el('span',{class:'tag',style:`border-color:${x[1]};color:${x[1]}`,text:x[0]});}
+function kartAlKutu(l){
+  const box=el('div',{style:'margin-top:14px'});
+  if(ME&&l.owner===ME){box.append(el('div',{class:'muted small',text:'Bu senin ilanın.'}));return box;}
+  box.append(el('div',{class:'muted small',text:'Kartla satın alma kontrol ediliyor…'}));
+  (async()=>{let acik=false;try{const r=await SB.rpc('kartla_satis_acik',{satici:l.owner});acik=!!r.data;}catch(e){}
+    box.innerHTML='';
+    if(acik&&l.qty>0&&l.status==='active')box.append(el('button',{class:'btn',onclick:()=>openCheckout(l)},'💳 Kartla satın al (TEST)'),
+      el('div',{class:'muted small',style:'margin-top:6px',text:'Para, sen kartı teslim alana kadar güvenli hesapta bekler.'}));
+    else box.append(el('div',{class:'muted small',text:'Bu satıcı henüz kartla satış açmadı; satıcıyla iletişime geçebilirsin.'}));})();
+  return box;}
+function openCheckout(l){
+  if(!USER)return needLogin('Satın almak için giriş yapmalısın');
+  const b=$('#modalBody');b.innerHTML='';const c=CAT.cards[BYID[l.card_id]];const max=Math.max(1,Math.min(l.qty,99));
+  const adet=el('select',{},...Array.from({length:max},(_,k)=>el('option',{value:String(k+1),text:String(k+1)})));
+  const f={ad:el('input',{maxlength:'60',placeholder:'Ad Soyad',value:(PROFILE&&PROFILE.display_name)||''}),tel:el('input',{maxlength:'20',placeholder:'05xx xxx xx xx',inputmode:'tel'}),
+    il:el('input',{maxlength:'40',placeholder:'İl / ilçe',value:(PROFILE&&PROFILE.city)||''}),adres:el('textarea',{maxlength:'400',rows:'3',placeholder:'Mahalle, sokak, bina ve daire no'})};
+  try{const k=JSON.parse(localStorage.getItem('kb_adres')||'null');if(k){f.ad.value=k.ad||f.ad.value;f.tel.value=k.tel||'';f.il.value=k.il||f.il.value;f.adres.value=k.adres||'';}}catch(e){}
+  const top=el('div',{class:'small',style:'margin-top:8px'}),msg=el('div',{class:'small',style:'margin-top:8px'});
+  const hesap=()=>{const n=+adet.value;top.innerHTML='';top.append(el('div',{},`${n} × ${tl(l.price)} = `,el('b',{text:tl(l.price*n)})),
+    el('div',{class:'muted small',text:'Kargo ücretini satıcıyla konuşursun. KartBorsa komisyonu satıcıdan kesilir, sana ek ücret yok.'}));};
+  adet.addEventListener('change',hesap);hesap();
+  const gonder=async e=>{e.preventDefault();msg.style.color='var(--danger)';
+    const t={ad:f.ad.value.trim(),tel:f.tel.value.trim(),il:f.il.value.trim(),adres:f.adres.value.trim()};
+    if(t.ad.length<3)return msg.textContent='Adını soyadını yaz.';
+    if(t.tel.replace(/\D/g,'').length<10)return msg.textContent='Geçerli bir telefon numarası yaz.';
+    if(t.il.length<2)return msg.textContent='İl / ilçe yaz.';
+    if(t.adres.length<10)return msg.textContent='Açık adresini yaz.';
+    try{localStorage.setItem('kb_adres',JSON.stringify(t));}catch(e){}
+    msg.style.color='';msg.textContent='Sipariş oluşturuluyor…';
+    const r=await SB.rpc('siparis_olustur',{p_listing:l.id,p_adet:+adet.value,p_teslimat:t});
+    if(r.error){msg.style.color='var(--danger)';msg.textContent=r.error.message;return;}
+    testOdeme(r.data,l.card_name,l.price*+adet.value);};
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:'Satın al: '+l.card_name}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('div',{class:'detail'},el('div',{},cardImg(c,false,l.photo_url||null)),
+      el('form',{onsubmit:gonder},
+        el('div',{class:'muted small',text:`Satıcı: ${l.seller_name} · ${l.cond} · ${l.lang}`}),
+        el('label',{},'Adet'),adet,top,
+        el('h3',{style:'font-size:16px;margin-top:16px',text:'Teslimat adresi'}),
+        el('label',{},'Ad Soyad'),f.ad,el('label',{},'Telefon'),f.tel,el('label',{},'İl / ilçe'),f.il,el('label',{},'Açık adres'),f.adres,
+        el('div',{class:'muted small',style:'margin-top:6px',text:'Adresin sadece bu siparişin satıcısına görünür.'}),
+        el('button',{class:'btn',type:'submit',style:'width:100%;margin-top:14px'},'Siparişi oluştur ve öde'),msg,testNot())));
+  $('#modal').classList.add('on');}
+function testOdeme(id,ad,tutar){
+  const b=$('#modalBody');b.innerHTML='';const msg=el('div',{class:'small',style:'margin-top:10px'});
+  const yap=async ok=>{msg.style.color='';msg.textContent='İşleniyor…';const r=await SB.rpc('test_odeme',{p_id:id,p_basarili:ok});
+    if(r.error){msg.style.color='var(--danger)';msg.textContent=r.error.message;return;}
+    await ilanYenile();b.innerHTML='';
+    b.append(el('h2',{text:r.data==='odendi'?'✓ Ödeme alındı (test)':'Ödeme iptal edildi'}),
+      el('p',{class:'muted',text:r.data==='odendi'?'Satıcı siparişini görüyor. Kartı kargoya verince kargo bilgisi Siparişlerim sayfasında görünecek. Kartı teslim alınca "Teslim aldım" de; para ancak o zaman satıcıya geçer.':'Sipariş iptal edildi, kartından para çekilmedi.'}),
+      el('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},el('button',{class:'btn',onclick:()=>{closeModal();profTab='siparisler';go('profil');drawProfil();}},'Siparişlerime git'),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),testNot());};
+  b.append(el('h2',{text:'Ödeme'}),
+    el('div',{class:'card',style:'margin:10px 0'},el('div',{text:ad}),el('div',{style:'font:700 24px "Space Grotesk",Inter',text:tl(tutar)})),
+    el('div',{class:'note',text:'TEST MODU: Gerçek sistemde burada PayTR\'nin güvenli ödeme penceresi açılacak ve kart bilgilerini oraya gireceksin; KartBorsa kart bilgini hiç görmeyecek. Şimdilik ödemenin sonucunu sen seç, gerçek para çekilmez.'}),
+    el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'},el('button',{class:'btn',onclick:()=>yap(true)},'Ödeme başarılı (test)'),el('button',{class:'btn sec',onclick:()=>yap(false)},'Ödemeden vazgeç')),msg);
+  $('#modal').classList.add('on');}
+async function ilanYenile(){try{let all=[],from=0;for(;;){const r=await SB.from('listings').select('*').order('created_at',{ascending:false}).range(from,from+999);if(r.error)return;all=all.concat(r.data);if(r.data.length<1000)break;from+=1000;}LIST=all;refreshAll();}catch(e){}}
+async function drawSiparisler(area){
+  area.append(el('div',{class:'muted',text:'Yükleniyor…'}));
+  const r=await SB.from('siparisler').select('*').order('olusturma',{ascending:false}).limit(200);
+  area.innerHTML='';
+  if(r.error){area.append(el('div',{class:'card muted',text:'Siparişler yüklenemedi: '+r.error.message}));return;}
+  const al=r.data.filter(s=>s.alici===ME),sat=r.data.filter(s=>s.satici===ME);
+  const kisi=id=>(PROFILES[id]&&PROFILES[id].display_name)||'Kullanıcı';
+  const islem=async(fn,args)=>{const x=await SB.rpc(fn,args);if(x.error){toast(x.error.message);return;}toast('Güncellendi ✓');if(fn==='siparis_iptal')await ilanYenile();drawProfil();};
+  const iki=(yazi,onay,fn)=>el('button',{class:'btn',onclick:e=>{const bt=e.currentTarget;if(!bt.dataset.ok){bt.dataset.ok='1';bt.textContent=onay;return;}fn();}},yazi);
+  const satir=(s,rol)=>{const c=CAT.cards[BYID[s.card_id]],t=s.teslimat||{};const acts=el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center'});
+    if(rol==='al'){
+      if(s.durum==='odeme_bekliyor')acts.append(el('button',{class:'btn',onclick:()=>testOdeme(s.id,s.card_name,s.tutar)},'Ödemeyi tamamla'),el('button',{class:'btn sec',onclick:()=>islem('siparis_iptal',{p_id:s.id})},'İptal et'));
+      if(s.durum==='odendi')acts.append(el('span',{class:'muted small',text:'Satıcının kargoya vermesi bekleniyor.'}),el('button',{class:'btn sec',onclick:()=>islem('siparis_itiraz',{p_id:s.id})},'Sorun bildir'));
+      if(s.durum==='kargoda')acts.append(iki('Teslim aldım','Eminim, para satıcıya geçsin',()=>islem('siparis_teslim',{p_id:s.id})),el('button',{class:'btn sec',onclick:()=>islem('siparis_itiraz',{p_id:s.id})},'Sorun bildir'));
+    }else if(s.durum==='odendi'){const k=el('input',{maxlength:'80',placeholder:'Kargo firması ve takip no',style:'flex:1;min-width:200px'});
+      acts.append(k,el('button',{class:'btn',onclick:()=>islem('siparis_kargola',{p_id:s.id,p_kargo:k.value.trim()})},'Kargoya verdim'),el('button',{class:'btn sec',onclick:()=>islem('siparis_iptal',{p_id:s.id})},'Siparişi iptal et'));}
+    if(s.durum==='itiraz')acts.append(el('span',{class:'small',text:'Site yöneticisi inceleyecek; Instagram\'dan @Ardaorhan61\'e yazabilirsin. Para bu sırada kimseye geçmez.'}));
+    return el('div',{class:'lrow'},el('div',{style:'width:56px;flex:0 0 56px'},c?cardImg(c,false):null),
+      el('div',{style:'flex:1;min-width:200px'},
+        el('div',{style:'display:flex;gap:8px;align-items:center;flex-wrap:wrap'},el('b',{text:`#${s.no} · ${s.card_name}`}),durumEt(s.durum)),
+        el('div',{class:'muted small',text:`${s.adet} adet · ${tl(s.tutar)} · ${rol==='al'?'Satıcı: '+kisi(s.satici):'Alıcı: '+kisi(s.alici)} · ${new Date(s.olusturma).toLocaleString('tr-TR')}`}),
+        rol==='sat'?el('div',{class:'small',text:`Sana geçecek: ${tl(s.satici_alacak)} (KartBorsa komisyonu ${tl(s.komisyon)})`}):null,
+        rol==='sat'&&['odendi','kargoda','itiraz'].includes(s.durum)?el('div',{class:'small',style:'margin-top:4px',text:`Gönderim adresi: ${t.ad} · ${t.tel} · ${t.adres} · ${t.il}`}):null,
+        s.kargo?el('div',{class:'small',text:'Kargo: '+s.kargo}):null,
+        s.durum==='aktarildi'?el('div',{class:'small',text:rol==='sat'?'Para hesabına aktarıldı (test).':'Sipariş tamamlandı.'}):null,acts));};
+  const blok=(baslik,liste,rol,bos)=>el('div',{class:'card',style:'margin-top:12px'},el('h3',{style:'font-size:17px',text:baslik}),...(liste.length?liste.map(s=>satir(s,rol)):[el('div',{class:'muted small',text:bos})]));
+  area.append(blok('Aldıklarım',al,'al','Henüz kartla bir şey satın almadın.'),
+    blok('Sattıklarım',sat,'sat','Henüz kartla satışın yok. Kartla satış için "Ödeme Hesabım" sekmesinden IBAN\'ını ekle.'),testNot());}
+function ibanGecerli(s){s=String(s).replace(/\s/g,'').toUpperCase();if(!/^TR\d{24}$/.test(s))return null;
+  const r=(s.slice(4)+s.slice(0,4)).replace(/[A-Z]/g,ch=>String(ch.charCodeAt(0)-55));let m=0;for(const d of r)m=(m*10+Number(d))%97;return m===1?s:null;}
+async function drawOdemeHesabi(area){
+  area.append(el('div',{class:'muted',text:'Yükleniyor…'}));
+  const r=await SB.from('odeme_hesaplari').select('*').eq('owner',ME).maybeSingle();area.innerHTML='';const h=r.data;
+  const ad=el('input',{maxlength:'80',placeholder:'Hesap sahibinin adı soyadı',value:h?h.ad_soyad:''});
+  const iban=el('input',{maxlength:'34',placeholder:'TR00 0000 0000 0000 0000 0000 00',autocomplete:'off',value:h?h.iban.replace(/(.{4})/g,'$1 ').trim():''});
+  const msg=el('div',{class:'small',style:'margin-top:8px'});
+  const kaydet=async e=>{e.preventDefault();msg.style.color='var(--danger)';const i=ibanGecerli(iban.value);
+    if(ad.value.trim().length<3)return msg.textContent='Hesap sahibinin adını soyadını yaz.';
+    if(!i)return msg.textContent='IBAN geçerli değil. TR ile başlayan 26 karakterlik IBAN\'ını kontrol et.';
+    msg.style.color='';msg.textContent='Kaydediliyor…';
+    const x=await SB.from('odeme_hesaplari').upsert({owner:ME,ad_soyad:ad.value.trim(),iban:i,updated_at:new Date().toISOString()});
+    if(x.error){msg.style.color='var(--danger)';msg.textContent='Kaydedilemedi: '+x.error.message;return;}
+    toast('Ödeme hesabın kaydedildi ✓');drawProfil();};
+  const kapat=async()=>{const x=await SB.from('odeme_hesaplari').delete().eq('owner',ME);if(x.error)return toast('Kapatılamadı: '+x.error.message);toast('Kartla satış kapatıldı');drawProfil();};
+  area.append(el('div',{class:'card'},el('h3',{style:'font-size:17px',text:'Ödeme hesabım'}),
+    el('div',{class:'small',style:'margin:6px 0 10px',text:h?'✓ Kartla satış açık: ilanlarında "Kartla satın al" düğmesi görünüyor.':'Kartla satış kapalı. IBAN\'ını eklersen alıcılar ilanlarını kartla satın alabilir; para, alıcı kartı teslim alınca bu hesaba gönderilir.'}),
+    el('form',{onsubmit:kaydet},el('label',{},'Hesap sahibinin adı soyadı'),ad,el('label',{},'IBAN'),iban,
+      el('div',{class:'muted small',style:'margin-top:6px',text:'IBAN\'ını sadece sen ve ödeme sistemi görür; ilanlarda ve profilinde görünmez. Hesap senin adına olmalı.'}),
+      el('div',{style:'margin-top:12px;display:flex;gap:10px;flex-wrap:wrap'},el('button',{class:'btn',type:'submit'},h?'Güncelle':'Kaydet ve kartla satışı aç'),h?el('button',{class:'btn sec',type:'button',onclick:kapat},'Kartla satışı kapat'):null),msg),
+    el('div',{class:'muted small',style:'margin-top:12px',text:'KartBorsa komisyonu: satış tutarının %5\'i satıcıdan kesilir (test oranı, şirket kurulunca kesinleşecek).'}),testNot()));}
 
 /* ---------- İlan Ver ---------- */
 let picked=null,photoBlob=null;
@@ -706,11 +818,11 @@ async function drawProfil(){
       PROFILE?el('button',{class:'btn sec',onclick:()=>openSeller(USER.id)},'Herkese açık profilim'):null,
       el('button',{class:'btn sec',onclick:openSifre},'🔑 Şifremi değiştir'),
       el('button',{class:'btn sec',onclick:async()=>{await SB.auth.signOut();USER=null;ME=null;PROFILE=null;COLL=[];WATCH=new Set();updateNav();refreshAll();drawProfil();toast('Çıkış yapıldı');}},'Çıkış yap'))));
-  const tabs=[['ilanlar','İlanlarım'],['koleksiyon','Koleksiyonum'],['takip','Takip Listem'],['ayarlar','Profil Ayarları']];
+  const tabs=[['ilanlar','İlanlarım'],['siparisler','Siparişlerim'],['koleksiyon','Koleksiyonum'],['takip','Takip Listem'],['odeme','Ödeme Hesabım'],['ayarlar','Profil Ayarları']];
   area.append(el('div',{class:'subtabs',style:'margin:16px 0'},...tabs.map(([k,t])=>el('button',{class:profTab===k?'on':'',onclick:()=>{profTab=k;drawProfil();}},t))));
   const sub=el('div');area.append(sub);
   if(!PROFILE&&profTab!=='ayarlar'){profTab='ayarlar';}
-  if(profTab==='ilanlar')drawMine(sub);else if(profTab==='koleksiyon')drawColl(sub);else if(profTab==='takip')drawWatch(sub);else drawSettings(sub);
+  if(profTab==='ilanlar')drawMine(sub);else if(profTab==='siparisler')drawSiparisler(sub);else if(profTab==='odeme')drawOdemeHesabi(sub);else if(profTab==='koleksiyon')drawColl(sub);else if(profTab==='takip')drawWatch(sub);else drawSettings(sub);
 }
 const stat=(n,t)=>el('div',{class:'pstat'},el('b',{text:String(n)}),el('span',{text:t}));
 

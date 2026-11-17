@@ -205,7 +205,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
   </section>
 </main>
 
-<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır.</footer>
+<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır. · <a href="gizlilik.html">Gizlilik</a></footer>
 
 <div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
 <div class="toast" id="toast"></div>
@@ -601,6 +601,29 @@ async function loadProfiles(){const r=await SB.from('profiles').select('id,displ
 function updateNav(){const b=$('#navProfil');b.textContent=PROFILE?PROFILE.display_name:(USER?'Profil':'Giriş Yap');sellerBox();}
 
 /* ---------- giriş / kayıt ---------- */
+const GOOGLE_CLIENT_ID='401937391672-q1un5seianuh6qkkf1ag93an8fpbmop9.apps.googleusercontent.com';
+function loadGsi(){return window.__gsi||(window.__gsi=new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.id)return res();
+  const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>res();s.onerror=()=>{window.__gsi=null;rej(new Error('Google yüklenemedi'));};document.head.append(s);}));}
+async function sha256hex(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function googleButton(gbox,msg){
+  try{await loadGsi();}catch(e){gbox.style.display='none';return;}
+  const raw=Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>x.toString(16).padStart(2,'0')).join(''),hashed=await sha256hex(raw);
+  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,nonce:hashed,ux_mode:'popup',callback:async resp=>{
+    msg.style.color='';msg.textContent='Google ile giriş yapılıyor…';
+    try{
+      const{data:cur}=await SB.auth.getSession();if(cur.session&&cur.session.user.is_anonymous)await SB.auth.signOut();
+      const r=await SB.auth.signInWithIdToken({provider:'google',token:resp.credential,nonce:raw});if(r.error)throw r.error;
+      USER=r.data.user;ME=USER.id;await loadMine();
+      let yeni=false;
+      if(!PROFILE){const md=USER.user_metadata||{};const nm=String(md.full_name||md.name||(USER.email||'').split('@')[0]||'Kullanıcı').slice(0,40);
+        const p=await SB.from('profiles').insert({id:USER.id,display_name:nm}).select().single();if(!p.error){PROFILE=p.data;PROFILES[USER.id]=PROFILE;}yeni=true;}
+      updateNav();refreshAll();toast(yeni?'Hoş geldin! Profilini tamamlayabilirsin.':'Giriş yapıldı ✓');
+      profTab=yeni?'ayarlar':'ilanlar';drawProfil();
+    }catch(err){msg.style.color='var(--danger)';msg.textContent='Google ile giriş olmadı: '+(err.message||err);}
+  }});
+  gbox.innerHTML='';
+  google.accounts.id.renderButton(gbox,{theme:'filled_black',size:'large',text:'continue_with',shape:'pill',locale:'tr',width:Math.max(220,Math.min(380,gbox.clientWidth||320))});
+}
 function authForm(area){
   let mode='giris',fails=0,lastEmail='';
   const box=el('div',{class:'card',style:'max-width:440px;margin:0 auto'});
@@ -618,6 +641,9 @@ function authForm(area){
     const fbox=el('div',{style:'margin-top:12px;text-align:center;display:'+(mode==='giris'&&fails>0?'block':'none')},
       el('button',{class:'btn sec',type:'button',onclick:forgot},'🔑 Şifremi unuttum'),fmsg,
       el('div',{class:'muted small',style:'margin-top:6px',text:'E-posta gelmezse Instagram\'dan (@Ardaorhan61) yaz.'}));
+    const gbox=el('div',{style:'margin-top:14px;display:flex;justify-content:center;min-height:44px'}),
+      gor=el('div',{class:'muted small',style:'text-align:center;margin:10px 0 0',text:'— veya e-postayla —'});
+    setTimeout(()=>googleButton(gbox,msg),0);
     const tabs=el('div',{class:'subtabs'},
       el('button',{class:mode==='giris'?'on':'',onclick:()=>{mode='giris';draw();}},'Giriş yap'),
       el('button',{class:mode==='kayit'?'on':'',onclick:()=>{mode='kayit';draw();}},'Kayıt ol'));
@@ -640,7 +666,7 @@ function authForm(area){
         if(mode==='giris'&&/Invalid login/i.test(m)){fails++;fbox.style.display='block';const fl=box.querySelector('.flink');if(fl)fl.remove();}
         msg.textContent=/Invalid login/i.test(m)?'E-posta ya da şifre hatalı.':/already registered|already exists/i.test(m)?'Bu e-postayla zaten bir hesap var, giriş yap.':m;}};
     box.append(el('h2',{style:'margin-bottom:4px',text:mode==='giris'?'Giriş yap':'Kayıt ol'}),
-      el('p',{class:'muted small',style:'margin-top:0',text:'Hesabınla ilan verebilir, koleksiyonunu ve takip listeni her cihazdan görebilirsin.'}),tabs,
+      el('p',{class:'muted small',style:'margin-top:0',text:'Hesabınla ilan verebilir, koleksiyonunu ve takip listeni her cihazdan görebilirsin.'}),tabs,gbox,gor,
       el('form',{onsubmit:submit},mode==='kayit'?el('div',{},el('label',{},'Adın / takma adın'),name):null,
         el('label',{},'E-posta'),email,el('label',{},'Şifre'),pw,
         el('button',{class:'btn',type:'submit',style:'width:100%;margin-top:14px'},mode==='giris'?'Giriş yap':'Kayıt ol'),msg),

@@ -102,7 +102,11 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 .subtabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:99px;cursor:pointer;font:600 14px Inter}
 .subtabs button.on{background:var(--accent);color:#1a1300;border-color:var(--accent)}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://images.pokemontcg.io">
+<link rel="preconnect" href="https://images.scrydex.com">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <header><div class="bar">
@@ -239,7 +243,7 @@ function imgLarge(c){const s=imgSmall(c);return s.includes('scrydex.com')?s.repl
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
   const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy'});
-  im.addEventListener('error',()=>im.remove());box.append(fb,im);return box;}
+  im.addEventListener('error',()=>{if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});box.append(fb,im);return box;}
 
 /* ---------- listings helpers ---------- */
 const active=()=>LIST.filter(l=>l.status==='active'&&l.qty>0);
@@ -366,7 +370,16 @@ function openSifre(rec){
 function closeModal(){$('#modal').classList.remove('on');}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-function openCard(i){
+const DETAY={};
+async function kartDetay(c){
+  if(!CAT.lite||Array.isArray(c[9]))return;
+  const sid=c[14].slice(0,c[14].lastIndexOf('-'));
+  try{DETAY[sid]=DETAY[sid]||fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>r.ok?r.json():{});const d=await DETAY[sid];
+    CAT.cards.forEach(x=>{const v=d[x[14]];if(v&&x[14].slice(0,x[14].lastIndexOf('-'))===sid){x[9]=v[0]||[];x[10]=v[1]||[];x[11]=v[2]||[];}});}catch(e){DETAY[sid]=null;}
+  if(!Array.isArray(c[9])){c[9]=[];c[10]=[];if(!Array.isArray(c[11]))c[11]=[];}
+}
+async function openCard(i){const c=CAT.cards[i];if(CAT.lite&&!Array.isArray(c[9])){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await kartDetay(c);}openCardNow(i);}
+function openCardNow(i){
   const c=CAT.cards[i],s=setOf(c),st=stockOf(c[14]);
   const b=$('#modalBody');b.innerHTML='';
   const box=el('div',{class:'buybox'},
@@ -860,21 +873,26 @@ function sellerBox(){const box=$('#lSellerBox');if(!box)return;box.innerHTML='';
     el('div',{class:'muted small',style:'margin-top:6px',text:'İlanın bu profil bilgileriyle yayınlanır.'}));}
 
 /* ---------- boot ---------- */
-function refreshAll(){rebuildStock();infoLine();if(CAT)drawCat();if($('#v-al').classList.contains('on'))drawAl();}
+function refreshAll(){rebuildStock();infoLine();if(CAT)drawCat();if(CAT&&$('#v-al').classList.contains('on'))drawAl();}
 async function loadListings(){
+  if(!window.supabase&&document.readyState==='loading')await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
   if(!window.supabase){throw new Error('Supabase kütüphanesi yüklenemedi');}
   const RECOVERY=/type=recovery/.test(location.hash),LINKERR=/error_code=/.test(location.hash);
   SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,storageKey:'kb_auth'}});
   await loadSession();loadProfiles();
   if(LINKERR){history.replaceState(null,'',location.pathname);toast('Şifre bağlantısının süresi dolmuş ya da kullanılmış. Girişte "Şifremi unuttum" ile yenisini iste.');}
-  if(RECOVERY&&USER){history.replaceState(null,'',location.pathname);go('profil');openSifre(true);}
+  if(RECOVERY&&USER){history.replaceState(null,'',location.pathname);(window.__katalog||Promise.resolve()).then(()=>{go('profil');openSifre(true);});}
   let all=[],from=0;for(;;){const r=await SB.from('listings').select('*').order('created_at',{ascending:false}).range(from,from+999);if(r.error)throw r.error;all=all.concat(r.data);if(r.data.length<1000)break;from+=1000;}
   LIST=all;refreshAll();
 }
 (async()=>{
-  try{await loadCatalog();}catch(e){$('#catInfo').textContent='Kart veritabanı yüklenemedi: '+e.message;return;}
-  loadPrices();
-  try{await loadListings();}catch(e){SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);}
+  const pCat=loadCatalog();window.__katalog=pCat.catch(()=>{});
+  const pFiyat=loadPrices();
+  const pIlan=loadListings().catch(e=>{SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);});
+  try{await pCat;}catch(e){$('#catInfo').textContent='Kart veritabanı yüklenemedi: '+e.message;return;}
+  if(OZET){labelPriceSets();drawCat();}
+  if(LIST&&LIST.length)refreshAll();
+  await Promise.all([pFiyat,pIlan]);
 })();
 
 </script>

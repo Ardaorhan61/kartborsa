@@ -60,6 +60,26 @@ jobs:
           cp -r veri/set veri/ozet.json veri/kur.json _site/fiyat/ 2>/dev/null || true
           ls -la _site _site/fiyat | head -20
 
+      - name: Kart dosyasını küçült (ayrıntılar ayrı dosyaya)
+        run: |
+          python3 - <<'PY'
+          import json, os
+          p = '_site/cards.json'
+          d = json.load(open(p, encoding='utf-8'))
+          os.makedirs('_site/detay', exist_ok=True)
+          det = {}
+          for c in d['cards']:
+              cid = c[-1]
+              sid = cid.rsplit('-', 1)[0]
+              det.setdefault(sid, {})[cid] = [c[9], c[10], c[11]]
+              c[9] = c[10] = c[11] = 0
+          for sid, v in det.items():
+              json.dump(v, open(f'_site/detay/{sid}.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+          d['lite'] = 1
+          json.dump(d, open(p, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+          print('cards.json', os.path.getsize(p) // 1024, 'KB,', len(det), 'ayrıntı dosyası')
+          PY
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -63,7 +63,7 @@ jobs:
           cp site/*.html _site/ 2>/dev/null || true
           cp -r site/img _site/ 2>/dev/null || true
           touch _site/.nojekyll
-          mkdir -p _site/tara && cp izi/izler.json _site/tara/ 2>/dev/null || true
+          mkdir -p _site/tara && cp izi/izler*.json _site/tara/ 2>/dev/null || true
           cp -r veri/set veri/ozet.json veri/kur.json _site/fiyat/ 2>/dev/null || true
           ls -la _site _site/fiyat | head -20
 

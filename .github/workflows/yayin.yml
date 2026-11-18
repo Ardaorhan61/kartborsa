@@ -185,6 +185,9 @@ jobs:
                       continue
                   if not c[13] and dz.get('resim', {}).get(k):
                       c[13] = dz['resim'][k]
+                  if len(c) > 16 and dz.get('ad', {}).get(k):
+                      c[15] = c[15] or c[0]
+                      c[0] = dz['ad'][k]
                   gr[c[1]].append(c)
               TIP = {'Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy',
                      'Dragon', 'Colorless'}
@@ -199,7 +202,7 @@ jobs:
                           continue
                       var.add(no)
                       kat = 'Energy' if ('Energy' in ad or tip == 'Energy') else ('Pokémon' if tip in TIP else 'Trainer')
-                      ks.append([ad, sidx[sid], no, '', kat, '', '', tip if tip in TIP else '', '', [], [], [], '', img,
+                      ks.append([dz.get('ad', {}).get(f'{sid}|{no}', ad), sidx[sid], no, '', kat, '', '', tip if tip in TIP else '', '', [], [], [], '', img,
                                  f'{sid}-d{no}', ad, 'bp'])
                       eklenen += 1
                   ks.sort(key=lambda c: (int(c[2]) if str(c[2]).isdigit() else 99999, str(c[2])))

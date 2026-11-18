@@ -166,6 +166,46 @@ jobs:
                       ja['cards'].append(c)
               json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print('Promo kartları eklendi:', ek_kart)
+          # Elle bulunan düzeltmeler (Bulbapedia): logolar, resimler, eksik kartlar, çıkmamış kartların silinmesi
+          dz_yol = 'site/.github/scripts/ja_duzeltme.json'
+          if os.path.exists(dz_yol) and os.path.exists('_site/cards_ja.json'):
+              dz = json.load(open(dz_yol, encoding='utf-8'))
+              ja = json.load(open('_site/cards_ja.json', encoding='utf-8'))
+              sidx = {s[0]: i for i, s in enumerate(ja['sets'])}
+              for s in ja['sets']:
+                  if not s[5] and dz.get('logo', {}).get(s[0]):
+                      s[5] = dz['logo'][s[0]]
+                  if not s[6] and dz.get('sembol', {}).get(s[0]):
+                      s[6] = dz['sembol'][s[0]]
+              sil = set(dz.get('sil', []))
+              gr = [[] for _ in ja['sets']]
+              for c in ja['cards']:
+                  k = ja['sets'][c[1]][0] + '|' + (str(c[2]).lstrip('0') or '0')
+                  if k in sil or not c[0]:
+                      continue
+                  if not c[13] and dz.get('resim', {}).get(k):
+                      c[13] = dz['resim'][k]
+                  gr[c[1]].append(c)
+              TIP = {'Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy',
+                     'Dragon', 'Colorless'}
+              eklenen = 0
+              for sid, liste in dz.get('ekle', {}).items():
+                  if sid not in sidx:
+                      continue
+                  ks = gr[sidx[sid]]
+                  var = {str(c[2]).lstrip('0') or '0' for c in ks}
+                  for no, ad, tip, img in liste:
+                      if no in var:
+                          continue
+                      var.add(no)
+                      kat = 'Energy' if ('Energy' in ad or tip == 'Energy') else ('Pokémon' if tip in TIP else 'Trainer')
+                      ks.append([ad, sidx[sid], no, '', kat, '', '', tip if tip in TIP else '', '', [], [], [], '', img,
+                                 f'{sid}-d{no}', ad, 'bp'])
+                      eklenen += 1
+                  ks.sort(key=lambda c: (int(c[2]) if str(c[2]).isdigit() else 99999, str(c[2])))
+              ja['cards'] = [c for ks in gr for c in ks]
+              json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+              print('Düzeltmeler uygulandı, eklenen kart:', eklenen)
           for p in ('_site/cards.json', '_site/cards_ja.json'):
               if not os.path.exists(p):
                   continue

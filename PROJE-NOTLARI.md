@@ -91,4 +91,9 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Eşleme: `.github/scripts/ja_logolar.json` (set kimliği → Pokellector görsel adı). İndirme: `.github/scripts/ja_logo.py`, iş akışı `ja-logo.yml` (eşleme değişince veya elle; sadece eksikleri indirir, sonra siteyi yeniden yayınlar).
 - Yayında (`yayin.yml`) logosu olmayan Japonca setlere `img/ja` içindeki görsel yazılır. 121 setin 101'inde logo var.
 - Logosu olmayan 20 set (Pokellector'da yok, ilk kartın resmi görünür): web1, E1, E3, E4, E5, PCG1–PCG9, WCS23, SVK, SVLN, SVLS, MC, MF.
-- Katalogda olmayan Japonca setler (TCGdex'te kartları yok): ADV1–5 ve DP1–5 dönemi, DPt (Pt1–4), LEGEND (L1–L3), BW1–BW9 ve yan setleri, XY1–XY11 ve CP setleri, ilk Kılıç&Kalkan setleri (S1W, S1H, S1a, S2, S2a, S3, S3a, S4, S4a, S5a, S6a, S7R, S8a, S10D, S10b, SI), SM ve SwSh promo setleri, deste/özel setler.
+- Eksik setler tamamlandı (19 Kasım 2026, gece): `.github/scripts/ja_ek.py` (yayin.yml'de "Japonca eksikleri tamamla" adımı, japonca.py'den sonra).
+  Pokellector'da olup TCGdex'te kartı olmayan 102 set eklendi (BW, XY, LEGEND, DPt, ilk Kılıç&Kalkan, promolar, desteler, Vending): toplam 223 set, 20.635 kart.
+  Bu setlerde kart adları İngilizce (Pokellector'da Japonca ad yok), resim ve logo Pokellector'dan, fiyat yok. Set kimlikleri Pokellector kodu (ör. ja-S2, ja-XY1), `pl` işaretli.
+  Set sayfaları bir kez okunur, `fiyat-verisi` dalında `japonca/ek.json` önbelleğinde tutulur; sadece Pokellector'a yeni eklenen setler okunur.
+  TCGdex setlerinde resmi olmayan kartlar da Pokellector resmi ya da aynı adlı kartın resmiyle dolduruldu (284 → 1).
+- Hâlâ eksik: ADV1–5 ve DP1–5 ana setleri (ne TCGdex'te ne Pokellector'da var); 20 setin logosu (listesi yukarıda).

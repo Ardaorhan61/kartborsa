@@ -7,14 +7,15 @@ on:
     inputs:
       butce:
         description: "Kart sayfaları için saniye"
-        default: "16000"
+        default: "12000"
 
 permissions:
   contents: write
   actions: write
 
+# Siteyi yayınlamayı engellemesin diye ayrı grup (yayin.yml push ile çalışınca fiyat verisini kaydetmez)
 concurrency:
-  group: yayin
+  group: ja-ayrinti
   cancel-in-progress: false
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
 
       - name: Eksikleri tamamla
         env:
-          BUTCE: ${{ inputs.butce || '16000' }}
+          BUTCE: ${{ inputs.butce || '12000' }}
         run: python3 site/.github/scripts/ja_ek.py veri site
 
       - name: Kaydet

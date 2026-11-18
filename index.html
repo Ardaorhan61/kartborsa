@@ -116,6 +116,10 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 @keyframes kbHale{0%,100%{box-shadow:0 24px 48px rgba(0,0,0,.6),0 0 18px 2px rgba(255,214,90,.25)}50%{box-shadow:0 30px 60px rgba(0,0,0,.65),0 0 55px 16px rgba(255,214,90,.5)}}
 @keyframes kbDalga{from{--kbr:0%}to{--kbr:115%}}
 @media (prefers-reduced-motion:reduce){#modalBody .detail .cimg.parla,#modalBody .detail .cimg.parla::after{animation:none}}
+#dilSec{display:flex;gap:3px;background:var(--panel2);border-radius:999px;padding:3px;margin:0 8px;flex:0 0 auto}
+#dilSec button{border:0;background:transparent;color:var(--muted);padding:6px 11px;border-radius:999px;font:600 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+#dilSec button.on{background:var(--accent);color:#14161c}
+@media (max-width:640px){#dilSec{margin:0 4px}#dilSec button{padding:5px 7px;font-size:12px}}
 </style>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -253,12 +257,12 @@ function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.to
 
 /* ---------- images ---------- */
 const setOf=c=>CAT.sets[c[1]];
-function imgSmall(c){return c[13]||`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`;}
-function imgLarge(c){const s=imgSmall(c);return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
+function imgSmall(c){return c[13]||(String(c[14]).startsWith('ja-')?'data:,':`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`);}
+function imgLarge(c){const s=imgSmall(c);if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
   const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy'});
-  im.addEventListener('error',()=>{if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});box.append(fb,im);return box;}
+  im.addEventListener('error',()=>{if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)&&!String(c[14]).startsWith('ja-')){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});box.append(fb,im);return box;}
 
 /* ---------- listings helpers ---------- */
 const active=()=>LIST.filter(l=>l.status==='active'&&l.qty>0);
@@ -270,25 +274,44 @@ function rebuildStock(){STOCKMAP={};active().forEach(l=>{const s=(STOCKMAP[l.car
 let catRes=[],catShown=60,catSet=null;
 const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2],m[3]]:[String(n),0,''];};
 async function loadCatalog(){
+  const pJa=fetch('cards_ja.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
   const r=await fetch('cards.json',{cache:'no-cache'});if(!r.ok)throw new Error('cards.json bulunamadı');
-  CAT=await r.json();CAT.keys=CAT.cards.map(c=>c[0].toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
-  [...new Set(CAT.cards.map(c=>c[3]).filter(Boolean))].sort().forEach(x=>$('#cRar').append(el('option',{value:x,text:x})));
-  CAT.sets.map((s,i)=>[s,i]).reverse().forEach(([s,i])=>{const t=`${s[1]} (${(s[3]||'').slice(0,4)})`;$('#cSet').append(el('option',{value:i,text:t}));$('#pzSet').append(el('option',{value:i,text:t}));});
-  infoLine();runCat();
+  CAT=await r.json();const J=await pJa;
+  if(J&&J.cards&&J.sets){const o=CAT.sets.length;J.sets.forEach(s=>CAT.sets.push(s));J.cards.forEach(c=>{c[1]+=o;CAT.cards.push(c);});}
+  CAT.keys=CAT.cards.map(c=>(c[0]+' '+(c[15]||'')).toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
+  dilKur();infoLine();runCat();
 }
-function infoLine(){if(!CAT)return;const last=CAT.sets[CAT.sets.length-1],a=active();
-  $('#catInfo').textContent=`${CAT.cards.length.toLocaleString('tr-TR')} kart · ${CAT.sets.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`;}
+/* ---------- İngilizce / Japonca ---------- */
+let DIL=(()=>{try{return localStorage.getItem('kb_dil')==='ja'?'ja':'en';}catch(e){return 'en';}})();
+const setDil=s=>s&&s[7]==='ja'?'ja':'en', dilOf=c=>setDil(CAT.sets[c[1]]);
+function dilKur(){
+  const temizle=id=>{const s=$(id);if(!s)return null;const ilk=s.options[0];s.innerHTML='';if(ilk)s.append(ilk);return s;};
+  const r=temizle('#cRar');[...new Set(CAT.cards.filter(c=>dilOf(c)===DIL).map(c=>c[3]).filter(Boolean))].sort().forEach(x=>r.append(el('option',{value:x,text:x})));
+  const a=temizle('#cSet'),b=temizle('#pzSet');
+  CAT.sets.map((s,i)=>[s,i]).reverse().filter(([s])=>setDil(s)===DIL).forEach(([s,i])=>{const t=`${s[1]} (${(s[3]||'').slice(0,4)})`;a.append(el('option',{value:i,text:t}));if(b)b.append(el('option',{value:i,text:t}));});
+  $('#cq').placeholder=DIL==='ja'?'Kart adını yaz: ör. リザードン, Charizard, Pikachu…':'Kart adını yaz: ör. Charizard, Pikachu ex, Umbreon VMAX…';
+  document.querySelectorAll('#dilSec button').forEach(x=>x.classList.toggle('on',x.dataset.d===DIL));
+  if(typeof labelPriceSets==='function')labelPriceSets();}
+function dilDegistir(d){if(d===DIL)return;DIL=d;try{localStorage.setItem('kb_dil',d);}catch(e){}catSet=null;
+  if(CAT){dilKur();infoLine();runCat();}
+  const v=document.querySelector('.view.on');if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}if(v&&v.id==='v-al')drawAl();}
+(function(){const nav=document.querySelector('header nav');if(!nav||document.getElementById('dilSec'))return;
+  const d=el('div',{id:'dilSec'});[['en','🇬🇧 İngilizce'],['ja','🇯🇵 Japonca']].forEach(([k,t])=>{const b=el('button',{onclick:()=>dilDegistir(k)},t);b.dataset.d=k;if(k===DIL)b.classList.add('on');d.append(b);});
+  nav.parentNode.insertBefore(d,nav);})();
+function infoLine(){if(!CAT)return;const ss=CAT.sets.filter(s=>setDil(s)===DIL),last=ss[ss.length-1];
+  const a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL);let n=0;for(const c of CAT.cards)if(dilOf(c)===DIL)n++;
+  $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':'');}
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
     el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
     s[5]?el('img',{src:s[5],alt:s[1],style:'height:56px;max-width:200px;object-fit:contain'}):null,
     el('div',{},el('div',{style:'font:700 20px "Space Grotesk",Inter',text:s[1]}),el('div',{class:'muted small',text:`${s[2]} · ${fmtDate(s[3])}`}))));}
-function openSet(i){$('#cSet').value=String(i);$('#cq').value='';go('katalog');runCat();window.scrollTo(0,0);}
+function openSet(i){if(CAT&&setDil(CAT.sets[i])!==DIL)dilDegistir(setDil(CAT.sets[i]));$('#cSet').value=String(i);$('#cq').value='';go('katalog');runCat();window.scrollTo(0,0);}
 function runCat(){
   if(!CAT)return;
   const q=$('#cq').value.toLowerCase().trim().replace(/\s+/g,' '),st=$('#cSet').value,ra=$('#cRar').value,su=$('#cSup').value,onlyStock=$('#cStock').checked;
   catSet=st===''?null:+st;const terms=q.split(' ').filter(Boolean);catRes=[];
-  for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];
+  for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];if(setDil(CAT.sets[c[1]])!==DIL)continue;
     if(catSet!==null&&c[1]!==catSet)continue;if(ra&&c[3]!==ra)continue;if(su&&c[4]!==su)continue;
     if(onlyStock&&!STOCKMAP[c[14]])continue;
     if(terms.length&&!terms.every(t=>CAT.keys[i].includes(t)))continue;catRes.push(i);}
@@ -305,9 +328,9 @@ function drawCat(){
   if(!filtering){
     $('#catCount').textContent='Bir set seç ya da yukarıdan kart adı ara.';$('#catMore').style.display='none';
     const by={},order=[],cnt={};CAT.cards.forEach(c=>cnt[c[1]]=(cnt[c[1]]||0)+1);
-    CAT.sets.forEach((s,i)=>{if(!by[s[2]]){by[s[2]]=[];order.push(s[2]);}by[s[2]].push(i);});
+    CAT.sets.forEach((s,i)=>{if(setDil(s)!==DIL)return;if(!by[s[2]]){by[s[2]]=[];order.push(s[2]);}by[s[2]].push(i);});
     order.sort((a,b)=>Math.max(...by[b])-Math.max(...by[a]));
-    order.forEach(se=>{area.append(el('div',{class:'series',lang:'en',text:se}));const g=el('div',{class:'sets'});
+    order.forEach(se=>{area.append(el('div',{class:'series',lang:DIL,text:se}));const g=el('div',{class:'sets'});
       by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i],logo=el('div',{class:'setlogo'});
         if(s[5]){const im=el('img',{src:s[5],alt:s[1]+' logosu',loading:'lazy'});im.addEventListener('error',()=>im.remove());logo.append(im);}
         g.append(el('div',{class:'settile',onclick:()=>openSet(i)},logo,
@@ -316,7 +339,7 @@ function drawCat(){
       area.append(g);});
     return;}
   $('#catCount').textContent=catRes.length.toLocaleString('tr-TR')+' kart';
-  if(!catRes.length){area.append(el('div',{class:'card muted',text:$('#cStock').checked?'Bu filtrede satışta kart yok.':'Eşleşen kart yok. Yazımı kontrol et (kart adları İngilizce).'}));$('#catMore').style.display='none';return;}
+  if(!catRes.length){area.append(el('div',{class:'card muted',text:$('#cStock').checked?'Bu filtrede satışta kart yok.':(DIL==='ja'?'Eşleşen kart yok. Kartın Japonca adını ya da Pokémon\'un İngilizce adını yaz (ör. リザードン ya da Charizard).':'Eşleşen kart yok. Yazımı kontrol et (kart adları İngilizce).')}));$('#catMore').style.display='none';return;}
   let cur=-1,grid=null;
   catRes.slice(0,catShown).forEach(i=>{const c=CAT.cards[i];
     if(c[1]!==cur){cur=c[1];const s=CAT.sets[cur],sec=el('div',{class:'setsec'});
@@ -432,7 +455,7 @@ function drawAl(){
   const area=$('#alArea');area.innerHTML='';if(!CAT)return;
   if(!SB){area.append(el('div',{class:'card muted',text:'İlanlar yüklenemedi.'}));return;}
   const q=norm($('#sq').value),sort=$('#sSort').value;
-  let a=active().filter(l=>BYID[l.card_id]!=null).filter(l=>!q||norm(`${l.card_name} ${l.set_name} ${l.city} ${l.seller_name}`).includes(q));
+  let a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).filter(l=>!q||norm(`${l.card_name} ${l.set_name} ${l.city} ${l.seller_name}`).includes(q));
   if(sort==='asc')a.sort((x,y)=>x.price-y.price);else if(sort==='desc')a.sort((x,y)=>y.price-x.price);else a.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
   $('#alInfo').textContent=`${active().length} ilan · toplam ${active().reduce((s,l)=>s+l.qty,0)} kart satışta`;
   if(!a.length){area.append(el('div',{class:'card muted'},LIST.length?'Aramana uyan ilan yok.':'Henüz ilan yok. İlk ilanı sen ver! ',el('a',{href:'#',onclick:e=>{e.preventDefault();go('ver');}},'İlan ver →')));return;}
@@ -801,7 +824,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 /* ---------- İlan Ver ---------- */
 let picked=null,photoBlob=null;
-function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);$('#lq').value=c[0];
+function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);if($('#lLang'))$('#lLang').value=dilOf(c)==='ja'?'Japonca':'İngilizce';$('#lq').value=c[0];
   $('#lPicked').textContent=`${c[0]} · ${s[1]} · #${c[2]} · ${c[3]||''}`;
   const p=$('#lCardPrev');p.innerHTML='';const st=stockOf(c[14]);
   p.append(cardImg(c,true),el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}),
@@ -809,7 +832,7 @@ function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);$('#lq').val
     el('div',{class:'small',style:'margin-top:4px'},priceLinks(c)));}
 $('#lq').addEventListener('input',()=>{const box=$('#lSug'),q=$('#lq').value.toLowerCase().trim();box.innerHTML='';picked=null;
   if(!CAT||q.length<2){box.style.display='none';return;}
-  const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q))hits.push(i);
+  const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q)&&dilOf(CAT.cards[i])===DIL)hits.push(i);
   hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();box.style.display='none';pickForListing(i);}},
     el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
   box.style.display=hits.length?'block':'none';});
@@ -926,7 +949,7 @@ let pzShown=100;
 function drawPiyasa(){const area=$('#pzArea');area.innerHTML='';if(!CAT||!OZET){area.append(el('div',{class:'card muted',text:'Piyasa verileri yükleniyor…'}));return;}
   const q=$('#pzq').value.toLowerCase().trim(),st=$('#pzSet').value,sort=$('#pzSort').value;
   let rows=[];for(const[id,o]of Object.entries(OZET.c)){const i=BYID[id];if(i==null)continue;const c=CAT.cards[i];
-    if(st!==''&&c[1]!==+st)continue;if(q&&!CAT.keys[i].includes(q))continue;const mv=mainValue(o);if(!mv)continue;
+    if(dilOf(c)!==DIL)continue;if(st!==''&&c[1]!==+st)continue;if(q&&!CAT.keys[i].includes(q))continue;const mv=mainValue(o);if(!mv)continue;
     rows.push({i,c,o,v:mv.tl,d1:pct(mv.tl,mv.prev),d7:o[1]!=null&&o[2]!=null?pct(o[1],o[2]):null,d30:o[1]!=null&&o[3]!=null?pct(o[1],o[3]):null,src:mv.src});}
   const key={val:'v',d1:'d1',d7:'d7',d30:'d30'}[sort.replace(/-(up|down)$/,'')]||'v',dir=sort.endsWith('-down')?1:-1;
   rows=rows.filter(r=>key==='v'||r[key]!=null);rows.sort((a,b)=>dir*((a[key]??-Infinity)-(b[key]??-Infinity)));
@@ -1144,7 +1167,7 @@ function collTotals(list){list=list||COLL;let qty=0,value=0,prev=0,paid=0,priced
   return{qty,value,prev,paid,priced};}
 function cardPicker(onPick,ph){const wrap=el('div',{style:'position:relative'}),inp=el('input',{placeholder:ph||'Kart adı yaz, listeden seç',autocomplete:'off'}),box=el('div',{class:'sug'});
   inp.addEventListener('input',()=>{box.innerHTML='';const q=inp.value.toLowerCase().trim();if(q.length<2){box.style.display='none';return;}
-    const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q))hits.push(i);
+    const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q)&&dilOf(CAT.cards[i])===DIL)hits.push(i);
     hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();box.style.display='none';inp.value=`${c[0]} · ${s[1]} #${c[2]}`;onPick(i);}},
       el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
     box.style.display=hits.length?'block':'none';});

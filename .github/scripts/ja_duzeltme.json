@@ -1,0 +1,315 @@
+{
+ "logo": {
+  "ja-web1": "https://archives.bulbagarden.net/media/upload/4/44/Pok%C3%A9mon_Card_web_Logo.png",
+  "ja-E1": "https://archives.bulbagarden.net/media/upload/a/a5/E1_Base_Expansion_Pack_pack.jpg",
+  "ja-E3": "https://archives.bulbagarden.net/media/upload/b/b0/E3_Logo.png",
+  "ja-E4": "https://archives.bulbagarden.net/media/upload/0/06/E4_Logo.png",
+  "ja-E5": "https://archives.bulbagarden.net/media/upload/f/fd/E5_Logo.png",
+  "ja-ADV1": "https://archives.bulbagarden.net/media/upload/f/f1/ADV1_Expansion_Pack_pack.jpg",
+  "ja-ADV2": "https://archives.bulbagarden.net/media/upload/6/66/ADV2_Miracle_of_the_Desert_pack.jpg",
+  "ja-ADV3": "https://archives.bulbagarden.net/media/upload/e/ed/ADV3_Rulers_of_the_Heavens_pack.jpg",
+  "ja-ADV4": "https://archives.bulbagarden.net/media/upload/4/48/Ex1_Magma_VS_Aqua_Two_Ambitions_pack.jpg",
+  "ja-ADV5": "https://archives.bulbagarden.net/media/upload/3/32/ADV4_Undone_Seal_pack.jpg",
+  "ja-PCG1": "https://archives.bulbagarden.net/media/upload/8/82/PCG1_Flight_of_Legends_pack.jpg",
+  "ja-PCG2": "https://archives.bulbagarden.net/media/upload/3/3b/PCG2_Clash_of_the_Blue_Sky_pack.jpg",
+  "ja-PCG3": "https://archives.bulbagarden.net/media/upload/a/a5/PCG3_Rocket_Gang_Strikes_Back_pack.jpg",
+  "ja-PCG4": "https://archives.bulbagarden.net/media/upload/5/58/PCG4_Golden_Sky_Silvery_Ocean_pack.jpg",
+  "ja-PCG5": "https://archives.bulbagarden.net/media/upload/9/96/PCG5_Mirage_Forest_pack.jpg",
+  "ja-PCG6": "https://archives.bulbagarden.net/media/upload/4/41/PCG6_Holon_Research_Tower_pack.jpg",
+  "ja-PCG7": "https://archives.bulbagarden.net/media/upload/1/1b/PCG7_Holon_Phantom_pack.jpg",
+  "ja-PCG8": "https://archives.bulbagarden.net/media/upload/6/61/PCG8_Miracle_Crystal_pack.jpg",
+  "ja-PCG9": "https://archives.bulbagarden.net/media/upload/d/dd/PCG9_Offense_Defense_Furthest_Ends_pack.jpg",
+  "ja-DP2": "https://archives.bulbagarden.net/media/upload/3/34/Secret_of_the_Lakes_Special_Pack.jpg",
+  "ja-DP3": "https://archives.bulbagarden.net/media/upload/9/9c/Shining_Darkness_Special_Pack.jpg",
+  "ja-DP4M": "https://archives.bulbagarden.net/media/upload/7/72/Moonlit_Pursuit_Dawn_Dash_Special_Pack.jpg",
+  "ja-DP4D": "https://archives.bulbagarden.net/media/upload/7/72/Moonlit_Pursuit_Dawn_Dash_Special_Pack.jpg",
+  "ja-DP5C": "https://archives.bulbagarden.net/media/upload/9/97/Cry_from_the_Mysterious_Temple_of_Anger_Special_Pack.jpg",
+  "ja-DP5T": "https://archives.bulbagarden.net/media/upload/9/97/Cry_from_the_Mysterious_Temple_of_Anger_Special_Pack.jpg",
+  "ja-WCS23": "https://archives.bulbagarden.net/media/upload/8/83/2023_World_Championships_Yokohama_Deck_Pikachu.jpg",
+  "ja-SVK": "https://archives.bulbagarden.net/media/upload/4/42/Stellar_Miracle_Deck_Build_Box.png",
+  "ja-SVLN": "https://archives.bulbagarden.net/media/upload/c/c3/Stellar_Tera_Type_Starter_Set_Sylveon_ex.jpg",
+  "ja-SVLS": "https://archives.bulbagarden.net/media/upload/8/80/Stellar_Tera_Type_Starter_Set_Ceruledge_ex.jpg",
+  "ja-MC": "https://archives.bulbagarden.net/media/upload/7/7a/Start_Deck_100_Battle_Collection.jpg",
+  "ja-MF": "https://archives.bulbagarden.net/media/upload/5/5c/30th_Celebration_Premium_Deck_Set_Espeon_Umbreon.jpg",
+  "ja-DP1D": "https://archives.bulbagarden.net/media/upload/5/50/DP1_Booster_Dialga.jpg",
+  "ja-DP1P": "https://archives.bulbagarden.net/media/upload/6/69/DP1_Booster_Palkia.jpg",
+  "ja-ADVP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-PCGP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-LP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-PP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-TP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png"
+ },
+ "sembol": {
+  "ja-WCS23": "https://archives.bulbagarden.net/media/upload/e/e2/SetSymbolWorld_Championships_Yokohama_Deck.png",
+  "ja-SVLN": "https://archives.bulbagarden.net/media/upload/2/2b/SetSymbolStellar_Tera_Type_Starter_Set_Sylveon_ex.png",
+  "ja-SVLS": "https://archives.bulbagarden.net/media/upload/8/80/SetSymbolStellar_Tera_Type_Starter_Set_Ceruledge_ex.png",
+  "ja-MF": "https://archives.bulbagarden.net/media/upload/8/85/SetSymbol30th_Celebration_Premium_Deck_Set_Espeon_Umbreon.png",
+  "ja-SVK": "https://archives.bulbagarden.net/media/upload/e/ec/SetSymbolStellar_Miracle_Deck_Build_Box.png",
+  "ja-ADVP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-PCGP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-LP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-PP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png",
+  "ja-TP": "https://archives.bulbagarden.net/media/upload/5/58/SetSymbolPromo.png"
+ },
+ "resim": {
+  "ja-PP|7": "https://archives.bulbagarden.net/media/upload/3/38/CelebiPPromo6.jpg",
+  "ja-PP|38": "https://archives.bulbagarden.net/media/upload/d/d8/PikachuPPromo44.jpg",
+  "ja-ADVP|1": "https://archives.bulbagarden.net/media/upload/4/42/KyogreexNintendoPromo1.jpg",
+  "ja-ADVP|2": "https://archives.bulbagarden.net/media/upload/2/21/GroudonexNintendoPromo2.jpg",
+  "ja-ADVP|15": "https://archives.bulbagarden.net/media/upload/3/32/TreeckoNintendoPromo16.jpg",
+  "ja-ADVP|17": "https://archives.bulbagarden.net/media/upload/c/ce/TorchicNintendoPromo17.jpg",
+  "ja-ADVP|19": "https://archives.bulbagarden.net/media/upload/5/53/MudkipNintendoPromo18.jpg",
+  "ja-ADVP|21": "https://archives.bulbagarden.net/media/upload/7/7d/LudicoloNintendoPromo20.jpg",
+  "ja-ADVP|23": "https://archives.bulbagarden.net/media/upload/7/74/PikachuNintendoPromo12.jpg",
+  "ja-ADVP|27": "https://archives.bulbagarden.net/media/upload/6/65/GroudonEXHiddenLegends102.jpg",
+  "ja-ADVP|28": "https://archives.bulbagarden.net/media/upload/7/75/MeowthEXTeamMagmavsTeamAqua42.jpg",
+  "ja-ADVP|30": "https://archives.bulbagarden.net/media/upload/2/2b/WhismurNintendoPromo19.jpg",
+  "ja-ADVP|32": "https://archives.bulbagarden.net/media/upload/5/5e/FlygonNintendoPromo25.jpg",
+  "ja-ADVP|34": "https://archives.bulbagarden.net/media/upload/d/d1/AbsolEXTeamMagmavsTeamAqua96.jpg",
+  "ja-PCGP|20": "https://archives.bulbagarden.net/media/upload/0/0a/LaRousseMunchlaxPCGPromo20.jpg",
+  "ja-PCGP|26": "https://archives.bulbagarden.net/media/upload/d/da/RocketRaikouexEXDeoxys108.png",
+  "ja-PCGP|80": "https://archives.bulbagarden.net/media/upload/1/13/MewNintendoPromo40.jpg",
+  "ja-PCGP|113": "https://archives.bulbagarden.net/media/upload/3/36/PikachuNintendoPromo35.jpg",
+  "ja-PCGP|130": "https://archives.bulbagarden.net/media/upload/7/73/007023_T_TACCHIKOUKAN-1.jpg",
+  "ja-DPP|5": "https://archives.bulbagarden.net/media/upload/6/6f/TurtwigDPPromo1.jpg",
+  "ja-DPP|7": "https://archives.bulbagarden.net/media/upload/c/c0/ChimcharDPPromo2.jpg",
+  "ja-DPP|8": "https://archives.bulbagarden.net/media/upload/c/cc/PiplupDPPromo3.jpg",
+  "ja-DPP|11": "https://archives.bulbagarden.net/media/upload/b/bb/PachirisuDPPromo4.jpg",
+  "ja-DPP|17": "https://archives.bulbagarden.net/media/upload/6/6f/TurtwigDPPromo1.jpg",
+  "ja-DPP|18": "https://archives.bulbagarden.net/media/upload/c/c0/ChimcharDPPromo2.jpg",
+  "ja-DPP|19": "https://archives.bulbagarden.net/media/upload/c/cc/PiplupDPPromo3.jpg",
+  "ja-DPP|23": "https://archives.bulbagarden.net/media/upload/c/ca/BunearyDPPromo6.jpg",
+  "ja-DPP|35": "https://archives.bulbagarden.net/media/upload/8/89/Cherrim6POPSeries8.png",
+  "ja-DPP|37": "https://archives.bulbagarden.net/media/upload/0/07/006036_P_MOUKAZARU.jpg",
+  "ja-DPP|38": "https://archives.bulbagarden.net/media/upload/9/97/006037_P_POTTAISHI.jpg",
+  "ja-DPP|40": "https://archives.bulbagarden.net/media/upload/e/eb/Luxio8POPSeries8.png",
+  "ja-DPP|52": "https://archives.bulbagarden.net/media/upload/8/8b/GrotleDPPromo34.jpg",
+  "ja-DPP|57": "https://archives.bulbagarden.net/media/upload/9/96/PikachuDPPromo16.jpg",
+  "ja-DPP|98": "https://archives.bulbagarden.net/media/upload/3/36/019507_P_PIKACHUU.jpg",
+  "ja-DPP|99": "https://archives.bulbagarden.net/media/upload/3/36/019507_P_PIKACHUU.jpg",
+  "ja-DPP|100": "https://archives.bulbagarden.net/media/upload/3/36/019507_P_PIKACHUU.jpg",
+  "ja-DPP|101": "https://archives.bulbagarden.net/media/upload/3/36/019507_P_PIKACHUU.jpg",
+  "ja-DPTP|31": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-DPTP|36": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|27": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|31": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|32": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|33": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|41": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-LP|42": "https://archives.bulbagarden.net/media/upload/3/38/023576_T_SHOURINOMEDARU.jpg",
+  "ja-web1|39": "https://archives.bulbagarden.net/media/upload/7/79/TeamRocketMeowthPok%C3%A9monWeb39.jpg",
+  "ja-VS1|77": "https://archives.bulbagarden.net/media/upload/1/11/WillSlowkingVS77.jpg"
+ },
+ "ekle": {
+  "ja-WCS23": [
+   [
+    "1",
+    "Pikachu",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/3/3d/PikachuexPaldeaEvolved63.jpg"
+   ],
+   [
+    "2",
+    "Magnemite",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/7/78/MagnemitePaldeaEvolved65.jpg"
+   ],
+   [
+    "3",
+    "Pawmi",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/5/5a/PawmiPaldeaEvolved74.jpg"
+   ],
+   [
+    "4",
+    "Pawmo",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/a/a0/PawmoPaldeaEvolved75.jpg"
+   ],
+   [
+    "5",
+    "Pawmot",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/a/aa/PawmotPaldeaEvolved76.jpg"
+   ],
+   [
+    "6",
+    "Tadbulb",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/1/1b/TadbulbPaldeaEvolved77.jpg"
+   ],
+   [
+    "7",
+    "Wattrel",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/d/dc/WattrelScarletViolet77.jpg"
+   ],
+   [
+    "8",
+    "Kilowattrel",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/9/93/KilowattrelPaldeaEvolved82.jpg"
+   ],
+   [
+    "9",
+    "Miraidon",
+    "Lightning",
+    "https://archives.bulbagarden.net/media/upload/5/59/MiraidonScarletViolet80.jpg"
+   ],
+   [
+    "10",
+    "Mankey",
+    "Fighting",
+    "https://archives.bulbagarden.net/media/upload/c/c1/MankeyScarletViolet107.jpg"
+   ],
+   [
+    "11",
+    "Primeape",
+    "Fighting",
+    "https://archives.bulbagarden.net/media/upload/7/79/PrimeapeScarletViolet108.jpg"
+   ],
+   [
+    "12",
+    "Annihilape",
+    "Fighting",
+    "https://archives.bulbagarden.net/media/upload/8/8b/AnnihilapeScarletViolet109.jpg"
+   ],
+   [
+    "13",
+    "Koraidon",
+    "Fighting",
+    "https://archives.bulbagarden.net/media/upload/e/ee/KoraidonScarletViolet124.jpg"
+   ],
+   [
+    "14",
+    "Squawkabilly",
+    "Colorless",
+    "https://archives.bulbagarden.net/media/upload/f/f9/SquawkabillyScarletViolet162.jpg"
+   ],
+   [
+    "15",
+    "Cyclizar",
+    "Colorless",
+    "https://archives.bulbagarden.net/media/upload/3/37/CyclizarScarletViolet163.jpg"
+   ],
+   [
+    "16",
+    "Energy Retrieval",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/9/96/EnergyRetrievalChaosRising108.jpg"
+   ],
+   [
+    "17",
+    "Energy Search",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/9/9e/EnergySearchFossil59.jpg"
+   ],
+   [
+    "18",
+    "Great Ball",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/5/57/GreatBallEXFireRedLeafGreen92.jpg"
+   ],
+   [
+    "19",
+    "Ultra Ball",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/d/d2/UltraBallFlashfire99.jpg"
+   ],
+   [
+    "20",
+    "Switch",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/1/1b/SwitchSwordShield183.jpg"
+   ],
+   [
+    "21",
+    "Pokémon Catcher",
+    "Item",
+    "https://archives.bulbagarden.net/media/upload/8/87/Pok%C3%A9monCatcherSunMoon126.jpg"
+   ],
+   [
+    "22",
+    "Exp. Share",
+    "Pokémon Tool",
+    "https://archives.bulbagarden.net/media/upload/d/da/ExpShareNextDestinies87.jpg"
+   ],
+   [
+    "23",
+    "Dendra",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/b/ba/DendraPaldeaEvolved266.jpg"
+   ],
+   [
+    "24",
+    "Jacq",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/e/ef/JacqScarletViolet175.jpg"
+   ],
+   [
+    "25",
+    "Judge",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/6/66/JudgeForbiddenLight108.jpg"
+   ],
+   [
+    "26",
+    "Youngster",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/d/d4/YoungsterScarletViolet198.jpg"
+   ],
+   [
+    "27",
+    "Nemona",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/4/48/NemonaPaldeanFates82.jpg"
+   ],
+   [
+    "28",
+    "Nemona",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/4/48/NemonaPaldeanFates82.jpg"
+   ],
+   [
+    "29",
+    "Professor's Research [Professor Sada]",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/c/cc/ProfessorResearchSWSHPromo152.jpg"
+   ],
+   [
+    "30",
+    "Professor's Research [Professor Turo]",
+    "Supporter",
+    "https://archives.bulbagarden.net/media/upload/c/cc/ProfessorResearchSWSHPromo152.jpg"
+   ]
+  ],
+  "ja-web1": [
+   [
+    "39",
+    "Team Rocket's Meowth",
+    "Colorless",
+    "https://archives.bulbagarden.net/media/upload/7/79/TeamRocketMeowthPok%C3%A9monWeb39.jpg"
+   ]
+  ],
+  "ja-VS1": [
+   [
+    "77",
+    "Will's Slowking",
+    "Psychic",
+    "https://archives.bulbagarden.net/media/upload/1/11/WillSlowkingVS77.jpg"
+   ]
+  ]
+ },
+ "sil": [
+  "ja-neo2|57",
+  "ja-M-P|128",
+  "ja-M-P|129",
+  "ja-M-P|130",
+  "ja-SP|134",
+  "ja-SP|194",
+  "ja-SP|195",
+  "ja-SP|196",
+  "ja-SP|197",
+  "ja-SP|233"
+ ]
+}

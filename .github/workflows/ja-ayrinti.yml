@@ -1,0 +1,56 @@
+name: Japonca eksikleri tamamla (uzun)
+
+# Elle başlatılır: Pokellector'dan eksik set/kartları ve kart ayrıntılarını (Japonca ad, nadirlik, fiyat)
+# uzun bir zaman bütçesiyle çeker, fiyat-verisi dalına kaydeder ve siteyi yeniden yayınlar.
+on:
+  workflow_dispatch:
+    inputs:
+      butce:
+        description: "Kart sayfaları için saniye"
+        default: "16000"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: yayin
+  cancel-in-progress: false
+
+jobs:
+  ek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+
+      - name: Fiyat verisini al
+        run: git clone --depth 1 --branch fiyat-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" veri
+
+      - name: Eksikleri tamamla
+        env:
+          BUTCE: ${{ inputs.butce || '16000' }}
+        run: python3 site/.github/scripts/ja_ek.py veri site
+
+      - name: Kaydet
+        run: |
+          cd veri
+          rm -rf .git
+          git init -q -b fiyat-verisi
+          git config user.name "KartBorsa fiyat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Japonca eksikler $(TZ=Europe/Istanbul date '+%d.%m.%Y %H:%M')"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
+
+      - name: Siteyi yeniden yayınla (bitmediyse kendini tekrar başlat)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(cat veri/japonca/ek_kalan.txt 2>/dev/null || echo 0)" != "0" ]; then
+            gh workflow run ja-ayrinti.yml --repo "${{ github.repository }}" --ref main
+          else
+            gh workflow run yayin.yml --repo "${{ github.repository }}" --ref main
+          fi

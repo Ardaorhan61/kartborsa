@@ -96,4 +96,13 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
   Bu setlerde kart adları İngilizce (Pokellector'da Japonca ad yok), resim ve logo Pokellector'dan, fiyat yok. Set kimlikleri Pokellector kodu (ör. ja-S2, ja-XY1), `pl` işaretli.
   Set sayfaları bir kez okunur, `fiyat-verisi` dalında `japonca/ek.json` önbelleğinde tutulur; sadece Pokellector'a yeni eklenen setler okunur.
   TCGdex setlerinde resmi olmayan kartlar da Pokellector resmi ya da aynı adlı kartın resmiyle dolduruldu (284 → 1).
-- Hâlâ eksik: ADV1–5 ve DP1–5 ana setleri (ne TCGdex'te ne Pokellector'da var); 20 setin logosu (listesi yukarıda).
+- Tamamlama, 2. tur (19 Kasım 2026, gece):
+  - `ja_ek.py` artık kart sayfalarından Japonca ad, nadirlik ve Cardmarket € fiyatını da alıyor (ek.json "kart" önbelleği; 5 günde bir yenilenir,
+    günlük çalışmada 20 dk bütçe). TCGdex setlerinde eksik numaralı kartlar Pokellector'dan eklenir (kimlik `ja-<set>-p<no>`).
+  - İlk büyük okuma için ayrı iş akışı `ja-ayrinti.yml` (elle başlatılır, ~2–3 saat, bitince siteyi yayınlar; bitmezse kendini yeniden başlatır).
+  - ADV1–5 ve DP1–DP5 setleri: `.github/scripts/ja_bulbapedia.json` (Bulbapedia'daki Japonca set listeleri). Kart bilgisi ve resmi İngilizce karşılık
+    kartından (aynı çizim, İngilizce baskı). Yayında (`yayin.yml`) kataloğa eklenir, `bp` işaretli.
+  - Japonca promolar: `.github/scripts/ja_promo.json` (Bulbapedia: ADV-P, PCG-P, DP-P, DPt-P, L-P, BW-P, XY-P, SM-P, S-P, SV-P, M-P, PPP, P, T).
+    Olmayan promo setleri eklenir, olan setlerde eksik numaralar tamamlanır. Resimler Bulbagarden arşivinden.
+  - Bulbagarden resimleri yalnızca "referrer" gönderilmezse açılıyor: index.html'de el() tüm resimlere referrerPolicy=no-referrer koyuyor.
+  - Hâlâ eksik (küçük): PT2'de 6 kart, WCS23 destesinin 29 kartı, neo4 #24, VS1 #77, web1 #39; bazı promo kartlarının resmi; ~38 setin logosu (ilk kart resmi görünür).

@@ -123,6 +123,49 @@ jobs:
                       ja['cards'].append(c)
               json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print('Bulbapedia setleri eklendi:', eklenen)
+          # Japonca promo setleri (Bulbapedia): olmayan setler eklenir, olan setlerde eksik numaralar tamamlanır
+          pr_yol = 'site/.github/scripts/ja_promo.json'
+          if os.path.exists(pr_yol) and os.path.exists('_site/cards_ja.json'):
+              pr = json.load(open(pr_yol, encoding='utf-8'))
+              ja = json.load(open('_site/cards_ja.json', encoding='utf-8'))
+              sidx = {s[0]: i for i, s in enumerate(ja['sets'])}
+              gr = [(s, []) for s in ja['sets']]
+              for c in ja['cards']:
+                  gr[c[1]][1].append(c)
+              ad_resim = {}
+              for c in ja['cards']:
+                  for a in (c[0], c[15] if len(c) > 15 else ''):
+                      if a and c[13] and a not in ad_resim:
+                          ad_resim[a] = c[13]
+              TIP = {'Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy',
+                     'Dragon', 'Colorless'}
+              SERI_P = {'ja-ADVP': 'ADV', 'ja-PCGP': 'PCG', 'ja-LP': 'LEGEND', 'ja-DPP': 'DP', 'ja-PPP': 'DP',
+                        'ja-DPTP': 'DPt', 'ja-PP': 'ポケットモンスターカードゲーム', 'ja-TP': 'ポケットモンスターカードゲーム'}
+              ek_kart = 0
+              for sid, b in pr.items():
+                  if sid in sidx:
+                      s, ks = gr[sidx[sid]]
+                  else:
+                      s, ks = [sid, b['ad'], SERI_P.get(sid, 'プロモ'), b['tarih'], len(b['kart']), '', '', 'ja', 'bp'], []
+                      gr.append((s, ks))
+                  var = {str(c[2]).lstrip('0') or '0' for c in ks}
+                  for no, ad, tip, img in b['kart']:
+                      if no in var:
+                          continue
+                      var.add(no)
+                      kat = 'Energy' if ('Energy' in ad or tip == 'Energy') else ('Pokémon' if tip in TIP else 'Trainer')
+                      ks.append([ad, 0, no, 'Promo', kat, tip if kat == 'Trainer' else '', '', tip if tip in TIP else '',
+                                 '', [], [], [], '', img or (ad_resim.get(ad, '') if kat != 'Pokémon' else ''), f'{sid}-b{no}', ad, 'bp'])
+                      ek_kart += 1
+              gr.sort(key=lambda g: (g[0][3] or '9999', g[0][0]))
+              ja['sets'], ja['cards'] = [], []
+              for i, (s, ks) in enumerate(gr):
+                  ja['sets'].append(s)
+                  for c in sorted(ks, key=lambda c: (int(c[2]) if str(c[2]).isdigit() else 99999, str(c[2]))):
+                      c[1] = i
+                      ja['cards'].append(c)
+              json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+              print('Promo kartları eklendi:', ek_kart)
           for p in ('_site/cards.json', '_site/cards_ja.json'):
               if not os.path.exists(p):
                   continue

@@ -6,7 +6,7 @@ Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü>
   - <çıktı>/izler.json varsa sadece eksik kartlar hesaplanır
 Aynı hesap index.html içindeki taraIz() fonksiyonuyla birebir aynıdır:
   resim -> 256x352 (gri) -> 8x8 blok ortalaması -> 32x44 -> DCT 8x8 -> 64 bit
-  A: tüm kart, B: resim bölgesi (satır 4..22, sütun 3..29)
+  A: tüm kart, B: resim bölgesi (satır 4..22, sütun 3..29), C/D: renk (Cb, Cr) tüm kart
 """
 import io, json, os, sys, time, concurrent.futures as cf, urllib.request
 import numpy as np
@@ -16,7 +16,7 @@ SITE, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
 cat = json.load(open(os.path.join(SITE, 'cards.json'), encoding='utf-8'))
 sets = cat['sets']
-eski_yol = os.path.join(OUT, 'izler.json')
+eski_yol = os.path.join(OUT, 'izler2.json')
 eski = {}
 if os.path.exists(eski_yol):
     try:
@@ -53,9 +53,12 @@ def iz(img):
     zemin = Image.new('RGBA', img.size, (128, 128, 128, 255))
     img = Image.alpha_composite(zemin, img).convert('RGB').resize((256, 352), Image.LANCZOS)
     a = np.asarray(img, dtype=np.float64)
-    gri = a[:, :, 0] * 0.299 + a[:, :, 1] * 0.587 + a[:, :, 2] * 0.114
-    g = gri.reshape(44, 8, 32, 8).mean(axis=(1, 3))
-    return phash(g) + phash(g[4:22, 3:29])
+    R, G, B = a[:, :, 0], a[:, :, 1], a[:, :, 2]
+    kucult = lambda m: m.reshape(44, 8, 32, 8).mean(axis=(1, 3))
+    g = kucult(R * 0.299 + G * 0.587 + B * 0.114)
+    cb = kucult(-0.168736 * R - 0.331264 * G + 0.5 * B)
+    cr = kucult(0.5 * R - 0.418688 * G - 0.081312 * B)
+    return phash(g) + phash(g[4:22, 3:29]) + phash(cb) + phash(cr)
 
 
 def indir(url):
@@ -103,5 +106,5 @@ with cf.ThreadPoolExecutor(24) as ex:
         if n % 500 == 0:
             print(n, '/', len(eksik), 'kart', int(time.time() - bas), 'sn', 'hata', hata, flush=True)
 
-json.dump({'v': 1, 'n': len(yeni), 'd': yeni}, open(eski_yol, 'w', encoding='utf-8'), separators=(',', ':'))
+json.dump({'v': 2, 'n': len(yeni), 'd': yeni}, open(eski_yol, 'w', encoding='utf-8'), separators=(',', ':'))
 print('bitti:', len(yeni), 'kart izi,', hata, 'resim alınamadı,', os.path.getsize(eski_yol) // 1024, 'KB')

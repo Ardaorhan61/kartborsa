@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """KartBorsa: kart tarama için her kartın resminden "görsel iz" (perceptual hash) çıkarır.
 
-Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü>
+Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü> [cards_ja.json]
   - <site>/cards.json okunur
   - <çıktı>/izler.json varsa sadece eksik kartlar hesaplanır
 Aynı hesap index.html içindeki taraIz() fonksiyonuyla birebir aynıdır:
@@ -16,6 +16,8 @@ SITE, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
 cat = json.load(open(os.path.join(SITE, 'cards.json'), encoding='utf-8'))
 sets = cat['sets']
+JA_YOL = sys.argv[3] if len(sys.argv) > 3 else ''
+ja = json.load(open(JA_YOL, encoding='utf-8')) if JA_YOL and os.path.exists(JA_YOL) else {'sets': [], 'cards': []}
 eski_yol = os.path.join(OUT, 'izler2.json')
 eski = {}
 if os.path.exists(eski_yol):
@@ -70,12 +72,13 @@ def indir(url):
 
 
 def isle(c):
-    cid = c[-1]
+    cid = c[14]
     urls = []
     if c[13]:
         urls.append(c[13])
-    urls.append('https://images.pokemontcg.io/%s/%s.png' % (sets[c[1]][0], c[2]))
-    urls.append('https://images.scrydex.com/pokemon/%s/small' % cid)
+    if not cid.startswith('ja-'):
+        urls.append('https://images.pokemontcg.io/%s/%s.png' % (sets[c[1]][0], c[2]))
+        urls.append('https://images.scrydex.com/pokemon/%s/small' % cid)
     for u in urls:
         for deneme in range(2):
             try:
@@ -85,12 +88,12 @@ def isle(c):
     return cid, None
 
 
-kartlar = cat['cards']
+kartlar = cat['cards'] + [c for c in ja['cards'] if c[13]]
 yeni = {}
 eksik = []
 for c in kartlar:
-    if c[-1] in eski:
-        yeni[c[-1]] = eski[c[-1]]
+    if c[14] in eski:
+        yeni[c[14]] = eski[c[14]]
     else:
         eksik.append(c)
 print('toplam', len(kartlar), 'hazır', len(yeni), 'hesaplanacak', len(eksik), flush=True)

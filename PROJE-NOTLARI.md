@@ -85,3 +85,10 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Japonca katalog: `.github/scripts/japonca.py` (TCGdex ja + resmi olmayanlar için Scrydex, aramada PokeAPI İngilizce adları). Her gün fiyatlarla birlikte çalışır; `fiyat-verisi` dalında `japonca/cards_ja.json`, sitede `cards_ja.json`. Kart kimlikleri `ja-<set>-<no>`.
 - İlk kurulum: 121 set, 13.156 kart, 12.872'si resimli; ~10.700 kartın Cardmarket fiyatı (€ → ₺).
 - Eksik: TCGdex'te kartları olmayan Japonca setler (ADV, LEGEND, BW, XY ve ilk Kılıç&Kalkan setlerinin bir kısmı) henüz katalogda yok.
+
+## Japonca set logoları ve eksik setler (19 Kasım 2026)
+- TCGdex Japonca setlerde logo vermiyor. Logolar ve set sembolleri Pokellector'dan (jp.pokellector.com) BİR KEZ indirilip `img/ja/<set>.png` ve `img/ja/<set>.sym.png` olarak depoya kaydedildi.
+- Eşleme: `.github/scripts/ja_logolar.json` (set kimliği → Pokellector görsel adı). İndirme: `.github/scripts/ja_logo.py`, iş akışı `ja-logo.yml` (eşleme değişince veya elle; sadece eksikleri indirir, sonra siteyi yeniden yayınlar).
+- Yayında (`yayin.yml`) logosu olmayan Japonca setlere `img/ja` içindeki görsel yazılır. 121 setin 101'inde logo var.
+- Logosu olmayan 20 set (Pokellector'da yok, ilk kartın resmi görünür): web1, E1, E3, E4, E5, PCG1–PCG9, WCS23, SVK, SVLN, SVLS, MC, MF.
+- Katalogda olmayan Japonca setler (TCGdex'te kartları yok): ADV1–5 ve DP1–5 dönemi, DPt (Pt1–4), LEGEND (L1–L3), BW1–BW9 ve yan setleri, XY1–XY11 ve CP setleri, ilk Kılıç&Kalkan setleri (S1W, S1H, S1a, S2, S2a, S3, S3a, S4, S4a, S5a, S6a, S7R, S8a, S10D, S10b, SI), SM ve SwSh promo setleri, deste/özel setler.

@@ -578,6 +578,117 @@ async function drawOdemeHesabi(area){
   document.addEventListener('pointerout',e=>{if(cur&&!(e.relatedTarget&&cur.contains(e.relatedTarget)))birak();});
   ['pointerup','pointercancel','scroll'].forEach(t=>document.addEventListener(t,e=>{if(t==='scroll'||e.pointerType!=='mouse')birak();},{passive:true,capture:true}));
 })();
+/* ---------- kamerayla kart tarama ---------- */
+let TARA={worker:null,stream:null,timer:null,isimler:null};
+function taraNorm(s){return String(s||'').toLowerCase().replace(/é/g,'e').replace(/[^a-z0-9]/g,'');}
+function taraNo(s){s=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return s.replace(/^([A-Z]*)0+(\d)/,'$1$2');}
+async function taraMotor(durum){
+  if(TARA.worker)return TARA.worker;
+  if(!window.Tesseract){durum('Tarayıcı hazırlanıyor (ilk seferde biraz sürebilir)…');
+    await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=()=>no(new Error('Tarama aracı yüklenemedi, internet bağlantını kontrol et.'));document.head.append(s);});}
+  durum('Okuma motoru açılıyor…');
+  TARA.worker=await Tesseract.createWorker('eng');
+  return TARA.worker;}
+function taraKamDurdur(){if(TARA.stream){TARA.stream.getTracks().forEach(t=>t.stop());TARA.stream=null;}if(TARA.timer){clearInterval(TARA.timer);TARA.timer=null;}}
+function taraBolge(src,x,y,w,h,olcek){
+  const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*olcek));c.height=Math.max(1,Math.round(h*olcek));
+  const g=c.getContext('2d');g.filter='grayscale(1) contrast(1.6)';g.drawImage(src,x,y,w,h,0,0,c.width,c.height);return c;}
+function taraBenzer(a,b){if(a===b)return 1;if(a.length<2||b.length<2)return 0;
+  const m=new Map();for(let i=0;i<a.length-1;i++){const k=a.slice(i,i+2);m.set(k,(m.get(k)||0)+1);}
+  let n=0;for(let i=0;i<b.length-1;i++){const k=b.slice(i,i+2),v=m.get(k);if(v){n++;m.set(k,v-1);}}
+  return 2*n/(a.length+b.length-2);}
+function taraIsimPuani(ad,metin){
+  if(!ad||!metin)return 0;if(metin.includes(ad))return 1;
+  if(ad.length<4)return 0;let en=0;const L=ad.length;
+  for(let i=0;i<=Math.max(0,metin.length-L+2);i++){const p=taraBenzer(ad,metin.slice(i,i+L));if(p>en)en=p;}
+  return en>=0.62?en*0.95:0;}
+function taraEslestir(ustMetin,altMetin,tumMetin){
+  const ust=taraNorm(ustMetin)||taraNorm(tumMetin),tum=taraNorm(tumMetin+' '+ustMetin).slice(0,700);
+  const nos=[];const re=/([A-Za-z]{0,3}\s?\d{1,3})\s*[\/|\\]\s*([A-Za-z]{0,3}\s?\d{2,3})/g;let m;
+  for(const t of [altMetin,tumMetin])while((m=re.exec(t||''))){const top=parseInt(String(m[2]).replace(/\D/g,''),10),n=taraNo(m[1]);
+    nos.push([n,top]);const d=n.replace(/^[A-Z]+/,'');if(d!==n)nos.push([d,top]);}
+  for(const t of [altMetin,tumMetin])for(const r of (t||'').match(/\d{6,7}/g)||[]){if(r.length===7)nos.push([taraNo(r.slice(0,3)),+r.slice(4)]);else nos.push([taraNo(r.slice(0,3)),+r.slice(3)]);}
+  const re2=/[T1Il]?G\s?(\d{2})\W{0,2}[NT1Il]?G\s?(\d{2})/g;
+  for(const t of [altMetin,tumMetin])while((m=re2.exec(t||''))){const a=String(+m[1]).padStart(2,'0');nos.push(['TG'+a,+m[2]],['GG'+a,+m[2]]);}
+  const isimMetni=(ust+' '+tum).slice(0,700);
+  let aday=[];
+  if(nos.length){const set=new Set(nos.map(x=>x[0]));aday=CAT.cards.map((c,i)=>i).filter(i=>set.has(taraNo(CAT.cards[i][2])));}
+  if(!aday.some(i=>taraIsimPuani(taraNorm(CAT.cards[i][0]),isimMetni)>0)){
+    if(!TARA.isimler){TARA.isimler=new Map();CAT.cards.forEach((c,i)=>{const k=taraNorm(c[0]);if(!TARA.isimler.has(k))TARA.isimler.set(k,[]);TARA.isimler.get(k).push(i);});}
+    const ek=[];for(const [k,ids] of TARA.isimler)if(k.length>=4&&taraIsimPuani(k,isimMetni)>0)ek.push(...ids);
+    aday=[...new Set([...aday,...ek])];}
+  const sonuc=aday.map(i=>{const c=CAT.cards[i],s=CAT.sets[c[1]]||[];const ad=taraNorm(c[0]);
+    const ip=Math.max(taraIsimPuani(ad,ust),taraIsimPuani(ad,tum)*0.9);
+    const no=nos.find(x=>x[0]===taraNo(c[2]));const top=no&&s[4]&&no[1]===s[4];const topVar=!!s[4]&&nos.some(x=>x[1]===s[4]);
+    return {i,p:ip*10+(ip>0?ad.length/10:0)+(no?5:0)+(top?4:(topVar&&ip>0?3:0))+1.5*c[1]/CAT.sets.length,ip,no:!!no,top};})
+    .filter(x=>x.ip>0||(x.no&&x.top)).sort((a,b)=>b.p-a.p);
+  return {liste:sonuc.slice(0,18),bulunanNo:nos[0]?`${nos[0][0]}/${nos[0][1]}`:null};}
+async function taraOku(kaynak,kartCercevesi,durum){
+  const w=await taraMotor(durum);durum('Kart okunuyor…');
+  const W=kaynak.width,H=kaynak.height;let ust='',alt='',tum='';
+  if(kartCercevesi){
+    ust=(await w.recognize(taraBolge(kaynak,0,0,W,H*0.14,2))).data.text;
+    alt=(await w.recognize(taraBolge(kaynak,0,H*0.86,W,H*0.14,2.4))).data.text;
+    const ham=document.createElement('canvas');ham.width=Math.round(W*2.4);ham.height=Math.round(H*0.14*2.4);ham.getContext('2d').drawImage(kaynak,0,H*0.86,W,H*0.14,0,0,ham.width,ham.height);
+    alt+='\n'+(await w.recognize(ham)).data.text;}
+  let r=taraEslestir(ust,alt,'');
+  if(!r.liste.length||!kartCercevesi||!(r.liste[0].ip>0)){durum('Kartın tamamı okunuyor…');tum=(await w.recognize(taraBolge(kaynak,0,0,W,H,Math.min(2,1600/Math.max(W,H))))).data.text;r=taraEslestir(ust,alt,tum);}
+  return r;}
+function openTara(){
+  const b=$('#modalBody');b.innerHTML='';taraKamDurdur();
+  const durumEl=el('div',{class:'small',style:'margin-top:8px;min-height:20px'});const durum=t=>{durumEl.style.color='';durumEl.textContent=t;};
+  const hata=t=>{durumEl.style.color='var(--danger)';durumEl.textContent=t;};
+  const sonucEl=el('div',{style:'margin-top:12px'});
+  const video=el('video',{playsinline:'',muted:'',autoplay:'',style:'width:100%;height:100%;object-fit:cover;display:block;background:#000'});
+  video.muted=true;video.setAttribute('playsinline','');video.setAttribute('muted','');
+  const kutu=el('div',{style:'position:relative;width:min(100%,320px);aspect-ratio:63/88;margin:0 auto;border-radius:14px;overflow:hidden;background:#0b0d12'},video,
+    el('div',{style:'position:absolute;inset:4%;border:2px dashed rgba(255,214,90,.9);border-radius:10px;pointer-events:none'}),
+    el('div',{style:'position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none',text:'Kartı çerçevenin içine sığdır'}));
+  const dosya=el('input',{type:'file',accept:'image/*',capture:'environment',style:'display:none'});
+  const goster=r=>{sonucEl.innerHTML='';
+    if(!r.liste.length){hata('Kart tanınamadı. Kartı düz tut, ışığı artır, kartın adı ve alttaki numarası (ör. 56/102) net görünsün. İstersen arama kutusuna adını yazabilirsin.');return;}
+    durum(`${r.liste.length} eşleşme bulundu${r.bulunanNo?' · okunan numara '+r.bulunanNo:''}. Doğru kartı seç:`);
+    sonucEl.append(el('div',{style:'display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px'},
+      ...r.liste.map(x=>{const c=CAT.cards[x.i],s=CAT.sets[c[1]]||[];
+        return el('div',{class:'card',style:'padding:8px'},
+          el('div',{style:'cursor:pointer',onclick:()=>{taraKamDurdur();openCard(x.i);}},cardImg(c,false)),
+          el('div',{class:'small',style:'margin-top:6px;font-weight:600',text:c[0]}),
+          el('div',{class:'muted small',text:`${s[1]||''} · #${c[2]}`}),
+          el('div',{style:'display:flex;flex-direction:column;gap:6px;margin-top:8px'},
+            el('button',{class:'btn sec',style:'padding:6px 8px;font-size:13px',onclick:()=>{taraKamDurdur();openCard(x.i);}},'Detaylar'),
+            el('button',{class:'btn',style:'padding:6px 8px;font-size:13px',onclick:async e=>{const bt=e.currentTarget;bt.disabled=true;if(await addToCollection(x.i)){bt.textContent='✓ Koleksiyonda';}else bt.disabled=false;}},'+ Koleksiyona ekle')));})));};
+  const isle=async(kaynak,cerceve)=>{sonucEl.innerHTML='';try{goster(await taraOku(kaynak,cerceve,durum));}catch(e){hata(e.message||String(e));}};
+  const cek=async()=>{if(!video.videoWidth)return hata('Kamera henüz açılmadı. "Fotoğraf çek / seç" düğmesini de kullanabilirsin.');
+    const vw=video.videoWidth,vh=video.videoHeight,cw=kutu.clientWidth,ch=kutu.clientHeight,sc=Math.max(cw/vw,ch/vh);
+    const sw=cw/sc,sh=ch/sc,sx=(vw-sw)/2,sy=(vh-sh)/2,ic=0.04;
+    const cv=document.createElement('canvas');cv.width=630;cv.height=880;
+    cv.getContext('2d').drawImage(video,sx+sw*ic,sy+sh*ic,sw*(1-2*ic),sh*(1-2*ic),0,0,630,880);
+    await isle(cv,true);};
+  dosya.addEventListener('change',async()=>{const f=dosya.files[0];if(!f)return;dosya.value='';
+    try{const bm=await createImageBitmap(f);const cv=document.createElement('canvas');const k=Math.min(1,1800/Math.max(bm.width,bm.height));
+      cv.width=Math.round(bm.width*k);cv.height=Math.round(bm.height*k);cv.getContext('2d').drawImage(bm,0,0,cv.width,cv.height);
+      const oran=cv.width/cv.height;await isle(cv,oran>0.62&&oran<0.82);}catch(e){hata('Fotoğraf açılamadı.');}});
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:'📷 Kart tara'}),el('button',{class:'btn sec',onclick:()=>{taraKamDurdur();closeModal();}},'Kapat')),
+    el('div',{class:'muted small',style:'margin-bottom:10px',text:'Kartını kameraya göster, kartın adı ve alt köşedeki numarası (ör. 56/102) okunsun. En iyi sonuç İngilizce kartlarda ve iyi ışıkta alınır.'}),
+    kutu,
+    el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px'},
+      el('button',{class:'btn',onclick:cek},'📸 Tara'),
+      el('button',{class:'btn sec',onclick:()=>dosya.click()},'🖼️ Fotoğraf çek / seç'),dosya),
+    durumEl,sonucEl);
+  $('#modal').classList.add('on');
+  TARA.timer=setInterval(()=>{if(!document.body.contains(video)||!$('#modal').classList.contains('on'))taraKamDurdur();},800);
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    durum('Kamera açılıyor… (izin sorarsa "İzin ver" de)');
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})
+      .then(s=>{if(!document.body.contains(video)){s.getTracks().forEach(t=>t.stop());return;}TARA.stream=s;video.srcObject=s;video.play().catch(()=>{});durum('Kart çerçevedeyken "📸 Tara"ya bas.');})
+      .catch(()=>{kutu.style.display='none';durum('Kamera açılamadı. "🖼️ Fotoğraf çek / seç" ile kartın fotoğrafını çekebilirsin.');});
+  }else{kutu.style.display='none';durum('"🖼️ Fotoğraf çek / seç" ile kartın fotoğrafını çek.');}
+  taraMotor(()=>{}).catch(()=>{});}
+function taraDugmesiEkle(){const q=$('#cq');if(!q||$('#taraBtn'))return;
+  const sar=el('div',{style:'display:flex;gap:8px;align-items:stretch'});q.replaceWith(sar);q.style.flex='1';q.style.minWidth='0';
+  sar.append(q,el('button',{id:'taraBtn',class:'btn',style:'white-space:nowrap;padding:0 16px;font-size:15px',onclick:openTara},'📷 Kart tara'));}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',taraDugmesiEkle);else taraDugmesiEkle();
+
 /* ---------- İlan Ver ---------- */
 let picked=null,photoBlob=null;
 function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);$('#lq').value=c[0];

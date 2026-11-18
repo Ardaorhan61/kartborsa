@@ -599,15 +599,17 @@ async function taraIzleriYukle(){
   for(const id of ids){const i=BYID[id];if(i===undefined)continue;const s=j.d[id];idx.push(i);
     h[n*4]=parseInt(s.slice(0,8),16);h[n*4+1]=parseInt(s.slice(8,16),16);h[n*4+2]=parseInt(s.slice(16,24),16);h[n*4+3]=parseInt(s.slice(24,32),16);n++;}
   TARA.iz={idx,h:h.subarray(0,n*4),n};return TARA.iz;}
-function taraIzKes(src,sx,sy,sw,sh){const c=document.createElement('canvas');c.width=256;c.height=352;const x=c.getContext('2d',{willReadFrequently:true});
-  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#808080';x.fillRect(0,0,256,352);x.drawImage(src,sx,sy,sw,sh,0,0,256,352);
+function taraIzKes(src,sx,sy,sw,sh,aci){const c=document.createElement('canvas');c.width=256;c.height=352;const x=c.getContext('2d',{willReadFrequently:true});
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#808080';x.fillRect(0,0,256,352);
+  if(aci){x.translate(128,176);x.rotate(-aci*Math.PI/180);x.translate(-128,-176);}x.drawImage(src,sx,sy,sw,sh,0,0,256,352);
   const d=x.getImageData(0,0,256,352).data,g=new Float64Array(256*352);for(let i=0;i<g.length;i++)g[i]=d[i*4]*0.299+d[i*4+1]*0.587+d[i*4+2]*0.114;return taraIzGri(g);}
 function taraKesimler(W,H,cerceve){const out=[],oran=63/88;
   let bw,bh;if(cerceve){bw=W;bh=H;}else if(W/H>oran){bh=H;bw=H*oran;}else{bw=W;bh=W/oran;}
   const olcek=cerceve?[1,.95,.9,.85]:[1,.9,.8,.7,.6,.5];
   for(const k of olcek){const w=bw*k,h=bh*k,cx=W/2,cy=H/2;
     const kay=k===1?[[0,0]]:(cerceve?[[0,0],[-.03,0],[.03,0],[0,-.03],[0,.03]]:[[0,0],[-.12,0],[.12,0],[0,-.12],[0,.12]]);
-    for(const [dx,dy] of kay){const x=cx-w/2+dx*bw,y=cy-h/2+dy*bh;if(x<-1||y<-1||x+w>W+1||y+h>H+1)continue;out.push([x,y,w,h]);}}
+    for(const [dx,dy] of kay){const x=cx-w/2+dx*bw,y=cy-h/2+dy*bh;if(x<-1||y<-1||x+w>W+1||y+h>H+1)continue;out.push([x,y,w,h,0]);}
+    if(k>=.9)for(const a of [-6,-3,3,6])out.push([cx-w/2,cy-h/2,w,h,a]);}
   return out;}
 function taraGorsel(src,W,H,cerceve){const I=TARA.iz;if(!I)return {liste:[],kesim:null};
   const kes=taraKesimler(W,H,cerceve),hs=kes.map(r=>taraIzKes(src,...r));
@@ -668,7 +670,9 @@ async function taraOku(kaynak,kartCercevesi,durum,ara){
     for(const g of gor.liste)m.set(g.i,{i:g.i,d:g.d,ip:0,no:false,top:false});
     for(const o of (ocr?ocr.liste:[])){const x=m.get(o.i)||{i:o.i,d:99};Object.assign(x,{ip:o.ip,no:o.no,top:o.top});m.set(o.i,x);}
     const l=[...m.values()].map(x=>({...x,p:Math.max(0,52-x.d)+(x.no?10:0)+(x.top?6:0)+x.ip*8}));
-    l.sort((a,b)=>b.p-a.p);return {liste:l.slice(0,12),bulunanNo:ocr&&ocr.bulunanNo,emin:l[0]&&l[0].d<=22};};
+    l.sort((a,b)=>b.p-a.p);const b0=l[0],b1=l[1];
+    const emin=!!b0&&(b0.d<=22||(b0.no&&b0.top&&b0.d<=40)||(b0.d<=34&&(!b1||b1.d-b0.d>=6)));
+    return {liste:l.slice(0,12),bulunanNo:ocr&&ocr.bulunanNo,emin};};
   if(gor.liste.length&&ara)ara(birlestir(null));
   let ocr=null;
   try{const w=await taraMotor(durum);durum(gor.liste.length?'Kart numarası kontrol ediliyor…':'Kart okunuyor…');

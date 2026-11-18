@@ -50,8 +50,15 @@ jobs:
         id: japonca
         run: python3 site/.github/scripts/japonca.py veri
 
+      - name: Japonca eksikleri tamamla (Pokellector)
+        if: steps.japonca.outcome == 'success' || hashFiles('veri/japonca/ek.json') == ''
+        continue-on-error: true
+        id: ek
+        timeout-minutes: 30
+        run: python3 site/.github/scripts/ja_ek.py veri site
+
       - name: Fiyat verisini kaydet
-        if: steps.fiyat.outcome == 'success' || steps.japonca.outcome == 'success'
+        if: steps.fiyat.outcome == 'success' || steps.japonca.outcome == 'success' || steps.ek.outcome == 'success'
         run: |
           cd veri
           rm -rf .git

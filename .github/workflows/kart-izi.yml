@@ -34,8 +34,13 @@ jobs:
           git clone --depth 1 --branch kart-izi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" izi \
             || mkdir -p izi
 
+      - name: Japonca katalog
+        run: |
+          git clone --depth 1 --branch fiyat-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" veri \
+            || mkdir -p veri
+
       - name: Kart izlerini hesapla
-        run: python site/.github/scripts/kart_izi.py site izi
+        run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json
 
       - name: İzleri kaydet
         run: |

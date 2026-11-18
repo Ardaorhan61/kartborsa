@@ -258,7 +258,7 @@ function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.to
 /* ---------- images ---------- */
 const setOf=c=>CAT.sets[c[1]];
 function imgSmall(c){return c[13]||(String(c[14]).startsWith('ja-')?'data:,':`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`);}
-function imgLarge(c){const s=imgSmall(c);if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
+function imgLarge(c){const s=imgSmall(c);if(s.includes('pokellector.com'))return s;if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
   const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy'});

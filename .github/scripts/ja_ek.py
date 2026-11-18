@@ -9,7 +9,7 @@ Set sayfaları BİR KEZ okunur ve <veri>/japonca/ek.json içinde saklanır; sonr
 Pokellector'a yeni eklenen setler okunur. Sonuç <veri>/japonca/cards_ja.json içine yazılır
 (japonca.py'den SONRA çalışır; her çalışmada önce eski eklemeler çıkarılıp yeniden eklenir).
 """
-import datetime, html, json, os, re, sys, time, urllib.request
+import datetime, html, json, os, re, sys, time, urllib.parse, urllib.request
 
 VERI, SITE = sys.argv[1], sys.argv[2]
 BASE = 'https://jp.pokellector.com'
@@ -73,14 +73,19 @@ def set_sayfasi(yol):
     m = re.search(r'<span>Cards</span>\s*<span>(\d+)</span>', p)
     sayi = int(m.group(1)) if m else 0
     kartlar = []
-    for r, no, ad in re.findall(
-            r'<div class="card[^"]*">.*?data-src="([^"]+)".*?<div class="plaque">#(\S*) - (.*?)</div>', p, re.S):
-        kartlar.append([no.strip(), html.unescape(ad).strip(), html.unescape(r).replace('.thumb.png', '.png')])
+    for href, r, no, ad in re.findall(
+            r'<div class="card[^"]*">.*?<a href="([^"]+)"[^>]*>.*?data-src="([^"]+)".*?<div class="plaque">#(\S*) - (.*?)</div>',
+            p, re.S):
+        kartlar.append([no.strip(), html.unescape(ad).strip(), html.unescape(r).replace('.thumb.png', '.png'),
+                        html.unescape(href)])
     return {'seri': seri, 'tarih': t, 'sayi': sayi, 'kartlar': kartlar}
 
 
 # ---------- Pokellector set listesi ----------
-ek = load(EKY, {'v': 1, 'sayfa': {}})
+ek = load(EKY, {})
+if ek.get('v') != 2:
+    ek = {'v': 2, 'sayfa': {}, 'kart': {}}
+ek.setdefault('kart', {})
 liste = []
 try:
     sp = get(BASE + '/sets')
@@ -105,22 +110,20 @@ for sid, ad in logolar.items():
 kat = load(KATY, None)
 if not kat:
     sys.exit('cards_ja.json yok')
+BAS = time.time()
+BUTCE = float(os.environ.get('BUTCE', '1200'))  # kart sayfaları için saniye
+TODAY = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).strftime('%Y-%m-%d')
 
 # önceki eklemeleri çıkar (her çalışmada temiz eklenir)
 eski_setler = kat['sets']
 tut = [i for i, s in enumerate(eski_setler) if not (len(s) > 8 and s[8] == 'pl')]
 yeni_idx = {i: n for n, i in enumerate(tut)}
 kat['sets'] = [eski_setler[i] for i in tut]
-kat['cards'] = [c for c in kat['cards'] if c[1] in yeni_idx]
+kat['cards'] = [c for c in kat['cards'] if c[1] in yeni_idx and not (len(c) > 16 and c[16] == 'pl')]
 for c in kat['cards']:
     c[1] = yeni_idx[c[1]]
 mevcut_kimlik = {s[0].lower() for s in kat['sets']}
-
-# resmi olmayan kartları olan TCGdex setleri
-resimsiz = {}
-for c in kat['cards']:
-    if not c[13]:
-        resimsiz.setdefault(kat['sets'][c[1]][0], []).append(c)
+sid_idx = {s[0]: i for i, s in enumerate(kat['sets'])}
 
 okunan = 0
 
@@ -140,35 +143,67 @@ def sayfa(ps):
     return d
 
 
-# ---------- 1) TCGdex setlerinde resmi olmayan kartlar ----------
-doldurulan = 0
+# ---------- Pokémon adları (kart türü için) ----------
+TUR = set()
+try:
+    for x in json.loads(get('https://pokeapi.co/api/v2/pokemon-species?limit=2000'))['results']:
+        TUR.add(x['name'].replace('-', ' '))
+except Exception as e:
+    print('PokeAPI alınamadı:', e)
+
+
+def kategori(en, ja=''):
+    if 'Energy' in en or 'エネルギー' in ja:
+        return 'Energy'
+    n = ' ' + re.sub(r"[^a-z0-9 ]", ' ', en.lower().replace("'s ", ' ').replace('.', '')) + ' '
+    n = re.sub(r'\s+', ' ', n)
+    for t in TUR:
+        if f' {t} ' in n:
+            return 'Pokémon'
+    return 'Trainer' if TUR else ''
+
+
+def kart_bilgi(href):
+    """Kart sayfası: Japonca ad, nadirlik, Cardmarket € fiyatı."""
+    p = get(BASE + urllib.parse.quote(href, safe="/%-._~'()!*,;:@&=+$"))
+    m = re.search(r'<strong>JPN:</strong>\s*(?:<a[^>]*>)?([^<]*)', p)
+    ja = html.unescape(m.group(1)).strip() if m else ''
+    m = re.search(r'<strong>Rarity:</strong>\s*([^<]*)', p)
+    nd = html.unescape(m.group(1)).strip() if m else ''
+    m = re.search(r'<div class="price">\s*€\s*([\d.,]+)\s*</div>\s*<cite>\s*from\s*<a href="https://www\.cardmarket', p)
+    eur = None
+    if m:
+        try:
+            eur = round(float(m.group(1).replace(',', '')), 2)
+        except Exception:
+            eur = None
+    return [ja, nd, eur, TODAY]
+
+
+# ---------- 1) TCGdex setleri: resmi olmayan ve hiç olmayan kartlar ----------
+doldurulan = eklenen_no = 0
+tcg_ek = []   # (set index, pokellector kartı)
 for ps in liste:
     sid = kapsanan.get(ps['num'])
-    if not sid or sid not in resimsiz:
+    if not sid or sid not in sid_idx:
         continue
     d = sayfa(ps)
     if not d:
         continue
-    resim = {sade(no): r for no, ad, r in d['kartlar']}
-    for c in resimsiz[sid]:
-        r = resim.get(sade(c[2]))
-        if r:
-            c[13] = r
+    si = sid_idx[sid]
+    kartlar = [c for c in kat['cards'] if c[1] == si]
+    var = {sade(c[2]) for c in kartlar}
+    resim = {sade(k[0]): k[2] for k in d['kartlar']}
+    for c in kartlar:
+        if not c[13] and resim.get(sade(c[2])):
+            c[13] = resim[sade(c[2])]
             doldurulan += 1
-
-# aynı adlı kartın resmi (temel enerjiler vb.)
-ad_resim = {}
-for c in kat['cards']:
-    if c[13] and c[0] not in ad_resim:
-        ad_resim[c[0]] = c[13]
-for c in kat['cards']:
-    if not c[13] and ad_resim.get(c[0]):
-        c[13] = ad_resim[c[0]]
-        doldurulan += 1
-print('Resmi tamamlanan kart:', doldurulan, flush=True)
+    for k in d['kartlar']:
+        if sade(k[0]) not in var:
+            var.add(sade(k[0]))
+            tcg_ek.append((si, sid, k))
 
 # ---------- 2) TCGdex'te olmayan setler ----------
-eklenen_set = eklenen_kart = 0
 yeni_setler = []
 for ps in liste:
     if ps['num'] in kapsanan:
@@ -184,35 +219,110 @@ for ps in liste:
         continue
     seri = SERI.get(d['seri'], d['seri'] or 'Diğer')
     s = [sid, ps['ad'], seri, d['tarih'], d['sayi'] or len(d['kartlar']), ps['logo'], ps['sembol'], 'ja', 'pl']
-    kartlar = []
-    gorulen = set()
-    for no, ad, r in d['kartlar']:
-        nk = re.sub(r'[^0-9A-Za-z]', '', no) or str(len(kartlar) + 1)
-        cid = f'{sid}-{nk}'
-        while cid in gorulen:
-            cid += 'b'
-        gorulen.add(cid)
-        kartlar.append([ad, None, sade(no), '', '', '', '', '', '', [], [], [], '', r, cid, ad])
-    yeni_setler.append((s, kartlar))
+    yeni_setler.append((s, d['kartlar']))
     mevcut_kimlik.add(sid.lower())
-    eklenen_set += 1
-    eklenen_kart += len(kartlar)
 
-# ---------- birleştir, tarihe göre sırala ----------
+# ---------- 3) kart sayfaları (Japonca ad, nadirlik, fiyat) — zaman bütçesiyle ----------
+gerek = [k[3] for _, _, k in tcg_ek if len(k) > 3] + [k[3] for _, ks in yeni_setler for k in ks if len(k) > 3]
+hic = [h for h in gerek if h not in ek['kart']]
+eski = sorted((h for h in gerek if h in ek['kart'] and ek['kart'][h][3] < TODAY),
+              key=lambda h: ek['kart'][h][3])
+sira = hic + [h for h in eski if (datetime.date.fromisoformat(TODAY) -
+                                  datetime.date.fromisoformat(ek['kart'][h][3])).days >= 5]
+kart_okunan = 0
+for h in sira:
+    if time.time() - BAS > BUTCE:
+        break
+    try:
+        ek['kart'][h] = kart_bilgi(h)
+        kart_okunan += 1
+    except Exception as e:
+        print('  kart sayfası alınamadı', h, e)
+        if h not in ek['kart']:
+            ek['kart'][h] = ['', '', None, TODAY]  # 5 gün sonra yeniden denenir
+    time.sleep(0.6)
+kalan = sum(1 for h in gerek if h not in ek['kart'])
+print(f'Kart sayfası okunan: {kart_okunan}, bilgisi hiç alınmamış kalan: {kalan}', flush=True)
+open(f'{VERI}/japonca/ek_kalan.txt', 'w').write(str(kalan))
+
+
+def kart_yap(sid, k, on=''):
+    no, ad, r = k[0], k[1], k[2]
+    b = ek['kart'].get(k[3]) if len(k) > 3 else None
+    ja = (b[0] if b else '') or ad
+    nd = b[1] if b else ''
+    nk = re.sub(r'[^0-9A-Za-z]', '', no) or 'x'
+    return [ja, None, sade(no), nd, kategori(ad, ja), '', '', '', '', [], [], [], '', r, f'{sid}-{on}{nk}', ad, 'pl'], \
+        (b[2] if b else None)
+
+
+fiyat = {}
+for si, sid, k in tcg_ek:
+    c, eur = kart_yap(sid, k, 'p')
+    c[1] = si
+    kat['cards'].append(c)
+    if eur is not None:
+        fiyat.setdefault(sid, {})[c[14]] = eur
+eklenen_kart = 0
 gruplar = {i: (s, []) for i, s in enumerate(kat['sets'])}
 for c in kat['cards']:
     gruplar[c[1]][1].append(c)
-hepsi = list(gruplar.values()) + yeni_setler
-hepsi.sort(key=lambda g: (g[0][3] or '9999', g[0][0]))
+for s, ks in yeni_setler:
+    liste_k, gorulen = [], set()
+    for k in ks:
+        c, eur = kart_yap(s[0], k)
+        while c[14] in gorulen:
+            c[14] += 'b'
+        gorulen.add(c[14])
+        liste_k.append(c)
+        if eur is not None:
+            fiyat.setdefault(s[0], {})[c[14]] = eur
+    gruplar[len(gruplar)] = (s, liste_k)
+    eklenen_kart += len(liste_k)
+
+# ---------- birleştir, tarihe göre sırala ----------
+hepsi = sorted(gruplar.values(), key=lambda g: (g[0][3] or '9999', g[0][0]))
 kat['sets'], kat['cards'] = [], []
 for i, (s, kartlar) in enumerate(hepsi):
     kat['sets'].append(s)
-    for c in kartlar:
+    for c in sorted(kartlar, key=lambda c: (int(c[2]) if str(c[2]).isdigit() else 99999, str(c[2]))):
         c[1] = i
         kat['cards'].append(c)
-
+# resmi hâlâ olmayanlar: aynı adlı başka kartın resmi (temel enerjiler vb.)
+ad_resim = {}
+for c in kat['cards']:
+    if c[13] and c[0] not in ad_resim:
+        ad_resim[c[0]] = c[13]
+for c in kat['cards']:
+    if not c[13] and ad_resim.get(c[0]):
+        c[13] = ad_resim[c[0]]
+        doldurulan += 1
 json.dump(kat, open(KATY, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
 json.dump(ek, open(EKY, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
-print(f'Eklenen set: {eklenen_set}, kart: {eklenen_kart}; okunan sayfa: {okunan}; '
+
+# ---------- fiyatlar (Pokellector'daki Cardmarket €) ----------
+os.makedirs(f'{VERI}/set', exist_ok=True)
+ozet = load(f'{VERI}/ozet.json', {'u': TODAY, 'c': {}})
+say = 0
+for sid, kartlar in fiyat.items():
+    yol = f'{VERI}/set/{sid}.json'
+    dosya = load(yol, {'u': TODAY, 'c': {}})
+    for cid, eur in kartlar.items():
+        if cid in dosya['c'] and dosya['c'][cid].get('pl') is None:
+            continue  # TCGdex fiyatı varsa ona dokunma
+        hist = [h for h in dosya['c'].get(cid, {}).get('h', []) if h[0] != TODAY]
+        if not hist or hist[-1][2] != eur:
+            hist.append([TODAY, None, eur])
+        hist = hist[-400:]
+        dosya['c'][cid] = {'h': hist, 'm': [None, None, eur, None, None, None, None], 'mu': TODAY.replace('-', '/'),
+                           'pl': 1}
+        once = hist[-2] if len(hist) >= 2 else [None, None, None]
+        ozet['c'][cid] = [None, eur, None, None, once[1], once[2], once[0]]
+        say += 1
+    dosya['u'] = TODAY
+    json.dump(dosya, open(yol, 'w'), separators=(',', ':'))
+json.dump(ozet, open(f'{VERI}/ozet.json', 'w'), separators=(',', ':'))
+print(f'TCGdex setlerinde resmi tamamlanan: {doldurulan}, eklenen eksik numara: {len(tcg_ek)}; '
+      f'yeni set: {len(yeni_setler)}, kart: {eklenen_kart}; okunan set sayfası: {okunan}; fiyatlı kart: {say}; '
       f'toplam {len(kat["sets"])} set, {len(kat["cards"])} kart; resmi olmayan '
       f'{sum(1 for c in kat["cards"] if not c[13])}', flush=True)

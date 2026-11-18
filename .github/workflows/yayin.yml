@@ -39,7 +39,7 @@ jobs:
             || mkdir -p izi
 
       - name: Fiyatları güncelle
-        if: github.event_name != 'push' || hashFiles('veri/ozet.json') == ''
+        if: github.event_name == 'schedule' || hashFiles('veri/ozet.json') == ''
         continue-on-error: true
         id: fiyat
         run: python3 site/.github/scripts/fiyatlar.py veri site/cards.json

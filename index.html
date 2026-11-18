@@ -284,6 +284,7 @@ async function loadCatalog(){
 /* ---------- İngilizce / Japonca ---------- */
 let DIL=(()=>{try{return localStorage.getItem('kb_dil')==='ja'?'ja':'en';}catch(e){return 'en';}})();
 const setDil=s=>s&&s[7]==='ja'?'ja':'en', dilOf=c=>setDil(CAT.sets[c[1]]);
+const KAPAK={};function setKapak(i){if(i in KAPAK)return KAPAK[i];let u='';for(const c of CAT.cards)if(c[1]===i&&c[13]){u=c[13];break;}return KAPAK[i]=u;}
 function dilKur(){
   const temizle=id=>{const s=$(id);if(!s)return null;const ilk=s.options[0];s.innerHTML='';if(ilk)s.append(ilk);return s;};
   const r=temizle('#cRar');[...new Set(CAT.cards.filter(c=>dilOf(c)===DIL).map(c=>c[3]).filter(Boolean))].sort().forEach(x=>r.append(el('option',{value:x,text:x})));
@@ -332,7 +333,7 @@ function drawCat(){
     order.sort((a,b)=>Math.max(...by[b])-Math.max(...by[a]));
     order.forEach(se=>{area.append(el('div',{class:'series',lang:DIL,text:se}));const g=el('div',{class:'sets'});
       by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i],logo=el('div',{class:'setlogo'});
-        if(s[5]){const im=el('img',{src:s[5],alt:s[1]+' logosu',loading:'lazy'});im.addEventListener('error',()=>im.remove());logo.append(im);}
+        {const ls=s[5]||setKapak(i);if(ls){const im=el('img',{src:ls,alt:s[1]+' logosu',loading:'lazy'});if(!s[5])im.style.cssText='max-height:100%;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.4)';im.addEventListener('error',()=>im.remove());logo.append(im);}}
         g.append(el('div',{class:'settile',onclick:()=>openSet(i)},logo,
           el('div',{class:'setname'},s[6]?el('img',{src:s[6],alt:'',loading:'lazy'}):null,el('span',{text:s[1]})),
           el('span',{class:'muted small',text:`${fmtDate(s[3])} · ${cnt[i]||0} kart`})));});

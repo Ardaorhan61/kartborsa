@@ -1,0 +1,36 @@
+name: Japonca set logoları
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: ['.github/scripts/ja_logolar.json']
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  logo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Eksik logoları indir (her biri bir kez)
+        run: python3 .github/scripts/ja_logo.py .
+
+      - name: Kaydet ve siteyi yeniden yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add img/ja
+          if git diff --cached --quiet; then
+            echo "Yeni logo yok"
+          else
+            git config user.name "KartBorsa logo"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -qm "Japonca set logoları ve sembolleri"
+            git push -q
+          fi
+          gh workflow run yayin.yml --ref main

@@ -6,7 +6,7 @@ Kullanım: python3 japonca.py <veri klasörü>
   <veri>/japonca/resim.json      → Scrydex resim kontrolü önbelleği
   <veri>/set/ja-<set>.json       → Japonca kartların fiyatları ve geçmişi
   <veri>/ozet.json               → Japonca fiyatlar da eklenir (fiyatlar.py'den SONRA çalışır)
-Kaynaklar: TCGdex (kart bilgisi, resim, Cardmarket fiyatı), Scrydex (TCGdex'te resmi olmayan kartlar),
+Kaynaklar: TCGdex (kart bilgisi, resim, Cardmarket fiyatı), Scrydex resim adresleri (sadece daha önce kaydedilmiş olanlar, Scrydex'e otomatik istek atılmaz),
 PokeAPI (Pokémon'ların İngilizce adları, aramada kullanılır).
 """
 import hashlib, json, os, re, sys, time, datetime, urllib.request, urllib.parse
@@ -106,26 +106,12 @@ def no_sade(local):
     return (local.lstrip('0') or '0') if local.isdigit() else local
 
 
-sahte = set()
-for u in ('https://images.scrydex.com/pokemon/zzz-999/small', 'https://images.scrydex.com/pokemon/zzz_ja-999/small',
-          'https://images.scrydex.com/pokemon/sv2a-1_ja/small'):
-    try:
-        sahte.add(hashlib.md5(get(u, raw=True)).hexdigest())
-    except Exception:
-        pass
 RESIM = load(f'{OUT}/japonca/resim.json', {})
 
 
 def scrydex_var(key):
-    if key in RESIM:
-        return RESIM[key]
-    try:
-        b = get(f'https://images.scrydex.com/pokemon/{key}/small', raw=True, tries=2)
-        ok = len(b) > 2000 and hashlib.md5(b).hexdigest() not in sahte
-    except Exception:
-        ok = False
-    RESIM[key] = ok
-    return ok
+    # Scrydex'e otomatik istek atılmaz (kuralları gereği); sadece daha önce kaydedilmiş sonuç kullanılır.
+    return RESIM.get(key, False)
 
 
 gerek = []
@@ -134,9 +120,6 @@ for s in detay:
         d = KART.get(c['id']) or c
         if not d.get('image'):
             gerek.append(f"{scrydex_kod(s['id'])}_ja-{no_sade(c['localId'])}")
-with ThreadPoolExecutor(16) as ex:
-    list(ex.map(scrydex_var, gerek))
-json.dump(RESIM, open(f'{OUT}/japonca/resim.json', 'w'), separators=(',', ':'))
 
 # ---------- katalog ----------
 HARF = {'Grass': 'G', 'Fire': 'R', 'Water': 'W', 'Lightning': 'L', 'Psychic': 'P', 'Fighting': 'F', 'Darkness': 'D',

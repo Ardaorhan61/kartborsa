@@ -78,7 +78,8 @@ def isle(c):
         urls.append(c[13])
     if not cid.startswith('ja-'):
         urls.append('https://images.pokemontcg.io/%s/%s.png' % (sets[c[1]][0], c[2]))
-        urls.append('https://images.scrydex.com/pokemon/%s/small' % cid)
+    # Scrydex'e otomatik istek atılmaz (kuralları gereği)
+    urls = [u for u in urls if 'scrydex.com' not in u]
     for u in urls:
         for deneme in range(2):
             try:

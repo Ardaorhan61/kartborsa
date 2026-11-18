@@ -240,7 +240,7 @@ const SUPABASE_KEY = "sb_publishable_ODVKFrVJrw94RBakGxiDgg_QcqMG_ZW";   // herk
 /* =========================== */
 
 const $=s=>document.querySelector(s);
-const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(v==null)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}kids.flat().forEach(k=>k!=null&&e.append(k.nodeType?k:document.createTextNode(k)));return e;};
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);if(tag==='img')e.referrerPolicy='no-referrer';for(const[k,v]of Object.entries(attrs)){if(v==null)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}kids.flat().forEach(k=>k!=null&&e.append(k.nodeType?k:document.createTextNode(k)));return e;};
 const tl=n=>(n==null||isNaN(n))?'—':Number(n).toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';
 const norm=s=>(s||'').toString().toLocaleLowerCase('tr').trim().replace(/\s+/g,' ');
 const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display='none',3000);};

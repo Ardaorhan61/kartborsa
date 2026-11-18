@@ -51,7 +51,7 @@ jobs:
         run: python3 site/.github/scripts/japonca.py veri
 
       - name: Japonca eksikleri tamamla (Pokellector)
-        if: steps.japonca.outcome == 'success' || hashFiles('veri/japonca/ek.json') == ''
+        if: steps.japonca.outcome == 'success' || github.event_name == 'workflow_dispatch' || hashFiles('veri/japonca/ek.json') == ''
         continue-on-error: true
         id: ek
         timeout-minutes: 30
@@ -86,6 +86,43 @@ jobs:
           python3 - <<'PY'
           import json, os
           os.makedirs('_site/detay', exist_ok=True)
+          # ADV / DP Japonca setleri (Bulbapedia listesi + İngilizce karşılık kartın bilgileri ve resmi)
+          bp_yol = 'site/.github/scripts/ja_bulbapedia.json'
+          if os.path.exists(bp_yol) and os.path.exists('_site/cards_ja.json'):
+              bp = json.load(open(bp_yol, encoding='utf-8'))
+              en = json.load(open('_site/cards.json', encoding='utf-8'))
+              enk = {c[14]: c for c in en['cards']}
+              ja = json.load(open('_site/cards_ja.json', encoding='utf-8'))
+              var = {s[0] for s in ja['sets']}
+              gr = [(s, []) for s in ja['sets']]
+              for c in ja['cards']:
+                  gr[c[1]][1].append(c)
+              eklenen = 0
+              for sid, b in bp.items():
+                  if sid in var:
+                      continue
+                  seri = 'ADV' if sid.startswith('ja-ADV') else 'DP'
+                  s = [sid, b['ja'] or b['ad'], seri, b['tarih'], len(b['kart']), '', b['sembol'], 'ja', 'bp']
+                  ks = []
+                  for no, nd, ecid in b['kart']:
+                      e = enk.get(ecid)
+                      if not e:
+                          continue
+                      esid = ecid.rsplit('-', 1)[0]
+                      img = e[13] or f'https://images.pokemontcg.io/{esid}/{e[2]}.png'
+                      ks.append([e[0], 0, no, nd, e[4], e[5], e[6], e[7], e[8], e[9], e[10], e[11], e[12], img,
+                                 f'{sid}-{no}', e[0], 'bp'])
+                  gr.append((s, ks))
+                  eklenen += 1
+              gr.sort(key=lambda g: (g[0][3] or '9999', g[0][0]))
+              ja['sets'], ja['cards'] = [], []
+              for i, (s, ks) in enumerate(gr):
+                  ja['sets'].append(s)
+                  for c in ks:
+                      c[1] = i
+                      ja['cards'].append(c)
+              json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+              print('Bulbapedia setleri eklendi:', eklenen)
           for p in ('_site/cards.json', '_site/cards_ja.json'):
               if not os.path.exists(p):
                   continue

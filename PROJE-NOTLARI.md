@@ -105,4 +105,6 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
   - Japonca promolar: `.github/scripts/ja_promo.json` (Bulbapedia: ADV-P, PCG-P, DP-P, DPt-P, L-P, BW-P, XY-P, SM-P, S-P, SV-P, M-P, PPP, P, T).
     Olmayan promo setleri eklenir, olan setlerde eksik numaralar tamamlanır. Resimler Bulbagarden arşivinden.
   - Bulbagarden resimleri yalnızca "referrer" gönderilmezse açılıyor: index.html'de el() tüm resimlere referrerPolicy=no-referrer koyuyor.
-  - Hâlâ eksik (küçük): PT2'de 6 kart, WCS23 destesinin 29 kartı, neo4 #24, VS1 #77, web1 #39; bazı promo kartlarının resmi; ~38 setin logosu (ilk kart resmi görünür).
+  - Son kontrol (19 Kasım 2026): `.github/scripts/ja_duzeltme.json` (yayında uygulanır): 38 setin logosu/paket resmi (Bulbagarden arşivi),
+    50 promo kartının resmi, WCS23 destesinin 30 kartı, web1 #39 ve VS1 #77 eklendi; hiç çıkmamış kartlar silindi (S-P 134/194–197/233, M-P 128–130, neo2 #57).
+    Sonuç: 241 set, 22.566 kart; resmi olmayan kart 0, logosu olmayan set 0. SV4a'daki 40 kart `ja-ayrinti.yml` bitince gelir.

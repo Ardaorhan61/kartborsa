@@ -74,6 +74,8 @@ jobs:
           mkdir -p _site/fiyat
           cp site/index.html site/cards.json _site/
           cp site/*.html _site/ 2>/dev/null || true
+          cp site/sw.js _site/ 2>/dev/null || true
+          sed -i "s/__SURUM__/$(date +%s)/g" _site/index.html
           cp -r site/img _site/ 2>/dev/null || true
           touch _site/.nojekyll
           cp veri/japonca/cards_ja.json _site/ 2>/dev/null || true

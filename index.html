@@ -1528,7 +1528,7 @@ async function loadListings(){
 (async()=>{
   const pCat=loadCatalog();window.__katalog=pCat.catch(()=>{});
   const pFiyat=loadPrices();
-  const pIlan=loadListings().catch(e=>{SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);});
+  const pIlan=loadListings().catch(e=>{SB=SB||null;toast('İlanlar yüklenemedi: '+(e.message||e));console.error(e);});window.__ilan=pIlan;
   try{await pCat;}catch(e){$('#catInfo').textContent='Kart veritabanı yüklenemedi: '+e.message;return;}
   if(OZET){labelPriceSets();drawCat();}
   if(LIST&&LIST.length)refreshAll();
@@ -1558,8 +1558,16 @@ function anaSayfa(){closeModal();if(typeof catSet!=='undefined')catSet=null;$('#
   let sT;addEventListener('scroll',()=>{clearTimeout(sT);sT=setTimeout(()=>{if(!POP)kaydet();},250);},{passive:true});
   // logo: ana sayfa
   const logo=document.querySelector('header .logo');if(logo){logo.removeAttribute('onclick');logo.onclick=e=>{e.preventDefault();anaSayfa();};logo.title='Ana sayfa';}
-  try{if('scrollRestoration' in history)history.scrollRestoration='manual';history.replaceState(anlik(),'');}catch(e){}
-  addEventListener('popstate',e=>{const s=e.state;if(!s||!s.kb)return;POP=true;
+  /* sayfa yenilenince: tarayıcının sakladığı son durum (görünüm, set, arama, açık kart, kaydırma) geri yüklenir */
+  const ONCEKI=history.state&&history.state.kb?history.state:null;
+  try{if('scrollRestoration' in history)history.scrollRestoration='manual';if(!ONCEKI)history.replaceState(anlik(),'');}catch(e){}
+  addEventListener('popstate',e=>uygula(e.state));
+  if(ONCEKI)(async()=>{try{await window.__katalog;}catch(e){}
+    if(ONCEKI.card&&BYID[ONCEKI.card]==null&&window.__ikinciDil){try{await window.__ikinciDil;}catch(e){}}
+    uygula(ONCEKI);
+    if(['profil','al','ver','piyasa'].includes(ONCEKI.v)){try{await window.__ilan;}catch(e){}if(gorunum()===ONCEKI.v){POP=true;try{go(ONCEKI.v);}finally{POP=false;}yerineDon(ONCEKI.y||0);}}
+  })();
+  function uygula(s){if(!s||!s.kb)return;POP=true;
     try{if(s.dil&&s.dil!==DIL)dilDegistir(s.dil);
       $('#cSet').value=s.set||'';$('#cq').value=s.q||'';$('#cRar').value=s.rar||'';$('#cSup').value=s.sup||'';$('#cStock').checked=!!s.stock;
       if(gorunum()!==s.v)go(s.v);
@@ -1567,7 +1575,7 @@ function anaSayfa(){closeModal();if(typeof catSet!=='undefined')catSet=null;$('#
       if(s.card&&CAT&&BYID[s.card]!=null){if(!kartAcik()||KART!==s.card)openCard(BYID[s.card]);}
       else if($('#modal').classList.contains('on'))_cm();
     }catch(err){console.warn('geri',err);}finally{POP=false;}
-    yerineDon(s.y||0);});
+    yerineDon(s.y||0);}
   function yerineDon(y){let bitti=false;const dur=()=>{bitti=true;['wheel','touchstart','keydown','mousedown'].forEach(t=>removeEventListener(t,dur));};
     ['wheel','touchstart','keydown','mousedown'].forEach(t=>addEventListener(t,dur,{passive:true}));
     const t0=Date.now();(function adim(){if(bitti)return;if(Math.abs(scrollY-y)>2)scrollTo(0,y);if(Date.now()-t0<1800)setTimeout(adim,90);else dur();})();}

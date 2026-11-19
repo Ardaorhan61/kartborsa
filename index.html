@@ -120,6 +120,65 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 #dilSec button{border:0;background:transparent;color:var(--muted);padding:6px 11px;border-radius:999px;font:600 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
 #dilSec button.on{background:var(--accent);color:#14161c}
 @media (max-width:640px){#dilSec{margin:0 4px}#dilSec button{padding:5px 7px;font-size:12px}}
+
+/* ===== Pokémon dokunuşları (19.11.2026) ===== */
+:root{--t-Grass:#5fbd58;--t-Fire:#f2683a;--t-Water:#3d9bf0;--t-Lightning:#f7d02c;--t-Psychic:#b06ce0;--t-Fighting:#c9763a;--t-Darkness:#4a5878;--t-Metal:#9aa7b8;--t-Fairy:#ef8cc4;--t-Dragon:#c9a227;--t-Colorless:#c8c2b0}
+body{background:radial-gradient(1200px 600px at 10% -10%,rgba(255,203,61,.07),transparent 60%),radial-gradient(900px 600px at 100% 0%,rgba(79,209,197,.06),transparent 60%),radial-gradient(900px 700px at 50% 110%,rgba(176,108,224,.06),transparent 60%),var(--bg);background-attachment:fixed}
+header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--t-Grass),var(--t-Fire),var(--t-Water),var(--t-Lightning),var(--t-Psychic),var(--t-Fighting),var(--t-Darkness),var(--t-Metal),var(--t-Fairy),var(--t-Dragon));opacity:.75}
+.logo .dot{position:relative;overflow:hidden;box-shadow:0 0 0 2px rgba(255,203,61,.25),0 4px 14px rgba(255,160,40,.35)}
+.logo .dot::after{content:'';position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);transform:translateX(-60%);animation:kbLogo 5s ease-in-out infinite}
+@keyframes kbLogo{0%,70%{transform:translateX(-60%)}85%,100%{transform:translateX(60%)}}
+.series{display:flex;align-items:center;gap:10px}
+.series::before{content:'';width:4px;height:18px;border-radius:4px;background:linear-gradient(180deg,var(--accent),#ff8a3d)}
+.settile{position:relative;overflow:hidden}
+.settile:hover{box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 0 1px rgba(255,203,61,.35);transform:translateY(-3px)}
+.settile .setlogo{transition:transform .25s}.settile:hover .setlogo{transform:scale(1.03)}
+.ctile .cimg{transition:box-shadow .25s,transform .25s}
+.ctile .cimg::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 45%,rgba(140,220,255,.25) 52%,rgba(255,150,230,.2) 58%,transparent 72%);background-size:250% 250%;background-position:120% 120%;opacity:0;transition:opacity .2s,background-position .7s ease}
+.ctile:hover .cimg{box-shadow:0 14px 30px rgba(0,0,0,.55),0 0 18px rgba(255,214,90,.25)}
+.ctile:hover .cimg::after{opacity:1;background-position:-20% -20%}
+.rar{position:absolute;z-index:3;right:6px;top:6px;font:700 11px Inter;padding:2px 7px;border-radius:99px;background:rgba(15,18,32,.82);color:#fff;letter-spacing:.02em;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.rar.r2{color:#9fe7ff}.rar.r3{color:#ffd76a}.rar.r4{background:linear-gradient(135deg,#ffcb3d,#ff7ac6,#7ad8ff);color:#1a1300}
+.tdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.tip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px 2px 4px;border-radius:99px;font-weight:700;font-size:13px;color:#10131f;background:var(--tc,#888)}
+.tip i{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(255,255,255,.25) 45%,rgba(0,0,0,.15) 70%),var(--tc,#888);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+.hpb{display:inline-flex;align-items:baseline;gap:4px;font:700 15px "Space Grotesk",Inter}.hpb small{font-size:11px;color:#ff8b8b;letter-spacing:.06em}
+.kbhero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr);gap:18px;align-items:center;background:linear-gradient(135deg,rgba(255,203,61,.10),rgba(79,209,197,.06) 55%,rgba(176,108,224,.10));border:1px solid var(--line);border-radius:18px;padding:22px;margin:4px 0 6px;position:relative;overflow:hidden}
+.kbhero::before{content:'';position:absolute;width:420px;height:420px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(255,203,61,.18),transparent 65%);pointer-events:none}
+.kbhero h2{font-size:28px;line-height:1.15;margin-bottom:8px}
+.kbhero h2 em{font-style:normal;background:linear-gradient(90deg,var(--accent),#ff8a3d,#ff7ac6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kbchips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.kbchip{display:inline-flex;align-items:center;gap:6px;background:rgba(15,18,32,.55);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font:600 13px Inter}
+.kbchip b{font-family:"Space Grotesk",Inter;color:var(--accent)}
+.kbara{display:flex;gap:6px;flex-wrap:wrap}
+.kbara button{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:5px 12px;font:600 13px Inter;cursor:pointer;transition:.15s}
+.kbara button:hover{border-color:var(--accent);color:var(--accent)}
+.kbfan{position:relative;height:250px}
+.kbfan .ctile{position:absolute;width:138px;top:10px;left:50%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.kbfan .ctile .cname,.kbfan .ctile .cset,.kbfan .ctile .cval{display:none}
+.kbfan .ctile:nth-child(1){transform:translateX(-115%) rotate(-11deg) translateY(18px)}
+.kbfan .ctile:nth-child(2){transform:translateX(-50%) rotate(0);z-index:2}
+.kbfan .ctile:nth-child(3){transform:translateX(15%) rotate(11deg) translateY(18px)}
+.kbfan:hover .ctile:nth-child(1){transform:translateX(-125%) rotate(-15deg) translateY(10px)}
+.kbfan:hover .ctile:nth-child(3){transform:translateX(25%) rotate(15deg) translateY(10px)}
+.kbfan .ctile:hover{z-index:4}
+.kbfan .lbl{position:absolute;bottom:-4px;left:0;right:0;text-align:center;font-size:12px;color:var(--muted)}
+.kbrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px;margin:14px 0 4px}
+.kbbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.kbbox h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.kbgun{display:flex;gap:14px;align-items:center;cursor:pointer}
+.kbgun .cimg{width:110px;flex:0 0 auto;animation:kbYuz 4s ease-in-out infinite}
+@keyframes kbYuz{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1deg)}}
+.kbtop{display:flex;flex-direction:column;gap:2px}
+.kbtop div{display:flex;align-items:center;gap:10px;padding:6px;border-radius:10px;cursor:pointer}
+.kbtop div:hover{background:var(--panel2)}
+.kbtop img{width:34px;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.kbtop .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:14px}
+.kbtop .v{font-size:12px;color:var(--muted);text-align:right}
+@media(max-width:760px){.kbhero{grid-template-columns:1fr;padding:18px}.kbhero h2{font-size:23px}.kbfan{height:215px}.kbfan .ctile{width:122px}.kbrow{grid-template-columns:1fr}}
+footer{border-top:1px solid var(--line);margin-top:30px;position:relative}
+footer .kbfoot{display:flex;align-items:center;gap:8px;font:700 14px "Space Grotesk",Inter;color:var(--text);margin-bottom:8px}
+@media (prefers-reduced-motion:reduce){.logo .dot::after,.kbgun .cimg{animation:none}.kbfan .ctile,.ctile .cimg::after{transition:none}}
 </style>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -142,7 +201,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 <main>
   <section class="view on" id="v-katalog">
     <div class="hero">
-      <div><h2>Tüm Pokémon kartları</h2><div class="muted small" id="catInfo">Kart veritabanı yükleniyor…</div></div>
+      <div><h2>Tüm Pokémon kartları</h2><div class="muted small" id="catInfo">Kartlar desteye diziliyor…</div></div>
     </div>
     <div class="card" style="margin-bottom:14px">
       <input id="cq" placeholder="Kart adını yaz: ör. Charizard, Pikachu ex, Umbreon VMAX…" autocomplete="off" style="font-size:17px;padding:14px">
@@ -228,7 +287,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
   </section>
 </main>
 
-<footer>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır. · <a href="gizlilik.html">Gizlilik</a></footer>
+<footer><div class="kbfoot">⚡ KartBorsa · koleksiyoncular için kart pazarı</div>Kart bilgileri ve görselleri Pokémon TCG API'sinden (pokemontcg.io) gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır. · <a href="gizlilik.html">Gizlilik</a></footer>
 
 <div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
 <div class="toast" id="toast"></div>
@@ -263,6 +322,53 @@ function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
   const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy'});
   im.addEventListener('error',()=>{if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)&&!String(c[14]).startsWith('ja-')){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});box.append(fb,im);return box;}
+
+
+/* ===== Pokémon dokunuşları: tür renkleri, nadirlik simgeleri, ana sayfa vitrini ===== */
+const TIP_TR={Grass:'Çimen',Fire:'Ateş',Water:'Su',Lightning:'Elektrik',Psychic:'Psişik',Fighting:'Dövüş',Darkness:'Karanlık',Metal:'Çelik',Fairy:'Peri',Dragon:'Ejderha',Colorless:'Renksiz'};
+const RAR_G=['●','◆','★','★★','★★★'];
+function tipPill(t){if(!t)return null;return el('span',{class:'tip',style:'--tc:var(--t-'+t+',#888)'},el('i'),TIP_TR[t]||t);}
+const MAL={G:'Grass',R:'Fire',W:'Water',L:'Lightning',P:'Psychic',F:'Fighting',D:'Darkness',M:'Metal',Y:'Fairy',N:'Dragon',C:'Colorless'};
+function maliyet(k){if(!k)return null;const b=el('span',{style:'display:inline-flex;gap:2px',title:'Saldırı maliyeti'});for(const h of String(k)){const t=MAL[h];if(!t)return el('span',{class:'muted',text:'['+k+']'});b.append(el('span',{class:'tdot',style:'margin:0;width:14px;height:14px;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(255,255,255,.2) 45%,rgba(0,0,0,.15) 70%),var(--t-'+t+')',title:TIP_TR[t]}));}return b;}
+function tipDot(t){return t&&TIP_TR[t]?el('span',{class:'tdot',style:'background:var(--t-'+t+')',title:TIP_TR[t]}):null;}
+function rarSeviye(r){if(!r)return 0;const x=String(r).toLowerCase().trim();
+  if(/secret|hyper|special illustration|ultra rare|gold|crown|shiny ultra|^ur$|^sar$|^ssr$|^hr$|^sr$|^csr$/.test(x))return 4;
+  if(/double|illustration|\bex\b|gx|vmax|vstar|break|prism|ace spec|radiant|amazing|shiny|lv\.x|legend|prime|star|^rr$|^rrr$|^ar$|^chr$|^k$|^s$/.test(x))return 3;
+  if(/rare|holo|promo|^r$|レア/.test(x))return 2;if(/uncommon|^u$/.test(x))return 1;return 0;}
+function rarRozet(r){if(!r)return null;const v=rarSeviye(r);return el('span',{class:'rar r'+v,title:r},RAR_G[v]);}
+function gunKarti(){const ad=new Date().toISOString().slice(0,10)+DIL;let h=0;for(const ch of ad)h=(h*31+ch.charCodeAt(0))>>>0;
+  const aday=[];for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&!/placeholder/.test(c[13])&&rarSeviye(c[3])>=3)aday.push(i);}
+  return aday.length?aday[h%aday.length]:null;}
+function vitrin(){const kart=[],yuk=[];let n=0;
+  for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];if(dilOf(c)!==DIL)continue;n++;
+    const mv=OZET?mainValue(OZET.c[c[14]]):null;if(!mv||!c[13])continue;kart.push([mv.tl,i]);const p=pct(mv.tl,mv.prev);if(p!=null&&p>0.5&&mv.tl>=50)yuk.push([p,i,mv.tl]);}
+  kart.sort((a,b)=>b[0]-a[0]);yuk.sort((a,b)=>b[0]-a[0]);
+  const g=gunKarti();let one=kart.slice(0,3).map(x=>x[1]);
+  if(one.length<3){one=[];for(let i=CAT.cards.length-1;i>=0&&one.length<3;i--){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&rarSeviye(c[3])>=3&&i!==g)one.push(i);}}
+  const ss=CAT.sets.filter(x=>setDil(x)===DIL).length,il=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).length;
+  const ara=q=>{$('#cq').value=q;runCat();window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
+  const oneri=DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
+  const fan=el('div',{class:'kbfan'});[one[1],one[0],one[2]].filter(x=>x!=null).forEach(i=>fan.append(tileFor(i)));
+  fan.append(el('div',{class:'lbl',text:kart.length?'💎 Katalogun en değerli kartları':'✨ Öne çıkan kartlar'}));
+  const hero=el('div',{class:'kbhero'},
+    el('div',{},el('h2',{},'Kartını bul, ',el('em',{},'değerini gör'),', güvenle al-sat.'),
+      el('div',{class:'muted',text:(DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
+      el('div',{class:'kbchips'},el('span',{class:'kbchip'},'🃏 ',el('b',{text:n.toLocaleString('tr-TR')}),' kart'),el('span',{class:'kbchip'},'📦 ',el('b',{text:String(ss)}),' set'),el('span',{class:'kbchip'},'🏷️ ',el('b',{text:String(il)}),' ilan')),
+      el('div',{class:'muted small',style:'margin-bottom:6px'},'Popüler aramalar:'),
+      el('div',{class:'kbara'},...oneri.map(q=>el('button',{type:'button',onclick:()=>ara(q)},q)))),fan);
+  const row=el('div',{class:'kbrow'});
+  if(g!=null){const c=CAT.cards[g],s=setOf(c),mv=OZET?mainValue(OZET.c[c[14]]):null;
+    row.append(el('div',{class:'kbbox'},el('h3',{},'🌟 Günün kartı'),el('div',{class:'kbgun',onclick:()=>openCard(g)},cardImg(c),
+      el('div',{},el('div',{style:'font:700 18px "Space Grotesk",Inter',text:c[0]}),el('div',{class:'muted small',text:s[1]+' · #'+c[2]}),
+        el('div',{style:'margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center'},tipPill(c[7]),c[6]?el('span',{class:'hpb'},el('small',{},'HP'),c[6]):null),
+        c[3]?el('div',{class:'small',style:'margin-top:6px'},el('span',{style:'margin-right:6px;color:var(--accent)'},RAR_G[rarSeviye(c[3])]),c[3]):null,
+        mv?el('div',{class:'price',style:'margin-top:6px',text:'≈ '+tlx(mv.tl)}):null,el('div',{class:'muted small',style:'margin-top:4px'},'Her gün yeni bir kart seçilir.')))));}
+  const top=el('div',{class:'kbtop'});
+  yuk.slice(0,6).forEach(([p,i,v])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{class:'n',text:c[0]}),el('span',{class:'v'},tlx(v),el('br'),chg(p))));});
+  if(!yuk.length){kart.slice(3,9).forEach(([v,i])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{class:'n',text:c[0]}),el('span',{class:'v',text:tlx(v)})));});
+    if(!kart.length)top.append(el('div',{class:'muted small',style:'cursor:default',text:OZET?'Fiyat bilgisi yok.':'Fiyatlar yükleniyor…'}));}
+  row.append(el('div',{class:'kbbox'},el('h3',{},yuk.length?'🔥 Bugün yükselenler':'💎 En değerli kartlar'),top,OZET?el('div',{style:'margin-top:8px'},el('a',{href:'#',class:'small',onclick:e=>{e.preventDefault();go('piyasa');}},'Tüm piyasa →')):null));
+  return el('div',{},hero,row);}
 
 /* ---------- listings helpers ---------- */
 const active=()=>LIST.filter(l=>l.status==='active'&&l.qty>0);
@@ -320,14 +426,15 @@ function runCat(){
   catShown=catSet!==null?120:60;drawCat();
 }
 function tileFor(i){const c=CAT.cards[i],s=setOf(c),st=STOCKMAP[c[14]];
-  const im=cardImg(c);if(st){im.append(el('span',{class:'badge',text:tl(st.min)}),el('span',{class:'badge qtyb',text:st.qty+' adet'}));}
+  const im=cardImg(c);{const rr=rarRozet(c[3]);if(rr&&!st)im.append(rr);}if(st){im.append(el('span',{class:'badge',text:tl(st.min)}),el('span',{class:'badge qtyb',text:st.qty+' adet'}));}
   const mv=OZET?mainValue(OZET.c[c[14]]):null;
-  return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}),mv?el('div',{class:'cval'},el('span',{text:'Piyasa ≈ '+tlx(mv.tl)+' '}),chg(pct(mv.tl,mv.prev),true)):null);}
+  return el('div',{class:'ctile',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset'},tipDot(c[7]),`${s[1]} · #${c[2]}`),mv?el('div',{class:'cval'},el('span',{text:'Piyasa ≈ '+tlx(mv.tl)+' '}),chg(pct(mv.tl,mv.prev),true)):null);}
 function drawCat(){
   const area=$('#catArea');area.innerHTML='';crumb();
   const filtering=catSet!==null||$('#cq').value.trim()||$('#cRar').value||$('#cSup').value||$('#cStock').checked;
   if(!filtering){
     $('#catCount').textContent='Bir set seç ya da yukarıdan kart adı ara.';$('#catMore').style.display='none';
+    try{area.append(vitrin());}catch(e){console.warn('vitrin',e);}
     const by={},order=[],cnt={};CAT.cards.forEach(c=>cnt[c[1]]=(cnt[c[1]]||0)+1);
     CAT.sets.forEach((s,i)=>{if(setDil(s)!==DIL)return;if(!by[s[2]]){by[s[2]]=[];order.push(s[2]);}by[s[2]].push(i);});
     order.sort((a,b)=>Math.max(...by[b])-Math.max(...by[a]));
@@ -439,14 +546,14 @@ function openCardNow(i){
       el('div',{},
         el('dl',{class:'kv'},el('dt',{},'Set'),el('dd',{},el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();openSet(c[1]);}},s[1])),
           el('dt',{},'Seri'),el('dd',{text:s[2]}),el('dt',{},'Kart no'),el('dd',{text:c[2]+(s[4]?' / '+s[4]:'')}),
-          el('dt',{},'Çıkış'),el('dd',{text:fmtDate(s[3])}),el('dt',{},'Nadirlik'),el('dd',{text:c[3]||'—'}),
+          el('dt',{},'Çıkış'),el('dd',{text:fmtDate(s[3])}),el('dt',{},'Nadirlik'),el('dd',{},c[3]?el('span',{style:'margin-right:6px;color:var(--accent)'},RAR_G[rarSeviye(c[3])]):null,c[3]||'—'),
           el('dt',{},'Tür'),el('dd',{text:[c[4],c[5]].filter(Boolean).join(' · ')}),
-          c[6]?el('dt',{},'HP'):null,c[6]?el('dd',{text:c[6]}):null,c[7]?el('dt',{},'Enerji tipi'):null,c[7]?el('dd',{text:c[7]}):null,
+          c[6]?el('dt',{},'HP'):null,c[6]?el('dd',{},el('span',{class:'hpb'},el('small',{},'HP'),c[6])):null,c[7]?el('dt',{},'Enerji tipi'):null,c[7]?el('dd',{},tipPill(c[7])):null,
           c[8]?el('dt',{},'Çizer'):null,c[8]?el('dd',{text:c[8]}):null),
         box,
         el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
         ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
-        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{text:(a[1]?`[${a[1]}] `:'')+a[0]}),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))),
+        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{style:'display:flex;align-items:center;gap:8px'},maliyet(a[1]),a[0]),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))),
     marketSection(c));
   $('#modal').classList.add('on');
 }
@@ -828,7 +935,7 @@ let picked=null,photoBlob=null;
 function pickForListing(i){picked=i;const c=CAT.cards[i],s=setOf(c);if($('#lLang'))$('#lLang').value=dilOf(c)==='ja'?'Japonca':'İngilizce';$('#lq').value=c[0];
   $('#lPicked').textContent=`${c[0]} · ${s[1]} · #${c[2]} · ${c[3]||''}`;
   const p=$('#lCardPrev');p.innerHTML='';const st=stockOf(c[14]);
-  p.append(cardImg(c,true),el('div',{class:'cname',text:c[0]}),el('div',{class:'cset',text:`${s[1]} · #${c[2]}`}),
+  p.append(cardImg(c,true),el('div',{class:'cname',text:c[0]}),el('div',{class:'cset'},tipDot(c[7]),`${s[1]} · #${c[2]}`),
     el('div',{class:'muted small',style:'margin-top:8px',text:st.qty?`Sitede şu an ${st.qty} adet var, en düşük ${tl(st.min)}.`:'Sitede bu karttan başka ilan yok.'}),
     el('div',{class:'small',style:'margin-top:4px'},priceLinks(c)));}
 $('#lq').addEventListener('input',()=>{const box=$('#lSug'),q=$('#lq').value.toLowerCase().trim();box.innerHTML='';picked=null;

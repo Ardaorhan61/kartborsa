@@ -140,3 +140,8 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Ön yükleme (preload) seçili katalog + fiyat özeti; `content-visibility:auto` set ve kart ızgaralarında; resimlerde decoding=async.
 - Ölçüm: ilk açılış ~1,4 MB → ~1,0 MB (diğer dil sonradan); tekrar açılışta veri için ağ 0 KB, ~100 ms.
 - Renk: seri başına renk (SRK dizisi, --sc) set kutularında şerit/zemin/parlama; kartlarda tür rengi (--tc) çerçeve, parlama ve ad çizgisi; kart detayında üst şerit tür renginde (--mc); renkli butonlar, sekmeler, başlıklar, vitrin kutuları.
+
+## 20 Kasım 2026 (gece) — giriş/kayıt, yenileme, hız 2
+- Yenileme: history.state (setId ile) sayfa yenilenince geri yüklenir (görünüm, set, filtreler, açık kart, kaydırma); pagehide/visibilitychange'de konum kaydedilir.
+- Giriş/Kayıt: profil sayfasında iki büyük seçenek. Kayıt: ad, soyad (auth user_metadata'da, gizli), kullanıcı adı (profiles.display_name, benzersizlik kontrolü), şehir, e-posta, şifre + tekrar, gizlilik onayı. Onay e-postası gerekirse profil ilk girişte `profilTamamla()` ile oluşur.
+- Hız 2: yayında cards.json / cards_ja.json içindeki resim adresi başları kısaltılır: `~0`…`~6` = d['pfx'] listesindeki önek (scrydex, tcgdex, pokellector, bulbapedia, pokemontcg, pokellector logos, img/ja). Site yüklerken geri açar. **Denetimde "~" ile başlayan adres bozuk değildir.** Yazı tipleri sayfayı bekletmez (preload+onload), resim sunucularına preconnect, ikinci dil boşta (requestIdleCallback) yüklenir, arama anahtarları sadece yeni kartlar için hesaplanır.

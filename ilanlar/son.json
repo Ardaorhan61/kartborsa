@@ -17,6 +17,26 @@
   "photo_url": null,
   "status": "sold",
   "created_at": "2026-11-17T17:00:18.099143+00:00",
-  "updated_at": "2026-11-17T21:19:40.709565+00:00"
+  "updated_at": "2026-11-18T16:02:59.682029+00:00"
+ },
+ {
+  "id": "e318a9fe-caa5-4e4c-977a-3bfa2fba2e6d",
+  "owner": "e34c904c-9352-4e4a-8501-b5dab4fb9771",
+  "card_id": "ja-M-P-020",
+  "card_name": "ピカチュウ",
+  "set_name": "メガ プロモカード",
+  "price": 5500,
+  "qty": 0,
+  "cond": "Mint",
+  "lang": "Japonca",
+  "note": "psa 10 certified",
+  "seller_name": "pokemon",
+  "instagram": "ardaturegunn",
+  "whatsapp": null,
+  "city": null,
+  "photo_url": null,
+  "status": "sold",
+  "created_at": "2026-11-18T22:37:21.757254+00:00",
+  "updated_at": "2026-11-18T22:37:25.823556+00:00"
  }
 ]

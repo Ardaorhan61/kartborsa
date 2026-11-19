@@ -1,0 +1,42 @@
+{
+ "ekle": {
+  "swshp": [
+   {
+    "id": "swshp-SWSH299",
+    "no": "SWSH299",
+    "ad": "Jirachi V",
+    "nadir": "Promo",
+    "tur": "Pokémon",
+    "alt": "Basic",
+    "hp": "180",
+    "tip": "Psychic",
+    "cizer": "N-DESIGN Inc.",
+    "resim": "https://archives.bulbagarden.net/media/upload/f/f9/JirachiVSWSHPromo299.jpg"
+   },
+   {
+    "id": "swshp-SWSH300",
+    "no": "SWSH300",
+    "ad": "Unown V",
+    "nadir": "Promo",
+    "tur": "Pokémon",
+    "alt": "Basic",
+    "hp": "180",
+    "tip": "Psychic",
+    "cizer": "PLANETA Mochizuki",
+    "resim": "https://archives.bulbagarden.net/media/upload/d/d9/UnownVSWSHPromo300.jpg"
+   },
+   {
+    "id": "swshp-SWSH301",
+    "no": "SWSH301",
+    "ad": "Lugia V",
+    "nadir": "Promo",
+    "tur": "Pokémon",
+    "alt": "Basic",
+    "hp": "220",
+    "tip": "Colorless",
+    "cizer": "PLANETA Mochizuki",
+    "resim": "https://archives.bulbagarden.net/media/upload/c/c8/LugiaVSWSHPromo301.jpg"
+   }
+  ]
+ }
+}

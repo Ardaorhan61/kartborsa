@@ -170,6 +170,11 @@ jobs:
           dz_yol = 'site/.github/scripts/ja_duzeltme.json'
           if os.path.exists(dz_yol) and os.path.exists('_site/cards_ja.json'):
               dz = json.load(open(dz_yol, encoding='utf-8'))
+              # enerji tipleri (Bulbapedia set listelerinden numara+ad eşleşmesiyle doğrulandı)
+              TIPH = {'G': 'Grass', 'R': 'Fire', 'W': 'Water', 'L': 'Lightning', 'P': 'Psychic', 'F': 'Fighting', 'D': 'Darkness',
+                      'M': 'Metal', 'Y': 'Fairy', 'N': 'Dragon', 'C': 'Colorless'}
+              tip_yol = 'site/.github/scripts/ja_tip.json'
+              JTIP = {k: TIPH[v] for k, v in json.load(open(tip_yol, encoding='utf-8')).items() if v in TIPH} if os.path.exists(tip_yol) else {}
               ja = json.load(open('_site/cards_ja.json', encoding='utf-8'))
               sidx = {s[0]: i for i, s in enumerate(ja['sets'])}
               for s in ja['sets']:
@@ -195,6 +200,8 @@ jobs:
                   if dz.get('adid', {}).get(c[14]):
                       c[15] = c[15] or c[0]
                       c[0] = dz['adid'][c[14]]
+                  if not c[7] and JTIP.get(c[14]):
+                      c[7] = JTIP[c[14]]
                   if not c[3] and dz.get('nadir', {}).get(c[14]):
                       c[3] = dz['nadir'][c[14]]
                   gr[c[1]].append(c)
@@ -238,6 +245,28 @@ jobs:
                   print('Yeni set eklendi:', ysid, len(yk), 'kart')
               json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print('Düzeltmeler uygulandı, eklenen kart:', eklenen)
+          # İngilizce katalog: elle doğrulanmış eksik kartlar (TCGdex verisi + Bulbapedia resmi)
+          en_yol = 'site/.github/scripts/en_duzeltme.json'
+          if os.path.exists(en_yol) and os.path.exists('_site/cards.json'):
+              ez = json.load(open(en_yol, encoding='utf-8'))
+              en = json.load(open('_site/cards.json', encoding='utf-8'))
+              eidx = {s[0]: i for i, s in enumerate(en['sets'])}
+              var = {c[14] for c in en['cards']}
+              eklendi = 0
+              for sid, liste in ez.get('ekle', {}).items():
+                  if sid not in eidx:
+                      continue
+                  for k in liste:
+                      if k['id'] in var:
+                          continue
+                      kart = [k['ad'], eidx[sid], k['no'], k.get('nadir', ''), k.get('tur', 'Pokémon'), k.get('alt', ''), k.get('hp', ''),
+                              k.get('tip', ''), k.get('cizer', ''), [], [], [], k.get('onceki', ''), k['resim'], k['id']]
+                      son = max((i for i, c in enumerate(en['cards']) if c[1] == eidx[sid]), default=len(en['cards']) - 1)
+                      en['cards'].insert(son + 1, kart)
+                      var.add(k['id'])
+                      eklendi += 1
+              json.dump(en, open('_site/cards.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+              print('İngilizce eklenen kart:', eklendi)
           for p in ('_site/cards.json', '_site/cards_ja.json'):
               if not os.path.exists(p):
                   continue

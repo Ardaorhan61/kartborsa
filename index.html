@@ -15,6 +15,7 @@ window.SURUM='__SURUM__';
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <link rel="preconnect" href="https://images.scrydex.com">
+<link rel="preconnect" href="https://wsrv.nl">
 <link rel="preconnect" href="https://assets.tcgdex.net">
 <link rel="preconnect" href="https://den-cards.pokellector.com">
 <link rel="preconnect" href="https://archives.bulbagarden.net">
@@ -405,10 +406,24 @@ function go(v){document.querySelectorAll('nav button').forEach(b=>b.classList.to
 const setOf=c=>CAT.sets[c[1]];
 function imgSmall(c){return c[13]||(String(c[14]).startsWith('ja-')?'data:,':`https://images.pokemontcg.io/${setOf(c)[0]}/${c[2]}.png`);}
 function imgLarge(c){const s=imgSmall(c);if(s.includes('pokellector.com'))return s;if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
+/* kalite + hız: resimler wsrv.nl üzerinden ekrana uygun boyutta WebP olarak gelir (2x keskin, ~4x küçük); olmazsa orijinal */
+function px(u,w,q){if(!u||typeof u!=='string'||/^data:/.test(u)||/wsrv\.nl/.test(u))return u;if(!/^https?:/.test(u))u='https://www.kartborsa.com/'+u.replace(/^\//,'');
+  return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&output=webp&q='+(q||80)+'&we';}
+function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loading:'lazy',decoding:'async'},attrs||{}));im.dataset.orj=u;
+  im.addEventListener('error',()=>{const o=im.dataset.orj;if(o&&/wsrv\.nl/.test(im.src)){delete im.dataset.orj;im.src=o;}else im.remove();});return im;}
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
-  const im=el('img',{src:src||(large?imgLarge(c):imgSmall(c)),alt:c?`${c[0]} – ${setOf(c)[1]}`:'Kart',loading:'lazy',decoding:'async'});
-  im.addEventListener('error',()=>{if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)&&!String(c[14]).startsWith('ja-')){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});box.append(fb,im);return box;}
+  const alt=c?`${c[0]} – ${setOf(c)[1]}`:'Kart';let im;
+  if(src||!c){im=el('img',{src:src||'',alt,loading:'lazy',decoding:'async'});}
+  else{const kay=imgLarge(c),ilk=large?imgLarge(c):imgSmall(c),ok=typeof kay==='string'&&/^(https?:|img\/)/.test(kay);
+    im=ok?el('img',{srcset:large?px(kay,600,86)+' 600w, '+px(kay,1000,86)+' 1000w':px(kay,240,78)+' 240w, '+px(kay,480,80)+' 480w',
+      sizes:large?'(max-width:680px) 92vw, 300px':'(max-width:600px) 46vw, 190px',src:px(kay,large?800:320,large?86:80),alt,loading:'lazy',decoding:'async'})
+      :el('img',{src:ilk,alt,loading:'lazy',decoding:'async'});
+    if(ok)im.dataset.orj=ilk;}
+  im.addEventListener('error',()=>{
+    if(im.dataset.orj&&/wsrv\.nl/.test(im.currentSrc||im.src)){const o=im.dataset.orj;delete im.dataset.orj;im.removeAttribute('srcset');im.removeAttribute('sizes');im.src=o;return;}
+    if(c&&!src&&!im.dataset.yedek&&!/scrydex/.test(im.src)&&!String(c[14]).startsWith('ja-')){im.dataset.yedek=1;im.src=`https://images.scrydex.com/pokemon/${c[14]}/${large?'large':'small'}`;}else im.remove();});
+  box.append(fb,im);return box;}
 
 
 /* ===== Pokémon dokunuşları: tür renkleri, nadirlik simgeleri, ana sayfa vitrini ===== */
@@ -451,8 +466,8 @@ function vitrin(){const kart=[],yuk=[];let n=0;
         c[3]?el('div',{class:'small',style:'margin-top:6px'},el('span',{style:'margin-right:6px;color:var(--accent)'},RAR_G[rarSeviye(c[3])]),c[3]):null,
         mv?el('div',{class:'price',style:'margin-top:6px',text:'≈ '+tlx(mv.tl)}):null,el('div',{class:'muted small',style:'margin-top:4px'},'Her gün yeni bir kart seçilir.')))));}
   const top=el('div',{class:'kbtop'});
-  yuk.slice(0,6).forEach(([p,i,v])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{class:'n',text:c[0]}),el('span',{class:'v'},tlx(v),el('br'),chg(p))));});
-  if(!yuk.length){kart.slice(3,9).forEach(([v,i])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{class:'n',text:c[0]}),el('span',{class:'v',text:tlx(v)})));});
+  yuk.slice(0,6).forEach(([p,i,v])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},pxImg(imgLarge(c),96,80,{alt:''}),el('span',{class:'n',text:c[0]}),el('span',{class:'v'},tlx(v),el('br'),chg(p))));});
+  if(!yuk.length){kart.slice(3,9).forEach(([v,i])=>{const c=CAT.cards[i];top.append(el('div',{onclick:()=>openCard(i)},pxImg(imgLarge(c),96,80,{alt:''}),el('span',{class:'n',text:c[0]}),el('span',{class:'v',text:tlx(v)})));});
     if(!kart.length)top.append(el('div',{class:'muted small',style:'cursor:default',text:OZET?'Fiyat bilgisi yok.':'Fiyatlar yükleniyor…'}));}
   row.append(el('div',{class:'kbbox'},el('h3',{},yuk.length?'🔥 Bugün yükselenler':'💎 En değerli kartlar'),top,OZET?el('div',{style:'margin-top:8px'},el('a',{href:'#',class:'small',onclick:e=>{e.preventDefault();go('piyasa');}},'Tüm piyasa →')):null));
   return el('div',{},hero,row);}
@@ -503,7 +518,7 @@ function infoLine(){if(!CAT)return;const ss=CAT.sets.filter(s=>setDil(s)===DIL),
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
     el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
-    s[5]?el('img',{src:s[5],alt:s[1],style:'height:56px;max-width:200px;object-fit:contain'}):null,
+    s[5]?pxImg(s[5],440,85,{alt:s[1],style:'height:56px;max-width:200px;object-fit:contain'}):null,
     el('div',{},el('div',{style:'font:700 20px "Space Grotesk",Inter',text:s[1]}),el('div',{class:'muted small',text:`${s[2]} · ${fmtDate(s[3])}`}))));}
 function openSet(i){if(CAT&&setDil(CAT.sets[i])!==DIL)dilDegistir(setDil(CAT.sets[i]));$('#cSet').value=String(i);$('#cq').value='';go('katalog');runCat();window.scrollTo(0,0);}
 function runCat(){
@@ -533,9 +548,9 @@ function drawCat(){
     const SRK=['#ffcb3d','#4fd1c5','#f2683a','#3d9bf0','#b06ce0','#5fbd58','#ef8cc4','#f7d02c','#c9763a','#7ab8ff','#ff7a7a','#9aa7b8'];
     order.forEach((se,si)=>{const sc=SRK[si%SRK.length];area.append(el('div',{class:'series',lang:DIL,text:se,style:'--sc:'+sc}));const g=el('div',{class:'sets',style:'--sc:'+sc});
       by[se].slice().reverse().forEach(i=>{const s=CAT.sets[i],logo=el('div',{class:'setlogo'});
-        {const ls=s[5]||setKapak(i);if(ls){const im=el('img',{src:ls,alt:s[1]+' logosu',loading:'lazy'});if(!s[5])im.style.cssText='max-height:100%;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.4)';im.addEventListener('error',()=>im.remove());logo.append(im);}}
+        {const ls=s[5]||setKapak(i);if(ls){const im=pxImg(ls,s[5]?320:160,85,{alt:s[1]+' logosu'});if(!s[5])im.style.cssText='max-height:100%;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.4)';logo.append(im);}}
         g.append(el('div',{class:'settile',style:'--sc:'+sc,onclick:()=>openSet(i)},logo,
-          el('div',{class:'setname'},s[6]?el('img',{src:s[6],alt:'',loading:'lazy'}):null,el('span',{text:s[1]})),
+          el('div',{class:'setname'},s[6]?pxImg(s[6],48,85,{alt:''}):null,el('span',{text:s[1]})),
           el('span',{class:'muted small',text:`${fmtDate(s[3])} · ${cnt[i]||0} kart`})));});
       area.append(g);});
     return;}
@@ -544,7 +559,7 @@ function drawCat(){
   let cur=-1,grid=null;
   catRes.slice(0,catShown).forEach(i=>{const c=CAT.cards[i];
     if(c[1]!==cur){cur=c[1];const s=CAT.sets[cur],sec=el('div',{class:'setsec'});
-      if(catSet===null)sec.append(el('h3',{},el('span',{class:'t'},s[5]?el('img',{src:s[5],alt:s[1],loading:'lazy'}):null,el('span',{text:s[1]})),
+      if(catSet===null)sec.append(el('h3',{},el('span',{class:'t'},s[5]?pxImg(s[5],240,85,{alt:s[1]}):null,el('span',{text:s[1]})),
         el('a',{class:'small',href:'#',onclick:(sid=>e=>{e.preventDefault();openSet(sid);})(cur)},'Setin tamamı →')));
       grid=el('div',{class:'cgrid'});sec.append(grid);area.append(sec);}
     grid.append(tileFor(i));});
@@ -1035,7 +1050,7 @@ $('#lq').addEventListener('input',()=>{const box=$('#lSug'),q=$('#lq').value.toL
   if(!CAT||q.length<2){box.style.display='none';return;}
   const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q)&&dilOf(CAT.cards[i])===DIL)hits.push(i);
   hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();box.style.display='none';pickForListing(i);}},
-    el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
+    pxImg(imgLarge(c),96,80,{alt:''}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
   box.style.display=hits.length?'block':'none';});
 $('#lq').addEventListener('blur',()=>setTimeout(()=>$('#lSug').style.display='none',150));
 function shrink(file,max=900,q=0.8){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
@@ -1430,7 +1445,7 @@ function cardPicker(onPick,ph){const wrap=el('div',{style:'position:relative'}),
   inp.addEventListener('input',()=>{box.innerHTML='';const q=inp.value.toLowerCase().trim();if(q.length<2){box.style.display='none';return;}
     const hits=[];for(let i=0;i<CAT.cards.length&&hits.length<25;i++)if(CAT.keys[i].includes(q)&&dilOf(CAT.cards[i])===DIL)hits.push(i);
     hits.forEach(i=>{const c=CAT.cards[i],s=setOf(c);box.append(el('div',{onmousedown:e=>{e.preventDefault();box.style.display='none';inp.value=`${c[0]} · ${s[1]} #${c[2]}`;onPick(i);}},
-      el('img',{src:imgSmall(c),alt:'',loading:'lazy'}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
+      pxImg(imgLarge(c),96,80,{alt:''}),el('span',{},el('b',{text:c[0]}),el('span',{class:'muted small',text:` · ${s[1]} · #${c[2]} · ${c[3]||''}`}))));});
     box.style.display=hits.length?'block':'none';});
   inp.addEventListener('blur',()=>setTimeout(()=>box.style.display='none',150));wrap.append(inp,box);wrap.input=inp;return wrap;}
 async function addToCollection(i,qty=1,cond='Near Mint',paid=null){

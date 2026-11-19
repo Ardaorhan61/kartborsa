@@ -172,7 +172,7 @@ header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px
 .kbtop{display:flex;flex-direction:column;gap:2px}
 .kbtop div{display:flex;align-items:center;gap:10px;padding:6px;border-radius:10px;cursor:pointer}
 .kbtop div:hover{background:var(--panel2)}
-.kbtop img{width:34px;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.kbtop img{width:34px;height:47px;object-fit:cover;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .kbtop .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:14px}
 .kbtop .v{font-size:12px;color:var(--muted);text-align:right}
 @media(max-width:760px){.kbhero{grid-template-columns:1fr;padding:18px}.kbhero h2{font-size:23px}.kbfan{height:215px}.kbfan .ctile{width:122px}.kbrow{grid-template-columns:1fr}}
@@ -346,7 +346,7 @@ function vitrin(){const kart=[],yuk=[];let n=0;
   const g=gunKarti();let one=kart.slice(0,3).map(x=>x[1]);
   if(one.length<3){one=[];for(let i=CAT.cards.length-1;i>=0&&one.length<3;i--){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&rarSeviye(c[3])>=3&&i!==g)one.push(i);}}
   const ss=CAT.sets.filter(x=>setDil(x)===DIL).length,il=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).length;
-  const ara=q=>{$('#cq').value=q;runCat();window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
+  const ara=q=>{const once=$('#cq').value;$('#cq').value=q;runCat();if(!once){try{history.pushState(Object.assign({},history.state||{kb:1},{q,v:'katalog',card:null,y:0}),'');}catch(e){}}window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
   const oneri=DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
   const fan=el('div',{class:'kbfan'});[one[1],one[0],one[2]].filter(x=>x!=null).forEach(i=>fan.append(tileFor(i)));
   fan.append(el('div',{class:'lbl',text:kart.length?'💎 Katalogun en değerli kartları':'✨ Öne çıkan kartlar'}));
@@ -1389,6 +1389,44 @@ async function loadListings(){
   if(OZET){labelPriceSets();drawCat();}
   if(LIST&&LIST.length)refreshAll();
   await Promise.all([pFiyat,pIlan]);
+})();
+
+/* ===== Geri tuşu: site içi geçmiş (sayfa, set, arama, kart detayı, kaydırma yeri) ===== */
+function anaSayfa(){closeModal();if(typeof catSet!=='undefined')catSet=null;$('#cSet').value='';$('#cq').value='';$('#cRar').value='';$('#cSup').value='';$('#cStock').checked=false;go('katalog');runCat();window.scrollTo(0,0);}
+(function(){
+  let POP=false,D=0,KART=null;
+  const gorunum=()=>{const v=document.querySelector('.view.on');return v?v.id.slice(2):'katalog';};
+  const kartAcik=()=>$('#modal').classList.contains('on')&&$('#modalBody .detail')&&KART;
+  const anlik=()=>({kb:1,v:gorunum(),dil:DIL,set:$('#cSet').value,q:$('#cq').value,rar:$('#cRar').value,sup:$('#cSup').value,stock:$('#cStock').checked,shown:catShown,card:kartAcik()?KART:null,y:scrollY});
+  const ayni=(a,b)=>a&&b&&['v','dil','set','q','rar','sup','stock','card'].every(k=>a[k]===b[k]);
+  function kaydet(){try{if(history.state&&history.state.kb)history.replaceState(Object.assign({},history.state,{y:scrollY,shown:catShown}),'');}catch(e){}}
+  function ekle(){if(POP)return;const s=anlik();try{if(ayni(s,history.state))history.replaceState(s,'');else history.pushState(s,'');}catch(e){}}
+  function sar(ad){const f=window[ad];if(typeof f!=='function')return;window[ad]=function(...a){const dis=D===0&&!POP;if(dis)kaydet();D++;let r;try{r=f.apply(this,a);}finally{D--;}
+    if(dis){if(r&&typeof r.then==='function')r.then(()=>ekle(),()=>{});else ekle();}return r;};}
+  ['go','openSet','openCard','dilDegistir','anaSayfa'].forEach(sar);
+  const _ocn=window.openCardNow;window.openCardNow=function(i){KART=CAT&&CAT.cards[i]?CAT.cards[i][14]:null;return _ocn.apply(this,arguments);};
+  const _cm=window.closeModal;window.closeModal=function(){const kartti=kartAcik();_cm.apply(this,arguments);
+    if(kartti&&!POP)setTimeout(()=>{if(D===0&&history.state&&history.state.card&&!$('#modal').classList.contains('on'))history.back();},0);};
+  // arama kutusu ve filtreler
+  let aT;$('#cq').addEventListener('input',()=>{clearTimeout(aT);aT=setTimeout(()=>{if(POP)return;const st=history.state||{};if(!st.q&&$('#cq').value.trim()){kaydet();ekle();}else{try{history.replaceState(anlik(),'');}catch(e){}}},700);});
+  ['#cSet','#cRar','#cSup','#cStock'].forEach(x=>$(x).addEventListener('change',()=>{if(!POP)setTimeout(()=>{kaydet();ekle();},0);}));
+  $('#catMore').addEventListener('click',()=>setTimeout(()=>{try{history.replaceState(anlik(),'');}catch(e){}},0));
+  let sT;addEventListener('scroll',()=>{clearTimeout(sT);sT=setTimeout(()=>{if(!POP)kaydet();},250);},{passive:true});
+  // logo: ana sayfa
+  const logo=document.querySelector('header .logo');if(logo){logo.removeAttribute('onclick');logo.onclick=e=>{e.preventDefault();anaSayfa();};logo.title='Ana sayfa';}
+  try{if('scrollRestoration' in history)history.scrollRestoration='manual';history.replaceState(anlik(),'');}catch(e){}
+  addEventListener('popstate',e=>{const s=e.state;if(!s||!s.kb)return;POP=true;
+    try{if(s.dil&&s.dil!==DIL)dilDegistir(s.dil);
+      $('#cSet').value=s.set||'';$('#cq').value=s.q||'';$('#cRar').value=s.rar||'';$('#cSup').value=s.sup||'';$('#cStock').checked=!!s.stock;
+      if(gorunum()!==s.v)go(s.v);
+      if(s.v==='katalog'&&CAT){runCat();if(s.shown&&s.shown>catShown){catShown=s.shown;drawCat();}}
+      if(s.card&&CAT&&BYID[s.card]!=null){if(!kartAcik()||KART!==s.card)openCard(BYID[s.card]);}
+      else if($('#modal').classList.contains('on'))_cm();
+    }catch(err){console.warn('geri',err);}finally{POP=false;}
+    yerineDon(s.y||0);});
+  function yerineDon(y){let bitti=false;const dur=()=>{bitti=true;['wheel','touchstart','keydown','mousedown'].forEach(t=>removeEventListener(t,dur));};
+    ['wheel','touchstart','keydown','mousedown'].forEach(t=>addEventListener(t,dur,{passive:true}));
+    const t0=Date.now();(function adim(){if(bitti)return;if(Math.abs(scrollY-y)>2)scrollTo(0,y);if(Date.now()-t0<1800)setTimeout(adim,90);else dur();})();}
 })();
 
 </script>

@@ -179,6 +179,19 @@ header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px
 footer{border-top:1px solid var(--line);margin-top:30px;position:relative}
 footer .kbfoot{display:flex;align-items:center;gap:8px;font:700 14px "Space Grotesk",Inter;color:var(--text);margin-bottom:8px}
 @media (prefers-reduced-motion:reduce){.logo .dot::after,.kbgun .cimg{animation:none}.kbfan .ctile,.ctile .cimg::after{transition:none}}
+
+/* eşlikçi Pokémon (profil fotoğrafının yanında) */
+.avwrap{position:relative;flex:0 0 auto;display:inline-block}
+.ortak{position:absolute;z-index:2;image-rendering:pixelated;filter:drop-shadow(0 3px 2px rgba(0,0,0,.55));transform-origin:50% 100%;animation:kbOrtak 3.4s ease-in-out infinite;cursor:pointer;-webkit-user-drag:none;user-select:none}
+.ortak:hover{animation:kbOrtakZipla .7s ease-in-out 2}
+@keyframes kbOrtak{0%,62%,100%{transform:translateY(0) scale(1,1)}68%{transform:translateY(0) scale(1.08,.9)}74%{transform:translateY(-7px) scale(.95,1.06)}80%{transform:translateY(0) scale(1.06,.94)}86%{transform:translateY(-3px)}90%{transform:translateY(0)}}
+@keyframes kbOrtakZipla{0%,100%{transform:translateY(0) scaleX(1)}25%{transform:translateY(-12px) scaleX(-1)}50%{transform:translateY(0) scaleX(-1)}75%{transform:translateY(-8px) scaleX(1)}}
+.ortaksec{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;max-height:330px;overflow:auto;margin-top:8px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.ortaksec button{background:transparent;border:1px solid transparent;border-radius:10px;padding:4px 2px;cursor:pointer;color:var(--muted);font:600 10px Inter;display:flex;flex-direction:column;align-items:center;gap:0}
+.ortaksec button:hover{background:var(--line);color:var(--text)}
+.ortaksec button.on{border-color:var(--accent);background:rgba(255,203,61,.12);color:var(--accent)}
+.ortaksec img{width:48px;height:48px;image-rendering:pixelated}
+@media (prefers-reduced-motion:reduce){.ortak{animation:none}}
 </style>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -1087,7 +1100,29 @@ let pzT;$('#pzq').addEventListener('input',()=>{clearTimeout(pzT);pzT=setTimeout
 let USER=null,PROFILE=null,PROFILES={},COLL=[],WATCH=new Set(),profTab='ilanlar';
 const avatarEl=(p,size=56)=>{const w=el('div',{class:'avatar',style:`width:${size}px;height:${size}px;font-size:${Math.round(size*.42)}px`});
   if(p&&p.avatar_url){const im=el('img',{src:p.avatar_url,alt:''});im.addEventListener('error',()=>{im.remove();w.textContent=(p.display_name||'?')[0].toUpperCase();});w.append(im);}
-  else w.textContent=((p&&p.display_name)||'?')[0].toUpperCase();return w;};
+  else w.textContent=((p&&p.display_name)||'?')[0].toUpperCase();
+  if(!(p&&p.partner>=1&&p.partner<=151))return w;
+  return el('div',{class:'avwrap',style:`width:${size}px;height:${size}px;margin-right:${Math.round(Math.max(30,size*.7)*.62)}px`},w,ortakEl(p.partner,size));};
+
+/* ---------- eşlikçi Pokémon (ilk 151) ---------- */
+const PK_EN=["Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran♀","Nidorina","Nidoqueen","Nidoran♂","Nidorino","Nidoking","Clefairy","Clefable","Vulpix","Ninetales","Jigglypuff","Wigglytuff","Zubat","Golbat","Oddish","Gloom","Vileplume","Paras","Parasect","Venonat","Venomoth","Diglett","Dugtrio","Meowth","Persian","Psyduck","Golduck","Mankey","Primeape","Growlithe","Arcanine","Poliwag","Poliwhirl","Poliwrath","Abra","Kadabra","Alakazam","Machop","Machoke","Machamp","Bellsprout","Weepinbell","Victreebel","Tentacool","Tentacruel","Geodude","Graveler","Golem","Ponyta","Rapidash","Slowpoke","Slowbro","Magnemite","Magneton","Farfetch’d","Doduo","Dodrio","Seel","Dewgong","Grimer","Muk","Shellder","Cloyster","Gastly","Haunter","Gengar","Onix","Drowzee","Hypno","Krabby","Kingler","Voltorb","Electrode","Exeggcute","Exeggutor","Cubone","Marowak","Hitmonlee","Hitmonchan","Lickitung","Koffing","Weezing","Rhyhorn","Rhydon","Chansey","Tangela","Kangaskhan","Horsea","Seadra","Goldeen","Seaking","Staryu","Starmie","Mr. Mime","Scyther","Jynx","Electabuzz","Magmar","Pinsir","Tauros","Magikarp","Gyarados","Lapras","Ditto","Eevee","Vaporeon","Jolteon","Flareon","Porygon","Omanyte","Omastar","Kabuto","Kabutops","Aerodactyl","Snorlax","Articuno","Zapdos","Moltres","Dratini","Dragonair","Dragonite","Mewtwo","Mew"],PK_JA=["フシギダネ","フシギソウ","フシギバナ","ヒトカゲ","リザード","リザードン","ゼニガメ","カメール","カメックス","キャタピー","トランセル","バタフリー","ビードル","コクーン","スピアー","ポッポ","ピジョン","ピジョット","コラッタ","ラッタ","オニスズメ","オニドリル","アーボ","アーボック","ピカチュウ","ライチュウ","サンド","サンドパン","ニドラン♀","ニドリーナ","ニドクイン","ニドラン♂","ニドリーノ","ニドキング","ピッピ","ピクシー","ロコン","キュウコン","プリン","プクリン","ズバット","ゴルバット","ナゾノクサ","クサイハナ","ラフレシア","パラス","パラセクト","コンパン","モルフォン","ディグダ","ダグトリオ","ニャース","ペルシアン","コダック","ゴルダック","マンキー","オコリザル","ガーディ","ウインディ","ニョロモ","ニョロゾ","ニョロボン","ケーシィ","ユンゲラー","フーディン","ワンリキー","ゴーリキー","カイリキー","マダツボミ","ウツドン","ウツボット","メノクラゲ","ドククラゲ","イシツブテ","ゴローン","ゴローニャ","ポニータ","ギャロップ","ヤドン","ヤドラン","コイル","レアコイル","カモネギ","ドードー","ドードリオ","パウワウ","ジュゴン","ベトベター","ベトベトン","シェルダー","パルシェン","ゴース","ゴースト","ゲンガー","イワーク","スリープ","スリーパー","クラブ","キングラー","ビリリダマ","マルマイン","タマタマ","ナッシー","カラカラ","ガラガラ","サワムラー","エビワラー","ベロリンガ","ドガース","マタドガス","サイホーン","サイドン","ラッキー","モンジャラ","ガルーラ","タッツー","シードラ","トサキント","アズマオウ","ヒトデマン","スターミー","バリヤード","ストライク","ルージュラ","エレブー","ブーバー","カイロス","ケンタロス","コイキング","ギャラドス","ラプラス","メタモン","イーブイ","シャワーズ","サンダース","ブースター","ポリゴン","オムナイト","オムスター","カブト","カブトプス","プテラ","カビゴン","フリーザー","サンダー","ファイヤー","ミニリュウ","ハクリュー","カイリュー","ミュウツー","ミュウ"];
+const PK_A='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/',PK_S='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/';
+function ortakEl(n,size){const w=Math.max(30,Math.round(size*.7));const im=el('img',{class:'ortak',src:PK_A+n+'.gif',alt:PK_EN[n-1]||'',title:(PK_EN[n-1]||'')+' · '+(PK_JA[n-1]||''),loading:'lazy',draggable:'false',
+  style:'width:'+w+'px;height:'+w+'px;right:-'+Math.round(w*.62)+'px;bottom:-'+Math.round(w*.12)+'px;animation-delay:-'+(Math.random()*3.4).toFixed(2)+'s'});
+  im.addEventListener('error',()=>{if(!im.dataset.y){im.dataset.y=1;im.src=PK_S+n+'.png';}else im.remove();});return im;}
+function ortakSecici(){const p=PROFILE||{};const kutu=el('div',{style:'margin-top:14px'});
+  if(!PROFILE){kutu.append(el('div',{class:'muted small',text:'Eşlikçi Pokémon seçmek için önce profilini kaydet.'}));return kutu;}
+  const ara=el('input',{placeholder:'Pokémon ara: Pikachu, ピカチュウ ya da 25',autocomplete:'off'}),izgara=el('div',{class:'ortaksec'}),bilgi=el('span',{class:'small muted'});
+  const kaydet=async n=>{bilgi.textContent='Kaydediliyor…';const r=await SB.from('profiles').update({partner:n}).eq('id',USER.id).select().single();
+    if(r.error){bilgi.textContent='Kaydedilemedi: '+r.error.message;return;}PROFILE=r.data;PROFILES[USER.id]=Object.assign(PROFILES[USER.id]||{},PROFILE);toast(n?PK_EN[n-1]+' artık seninle! ✨':'Eşlikçi kaldırıldı');drawProfil();};
+  const ciz=()=>{const q=ara.value.trim().toLowerCase();izgara.innerHTML='';
+    for(let n=1;n<=151;n++){if(q&&!(String(n)===q||PK_EN[n-1].toLowerCase().includes(q)||(PK_JA[n-1]||'').includes(q)))continue;
+      izgara.append(el('button',{type:'button',class:p.partner===n?'on':'',title:PK_EN[n-1]+' · '+PK_JA[n-1],onclick:()=>kaydet(n)},el('img',{src:PK_S+n+'.png',alt:'',loading:'lazy'}),'#'+n+' '+PK_EN[n-1]));}};
+  ara.addEventListener('input',ciz);ciz();
+  kutu.append(el('label',{},'⭐ Eşlikçi Pokémon\'un (ilk 151 Pokémon\'dan biri, profil fotoğrafının yanında durur)'),
+    el('div',{style:'display:flex;gap:10px;align-items:center;flex-wrap:wrap'},ara,p.partner?el('button',{type:'button',class:'btn sec',onclick:()=>kaydet(null)},'Kaldır'):null,bilgi),izgara);
+  return kutu;}
+
 const fmtDay=t=>new Date(t).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
 const cardValue=id=>{const mv=OZET?mainValue(OZET.c[id]):null;return mv;};
 function needLogin(why){toast(why||'Bunun için giriş yapmalısın');go('profil');}
@@ -1107,7 +1142,7 @@ async function loadMine(){
   try{await loadFriends();}catch(e){console.warn('arkadaşlar',e);}
   if(PROFILE)PROFILES[PROFILE.id]=PROFILE;
 }
-async function loadProfiles(){const r=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at');if(!r.error)r.data.forEach(p=>PROFILES[p.id]=Object.assign(PROFILES[p.id]||{},p));}
+async function loadProfiles(){const r=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at,partner');if(!r.error)r.data.forEach(p=>PROFILES[p.id]=Object.assign(PROFILES[p.id]||{},p));}
 function updateNav(){const b=$('#navProfil');b.textContent=PROFILE?PROFILE.display_name:(USER?'Profil':'Giriş Yap');{const n=typeof frGelen==='function'?frGelen():0;if(n)b.append(el('span',{class:'cartcount',title:n+' arkadaşlık isteği',text:String(n)}));}sellerBox();}
 
 /* ---------- giriş / kayıt ---------- */
@@ -1227,13 +1262,13 @@ function drawSettings(area){
         msg.style.color='';msg.textContent='Kaydediliyor…';
         try{let avatar_url=p.avatar_url||null;
           if(av){const path=`${USER.id}/avatar-${Date.now().toString(36)}.jpg`;const up=await SB.storage.from('photos').upload(path,av,{contentType:'image/jpeg'});if(up.error)throw up.error;avatar_url=SB.storage.from('photos').getPublicUrl(path).data.publicUrl;}
-          const row={id:USER.id,display_name:name,city:f.city.value.trim()||null,bio:f.bio.value.trim()||null,instagram:ig||null,whatsapp:wa||null,show_collection:f.show.checked,avatar_url};
+          const row={id:USER.id,display_name:name,city:f.city.value.trim()||null,bio:f.bio.value.trim()||null,instagram:ig||null,whatsapp:wa||null,show_collection:f.show.checked,avatar_url,partner:(PROFILE&&PROFILE.partner)||null};
           const r=await SB.from('profiles').upsert(row).select().single();if(r.error)throw r.error;
           PROFILE=r.data;PROFILES[USER.id]=PROFILE;
           LIST.filter(l=>l.owner===USER.id).forEach(l=>{l.seller_name=PROFILE.display_name;l.city=PROFILE.city;if(ig)l.instagram=ig;if(wa)l.whatsapp=wa;});
           updateNav();refreshAll();toast('Profil kaydedildi ✓');drawProfil();
         }catch(err){msg.style.color='var(--danger)';msg.textContent='Kaydedilemedi: '+(err.message||err);}}},
-        el('label',{},'Profil fotoğrafı'),f.file,prev,
+        el('label',{},'Profil fotoğrafı'),f.file,prev,ortakSecici(),
         el('div',{class:'row'},el('div',{},el('label',{},'Adın / takma adın *'),f.name),el('div',{},el('label',{},'Şehir'),f.city)),
         el('label',{},'Hakkımda'),f.bio,
         el('div',{class:'row'},el('div',{},el('label',{},'Instagram'),f.ig),el('div',{},el('label',{},'WhatsApp'),f.wa)),
@@ -1367,7 +1402,7 @@ async function openSeller(id){
 var FR=[];
 async function loadFriends(){FR=[];if(!USER||!SB)return;const r=await SB.from('friendships').select('*').or('requester.eq.'+USER.id+',addressee.eq.'+USER.id);if(!r.error)FR=r.data||[];
   const ids=FR.map(f=>f.requester===USER.id?f.addressee:f.requester).filter(id=>!PROFILES[id]);
-  if(ids.length){const p=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at').in('id',ids);if(!p.error)p.data.forEach(x=>PROFILES[x.id]=Object.assign(PROFILES[x.id]||{},x));}}
+  if(ids.length){const p=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at,partner').in('id',ids);if(!p.error)p.data.forEach(x=>PROFILES[x.id]=Object.assign(PROFILES[x.id]||{},x));}}
 function frDurum(id){const f=FR.find(x=>x.requester===id||x.addressee===id);if(!f)return{d:'yok'};if(f.status==='accepted')return{d:'arkadas',f};return{d:f.requester===USER.id?'gonderildi':'gelen',f};}
 const frGelen=()=>USER&&FR?FR.filter(f=>f.status==='pending'&&f.addressee===USER.id).length:0;
 async function frIslem(tur,id,f){if(!USER){toast('Önce giriş yap');go('profil');return;}let r;
@@ -1390,7 +1425,7 @@ function frSatir(id,...ek){const p=PROFILES[id]||{display_name:'Kullanıcı'};
 function drawFriends(area){
   const q=el('input',{placeholder:'Arkadaşının kullanıcı adını yaz (en az 2 harf)…',autocomplete:'off',style:'font-size:16px'}),sonuc=el('div');
   let t;q.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(async()=>{const v=q.value.trim();sonuc.innerHTML='';if(v.length<2)return;
-    const r=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at').ilike('display_name','%'+v.replace(/[%_\\]/g,m=>'\\'+m)+'%').neq('id',USER.id).limit(20);
+    const r=await SB.from('profiles').select('id,display_name,avatar_url,city,created_at,partner').ilike('display_name','%'+v.replace(/[%_\\]/g,m=>'\\'+m)+'%').neq('id',USER.id).limit(20);
     if(r.error){sonuc.append(el('div',{class:'muted small',text:'Arama yapılamadı.'}));return;}
     const ls=(r.data||[]).filter(p=>p.display_name&&p.display_name!=='Silinmiş hesap');ls.forEach(p=>PROFILES[p.id]=Object.assign(PROFILES[p.id]||{},p));
     if(!ls.length){sonuc.append(el('div',{class:'muted small',style:'margin-top:8px',text:'Bu isimde kullanıcı bulunamadı.'}));return;}

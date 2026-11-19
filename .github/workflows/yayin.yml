@@ -216,6 +216,26 @@ jobs:
                       eklenen += 1
                   ks.sort(key=lambda c: (int(c[2]) if str(c[2]).isdigit() else 99999, str(c[2])))
               ja['cards'] = [c for ks in gr for c in ks]
+              # etiketler (ör. McDonald's promoları) aramada ve kart detayında görünür
+              etiket = dz.get('etiket', {})
+              for c in ja['cards']:
+                  if etiket.get(c[14]):
+                      c[12] = etiket[c[14]]
+              # elle eklenen yeni setler (Bulbapedia): tarihine göre doğru yere yerleştirilir
+              for ysid, ys in dz.get('yeniset', {}).items():
+                  if any(s[0] == ysid for s in ja['sets']):
+                      continue
+                  yer = next((i for i, s in enumerate(ja['sets']) if (s[3] or '9999') > ys['tarih']), len(ja['sets']))
+                  for c in ja['cards']:
+                      if c[1] >= yer:
+                          c[1] += 1
+                  ja['sets'].insert(yer, [ysid, ys['ad'], ys['seri'], ys['tarih'], len(ys['kartlar']), ys.get('logo', ''),
+                                          ys.get('sembol', ''), 'ja', 'bp'])
+                  yk = [[k[1] or k[2], yer, k[0], 'Promo', 'Pokémon', 'Basic', k[5] or '', k[3] or '', '', [], [], [],
+                         ys.get('etiket', ''), k[4], f'{ysid}-{k[0]}', k[2], 'bp'] for k in ys['kartlar']]
+                  bas = next((i for i, c in enumerate(ja['cards']) if c[1] > yer), len(ja['cards']))
+                  ja['cards'][bas:bas] = yk
+                  print('Yeni set eklendi:', ysid, len(yk), 'kart')
               json.dump(ja, open('_site/cards_ja.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print('Düzeltmeler uygulandı, eklenen kart:', eklenen)
           for p in ('_site/cards.json', '_site/cards_ja.json'):

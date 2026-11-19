@@ -109,3 +109,13 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
     50 promo kartının resmi, WCS23 destesinin 30 kartı, web1 #39 ve VS1 #77 eklendi; hiç çıkmamış kartlar silindi (S-P 134/194–197/233, M-P 128–130, neo2 #57).
     Sonuç: 241 set, 22.566 kart; resmi olmayan kart 0, logosu olmayan set 0. SV4a'daki 40 kart `ja-ayrinti.yml` bitince gelir.
     Japonca adlar: `ja_duzeltme.json` içindeki "ad" listesi (Bulbapedia kart sayfalarındaki Japonca ad, 3.601 kart); Bulbapedia'dan gelen 1.932 kartın hepsi Japonca adla. İngilizce ad aramada çalışmaya devam eder.
+
+## Japonca eksikler — 19 Kasım 2026 (öğleden sonra)
+- Uzun iş (ja-ayrinti.yml) gece başarıyla bitti: 241 set, 22.619 kart; SV4a 360 kartla tam.
+- `ja_duzeltme.json` yeni anahtarlar (yayin.yml uygular):
+  - `adid`: kart kimliği → Japonca ad (1.008 kart; PokeAPI tür adları + katalogdaki EN→JA eşleşmeleri + Bulbapedia + kart görsellerinden elle). Sadece Ｎ ve AZ Latin harfli kaldı (resmi adları bu).
+  - `setad`: set kimliği → Japonca set adı (103 set).
+  - `setsayi`: set kart sayısı düzeltmesi (ja-PT2 = 90; Pokellector 96 diyordu, Bulbapedia'ya göre Japonca set 90 kart → eksik yok).
+  - `nadir`: kart kimliği → nadirlik (elle düzeltme için, şimdilik boş).
+- `ja_ek.py`: TCGdex setlerinde nadirliği / fiyatı / Japonca adı eksik kartların Pokellector kart sayfaları da okunuyor (nadirlik, ad, Cardmarket € fiyatı). "card-placeholder" resimleri boş sayılıp aynı adlı kartın resmiyle dolduruluyor (37 kart).
+- 19 Kasım 14:53'te ja-ayrinti.yml yeniden başlatıldı (~2–3 saat). Bitince kontrol: nadirliksiz kart (2.959'du), fiyatlı kart (12.163'tü), yer tutucu resim (37'ydi). Pokellector'da sayfası olmayan setler (ör. ja-MC) nadirliksiz kalabilir.

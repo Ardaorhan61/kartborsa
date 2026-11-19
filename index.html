@@ -1557,6 +1557,7 @@ function anaSayfa(){closeModal();if(typeof catSet!=='undefined')catSet=null;$('#
   ['#cSet','#cRar','#cSup','#cStock'].forEach(x=>$(x).addEventListener('change',()=>{if(!POP)setTimeout(()=>{kaydet();ekle();},0);}));
   $('#catMore').addEventListener('click',()=>setTimeout(()=>{try{history.replaceState(anlik(),'');}catch(e){}},0));
   let sT;addEventListener('scroll',()=>{clearTimeout(sT);sT=setTimeout(()=>{if(!POP)kaydet();},250);},{passive:true});
+  addEventListener('pagehide',()=>{if(!POP)kaydet();});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!POP)kaydet();});
   // logo: ana sayfa
   const logo=document.querySelector('header .logo');if(logo){logo.removeAttribute('onclick');logo.onclick=e=>{e.preventDefault();anaSayfa();};logo.title='Ana sayfa';}
   /* sayfa yenilenince: tarayıcının sakladığı son durum (görünüm, set, arama, açık kart, kaydırma) geri yüklenir */

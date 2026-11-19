@@ -282,6 +282,24 @@ jobs:
               for sid, v in det.items():
                   json.dump(v, open(f'_site/detay/{sid}.json', 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               d['lite'] = 1
+              # hız: tekrar eden resim adresi başları kısaltılır (~0… ~6…), site yüklerken geri açar
+              PFX = ['https://images.scrydex.com/pokemon/', 'https://assets.tcgdex.net/', 'https://den-cards.pokellector.com/',
+                     'https://archives.bulbagarden.net/media/upload/', 'https://images.pokemontcg.io/',
+                     'https://den-media.pokellector.com/logos/', 'img/ja/']
+
+              def kisalt(u):
+                  if isinstance(u, str):
+                      for k, on in enumerate(PFX):
+                          if u.startswith(on):
+                              return '~' + str(k) + u[len(on):]
+                  return u
+              for c in d['cards']:
+                  c[13] = kisalt(c[13])
+              for s_ in d['sets']:
+                  if len(s_) > 6:
+                      s_[5] = kisalt(s_[5])
+                      s_[6] = kisalt(s_[6])
+              d['pfx'] = PFX
               json.dump(d, open(p, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print(p, os.path.getsize(p) // 1024, 'KB,', len(det), 'ayrıntı dosyası')
           # Japonca setler: TCGdex'te logo/sembol yoksa img/ja/ içindeki görseller (ja-logo.yml indirir)

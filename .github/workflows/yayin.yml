@@ -177,6 +177,10 @@ jobs:
                       s[5] = dz['logo'][s[0]]
                   if not s[6] and dz.get('sembol', {}).get(s[0]):
                       s[6] = dz['sembol'][s[0]]
+                  if dz.get('setad', {}).get(s[0]):
+                      s[1] = dz['setad'][s[0]]
+                  if dz.get('setsayi', {}).get(s[0]):
+                      s[4] = dz['setsayi'][s[0]]
               sil = set(dz.get('sil', []))
               gr = [[] for _ in ja['sets']]
               for c in ja['cards']:
@@ -188,6 +192,11 @@ jobs:
                   if len(c) > 16 and dz.get('ad', {}).get(k):
                       c[15] = c[15] or c[0]
                       c[0] = dz['ad'][k]
+                  if dz.get('adid', {}).get(c[14]):
+                      c[15] = c[15] or c[0]
+                      c[0] = dz['adid'][c[14]]
+                  if not c[3] and dz.get('nadir', {}).get(c[14]):
+                      c[3] = dz['nadir'][c[14]]
                   gr[c[1]].append(c)
               TIP = {'Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy',
                      'Dragon', 'Colorless'}

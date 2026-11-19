@@ -355,7 +355,7 @@ function vitrin(){const kart=[],yuk=[];let n=0;
       el('div',{class:'muted',text:(DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
       el('div',{class:'kbchips'},el('span',{class:'kbchip'},'🃏 ',el('b',{text:n.toLocaleString('tr-TR')}),' kart'),el('span',{class:'kbchip'},'📦 ',el('b',{text:String(ss)}),' set'),el('span',{class:'kbchip'},'🏷️ ',el('b',{text:String(il)}),' ilan')),
       el('div',{class:'muted small',style:'margin-bottom:6px'},'Popüler aramalar:'),
-      el('div',{class:'kbara'},...oneri.map(q=>el('button',{type:'button',onclick:()=>ara(q)},q)))),fan);
+      el('div',{class:'kbara'},...oneri.map(q=>el('button',{type:'button',onclick:()=>ara(q)},q)),DIL==='ja'?el('button',{type:'button',style:'border-color:#ffc72c;color:#ffc72c',onclick:()=>ara('mcdonald')},'🍔 McDonald\'s promoları'):null)),fan);
   const row=el('div',{class:'kbrow'});
   if(g!=null){const c=CAT.cards[g],s=setOf(c),mv=OZET?mainValue(OZET.c[c[14]]):null;
     row.append(el('div',{class:'kbbox'},el('h3',{},'🌟 Günün kartı'),el('div',{class:'kbgun',onclick:()=>openCard(g)},cardImg(c),
@@ -384,7 +384,7 @@ async function loadCatalog(){
   const r=await fetch('cards.json',{cache:'no-cache'});if(!r.ok)throw new Error('cards.json bulunamadı');
   CAT=await r.json();const J=await pJa;
   if(J&&J.cards&&J.sets){const o=CAT.sets.length;J.sets.forEach(s=>CAT.sets.push(s));J.cards.forEach(c=>{c[1]+=o;CAT.cards.push(c);});}
-  CAT.keys=CAT.cards.map(c=>(c[0]+' '+(c[15]||'')).toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
+  CAT.keys=CAT.cards.map(c=>(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);
   dilKur();infoLine();runCat();
 }
 /* ---------- İngilizce / Japonca ---------- */
@@ -541,7 +541,7 @@ function openCardNow(i){
       el('button',{class:'btn sec',onclick:async e=>{const n=COLL.filter(x=>x.card_id===c[14]).reduce((s,x)=>s+x.qty,0);if(await addToCollection(i)){e.currentTarget.textContent=`✓ Koleksiyonda (${n+1})`;}}},
         (()=>{const n=COLL.filter(x=>x.card_id===c[14]).reduce((s,x)=>s+x.qty,0);return n?`✓ Koleksiyonda (${n}) · bir tane ekle`:'+ Koleksiyona ekle';})())),
     ...st.list.map(l=>listingRow(l,false)));
-  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:c[0]}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('div',{},el('h2',{text:c[0]}),typeof c[12]==='string'&&/mcdonald/i.test(c[12])?el('span',{class:'tag',style:'margin-top:6px;border-color:#ffc72c;color:#ffc72c'},'🍔 McDonald\'s promo kartı'):null),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
     el('div',{class:'detail'},el('div',{},cardImg(c,true)),
       el('div',{},
         el('dl',{class:'kv'},el('dt',{},'Set'),el('dd',{},el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();openSet(c[1]);}},s[1])),

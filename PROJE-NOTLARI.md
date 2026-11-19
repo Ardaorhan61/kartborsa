@@ -132,3 +132,11 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - `.github/scripts/en_duzeltme.json`: İngilizce katalogda eksik SWSH299 Jirachi V, SWSH300 Unown V, SWSH301 Lugia V (veri TCGdex, resim Bulbapedia'daki promo taraması). yayin.yml'de cards.json'a eklenir.
 - ja_duzeltme.json `sembol`: 7 Japonca set sembolü (web1, E1, E3, E4, E5, PCG1, MC; Bulbapedia'daki Japonca adlı SetSymbol dosyaları). PCG2–PCG9 için sadece İngilizce set sembolü var → eklenmedi.
 - Kaynağı olmadığı için boş: Japonca 1.044 nadirlik (ja-MC Bulbapedia'da boş, ja-M6a "-"), 10.475 Japonca fiyat, 438 tip, 10 sembol, 2 McDonald's set logosu; İngilizce 295 nadirlik (çoğu McDonald's), 132 fiyat.
+
+## 20 Kasım 2026 — hız ve renk
+- Hız: index.html'de `window.SURUM='__SURUM__'` yayında (yayin.yml "Siteyi hazırla": sed ile zaman damgası). Aynı sitedeki tüm .json istekleri `?v=SURUM` ile gider (fetch sarmalayıcı), `cache:'no-cache'` kaldırılır.
+- `sw.js` (köke kopyalanır): sayfa önce internetten; sürümlü .json önbellekten (yoksa indirip saklar, eski sürümleri siler); Google yazı tipleri ve Supabase kütüphanesi önbellekten. Kayıt sadece kartborsa.com'da.
+- loadCatalog: önce seçili dilin kataloğu, diğeri 400 ms sonra arka planda (`window.__ikinciDil`), CAT'e eklenir.
+- Ön yükleme (preload) seçili katalog + fiyat özeti; `content-visibility:auto` set ve kart ızgaralarında; resimlerde decoding=async.
+- Ölçüm: ilk açılış ~1,4 MB → ~1,0 MB (diğer dil sonradan); tekrar açılışta veri için ağ 0 KB, ~100 ms.
+- Renk: seri başına renk (SRK dizisi, --sc) set kutularında şerit/zemin/parlama; kartlarda tür rengi (--tc) çerçeve, parlama ve ad çizgisi; kart detayında üst şerit tür renginde (--mc); renkli butonlar, sekmeler, başlıklar, vitrin kutuları.

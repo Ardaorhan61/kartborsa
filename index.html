@@ -12,7 +12,14 @@ window.SURUM='__SURUM__';
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="preconnect" href="https://images.scrydex.com">
+<link rel="preconnect" href="https://assets.tcgdex.net">
+<link rel="preconnect" href="https://den-cards.pokellector.com">
+<link rel="preconnect" href="https://archives.bulbagarden.net">
+<link rel="dns-prefetch" href="https://images.pokemontcg.io">
+<link rel="dns-prefetch" href="https://den-media.pokellector.com">
 <style>
 :root{--bg:#0f1220;--panel:#171b2e;--panel2:#1f2440;--line:#2a3052;--text:#eef0fa;--muted:#9aa1c3;--accent:#ffcb3d;--accent2:#4fd1c5;--danger:#ff6b6b;--ok:#5ee08a;--r:14px}
 *{box-sizing:border-box}
@@ -464,11 +471,12 @@ async function loadCatalog(){
   const al=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
   const ilk=DIL==='ja'?'cards_ja.json':'cards.json',iki=DIL==='ja'?'cards.json':'cards_ja.json';
   const A=await al(ilk);if(!A||!A.cards)throw new Error(ilk+' bulunamadı');
-  const ekle=D=>{const o=CAT.sets.length;D.sets.forEach(x=>CAT.sets.push(x));D.cards.forEach(c=>{c[1]+=o;CAT.cards.push(c);});};
-  const bitir=()=>{CAT.keys=CAT.cards.map(c=>(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase());CAT.cards.forEach((c,i)=>BYID[c[14]]=i);};
-  CAT={sets:[],cards:[],lite:A.lite,built:A.built,v:A.v};ekle(A);bitir();
+  const ekle=D=>{if(D.pfx){const P=D.pfx,ac=u=>typeof u==='string'&&u.charCodeAt(0)===126?P[+u[1]]+u.slice(2):u;for(const c of D.cards)c[13]=ac(c[13]);for(const x of D.sets){x[5]=ac(x[5]);x[6]=ac(x[6]);}}
+    const o=CAT.sets.length,b=CAT.cards.length;for(const x of D.sets)CAT.sets.push(x);for(const c of D.cards){c[1]+=o;CAT.cards.push(c);}return b;};
+  const bitir=b=>{CAT.keys=CAT.keys||[];for(let i=b;i<CAT.cards.length;i++){const c=CAT.cards[i];CAT.keys[i]=(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase();BYID[c[14]]=i;}};
+  CAT={sets:[],cards:[],keys:[],lite:A.lite,built:A.built,v:A.v};bitir(ekle(A));
   dilKur();infoLine();runCat();
-  window.__ikinciDil=new Promise(res=>setTimeout(res,400)).then(()=>al(iki)).then(B=>{if(!B||!B.cards)return;ekle(B);bitir();
+  window.__ikinciDil=new Promise(res=>{const bos=window.requestIdleCallback||(f=>setTimeout(f,600));bos(()=>res(),{timeout:2500});}).then(()=>al(iki)).then(B=>{if(!B||!B.cards)return;bitir(ekle(B));
     try{if(typeof rebuildStock==='function')rebuildStock();infoLine();if($('#v-katalog').classList.contains('on'))runCat();if(LIST&&LIST.length)refreshAll();}catch(e){console.warn(e);}});
 }
 /* ---------- İngilizce / Japonca ---------- */

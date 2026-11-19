@@ -5035,5 +5035,312 @@
  },
  "setsayi": {
   "ja-PT2": 90
+ },
+ "etiket": {
+  "ja-PP-b21": "McDonald's マクドナルド",
+  "ja-PP-b22": "McDonald's マクドナルド",
+  "ja-PP-b23": "McDonald's マクドナルド",
+  "ja-PP-b24": "McDonald's マクドナルド",
+  "ja-PP-b25": "McDonald's マクドナルド",
+  "ja-PP-b29": "McDonald's マクドナルド",
+  "ja-PP-b30": "McDonald's マクドナルド",
+  "ja-PP-b31": "McDonald's マクドナルド",
+  "ja-PP-b32": "McDonald's マクドナルド",
+  "ja-PP-b33": "McDonald's マクドナルド",
+  "ja-PP-b34": "McDonald's マクドナルド",
+  "ja-PP-b35": "McDonald's マクドナルド",
+  "ja-PP-b36": "McDonald's マクドナルド",
+  "ja-PP-b37": "McDonald's マクドナルド",
+  "ja-ADVP-b3": "McDonald's マクドナルド",
+  "ja-ADVP-b4": "McDonald's マクドナルド",
+  "ja-ADVP-b5": "McDonald's マクドナルド",
+  "ja-ADVP-b6": "McDonald's マクドナルド",
+  "ja-ADVP-b7": "McDonald's マクドナルド",
+  "ja-ADVP-b46": "McDonald's マクドナルド",
+  "ja-ADVP-b47": "McDonald's マクドナルド",
+  "ja-ADVP-b48": "McDonald's マクドナルド",
+  "ja-ADVP-b49": "McDonald's マクドナルド",
+  "ja-ADVP-b50": "McDonald's マクドナルド",
+  "ja-PCGP-b28": "McDonald's マクドナルド",
+  "ja-PCGP-b29": "McDonald's マクドナルド",
+  "ja-PCGP-b30": "McDonald's マクドナルド",
+  "ja-PCGP-b31": "McDonald's マクドナルド",
+  "ja-PCGP-b32": "McDonald's マクドナルド",
+  "ja-PCGP-b33": "McDonald's マクドナルド",
+  "ja-PCGP-b34": "McDonald's マクドナルド",
+  "ja-PCGP-b81": "McDonald's マクドナルド",
+  "ja-PCGP-b82": "McDonald's マクドナルド",
+  "ja-PCGP-b83": "McDonald's マクドナルド",
+  "ja-PCGP-b84": "McDonald's マクドナルド",
+  "ja-PCGP-b85": "McDonald's マクドナルド",
+  "ja-PCGP-b86": "McDonald's マクドナルド",
+  "ja-PCGP-b87": "McDonald's マクドナルド",
+  "ja-PCGP-b88": "McDonald's マクドナルド",
+  "ja-PCGP-b89": "McDonald's マクドナルド",
+  "ja-PCGP-b90": "McDonald's マクドナルド",
+  "ja-PCGP-b119": "McDonald's マクドナルド",
+  "ja-PCGP-b120": "McDonald's マクドナルド",
+  "ja-PCGP-b121": "McDonald's マクドナルド",
+  "ja-PCGP-b122": "McDonald's マクドナルド",
+  "ja-PCGP-b123": "McDonald's マクドナルド",
+  "ja-PCGP-b124": "McDonald's マクドナルド",
+  "ja-PCGP-b125": "McDonald's マクドナルド",
+  "ja-PCGP-b126": "McDonald's マクドナルド",
+  "ja-PCGP-b127": "McDonald's マクドナルド",
+  "ja-PCGP-b128": "McDonald's マクドナルド",
+  "ja-DPP-b27": "McDonald's マクドナルド",
+  "ja-DPP-b28": "McDonald's マクドナルド",
+  "ja-DPP-b29": "McDonald's マクドナルド",
+  "ja-DPP-b30": "McDonald's マクドナルド",
+  "ja-DPP-b31": "McDonald's マクドナルド",
+  "ja-DPP-b32": "McDonald's マクドナルド",
+  "ja-DPP-b33": "McDonald's マクドナルド",
+  "ja-BWP-160": "McDonald's マクドナルド",
+  "ja-BWP-161": "McDonald's マクドナルド",
+  "ja-XYP-61": "McDonald's マクドナルド",
+  "ja-XYP-62": "McDonald's マクドナルド",
+  "ja-XYP-63": "McDonald's マクドナルド",
+  "ja-XYP-64": "McDonald's マクドナルド",
+  "ja-XYP-65": "McDonald's マクドナルド",
+  "ja-M-P-017": "McDonald's マクドナルド",
+  "ja-M-P-018": "McDonald's マクドナルド",
+  "ja-M-P-019": "McDonald's マクドナルド",
+  "ja-M-P-020": "McDonald's マクドナルド",
+  "ja-M-P-021": "McDonald's マクドナルド",
+  "ja-M-P-022": "McDonald's マクドナルド"
+ },
+ "yeniset": {
+  "ja-MCD02": {
+   "ad": "マクドナルドオリジナル ミニマム★パック",
+   "seri": "ポケモンカードe",
+   "tarih": "2002/01/26",
+   "etiket": "McDonald's マクドナルド",
+   "kartlar": [
+    [
+     "1",
+     "フシギダネ",
+     "Bulbasaur",
+     "Grass",
+     "https://archives.bulbagarden.net/media/upload/c/cd/BulbasaurMcDonaldPack1.jpg",
+     "50"
+    ],
+    [
+     "2",
+     "ナゾノクサ",
+     "Oddish",
+     "Grass",
+     "https://archives.bulbagarden.net/media/upload/a/a2/OddishMcDonaldPack2.jpg",
+     "50"
+    ],
+    [
+     "3",
+     "チコリータ",
+     "Chikorita",
+     "Grass",
+     "https://archives.bulbagarden.net/media/upload/7/76/ChikoritaMcDonaldPack3.jpg",
+     "50"
+    ],
+    [
+     "4",
+     "ヒトカゲ",
+     "Charmander",
+     "Fire",
+     "https://archives.bulbagarden.net/media/upload/6/60/CharmanderMcDonaldPack4.jpg",
+     "50"
+    ],
+    [
+     "5",
+     "ロコン",
+     "Vulpix",
+     "Fire",
+     "https://archives.bulbagarden.net/media/upload/9/9f/VulpixMcDonaldPack5.jpg",
+     "50"
+    ],
+    [
+     "6",
+     "ヒノアラシ",
+     "Cyndaquil",
+     "Fire",
+     "https://archives.bulbagarden.net/media/upload/c/cb/CyndaquilMcDonaldPack6.jpg",
+     "50"
+    ],
+    [
+     "7",
+     "ゼニガメ",
+     "Squirtle",
+     "Water",
+     "https://archives.bulbagarden.net/media/upload/7/77/SquirtleMcDonaldPack7.jpg",
+     "50"
+    ],
+    [
+     "8",
+     "ワニノコ",
+     "Totodile",
+     "Water",
+     "https://archives.bulbagarden.net/media/upload/7/72/TotodileMcDonaldPack8.jpg",
+     "50"
+    ],
+    [
+     "9",
+     "マリル",
+     "Marill",
+     "Water",
+     "https://archives.bulbagarden.net/media/upload/4/40/MarillMcDonaldPack9.jpg",
+     "50"
+    ],
+    [
+     "10",
+     "ピカチュウ",
+     "Pikachu",
+     "Lightning",
+     "https://archives.bulbagarden.net/media/upload/c/c2/PikachuMcDonaldPack10.jpg",
+     "50"
+    ],
+    [
+     "11",
+     "チョンチー",
+     "Chinchou",
+     "Lightning",
+     "https://archives.bulbagarden.net/media/upload/a/a9/ChinchouMcDonaldPack11.jpg",
+     "40"
+    ],
+    [
+     "12",
+     "メリープ",
+     "Mareep",
+     "Lightning",
+     "https://archives.bulbagarden.net/media/upload/5/5f/MareepMcDonaldPack12.jpg",
+     "50"
+    ],
+    [
+     "13",
+     "ケーシィ",
+     "Abra",
+     "Psychic",
+     "https://archives.bulbagarden.net/media/upload/2/2b/AbraMcDonaldPack13.jpg",
+     "40"
+    ],
+    [
+     "14",
+     "ヤドン",
+     "Slowpoke",
+     "Psychic",
+     "https://archives.bulbagarden.net/media/upload/7/77/SlowpokeMcDonaldPack14.jpg",
+     "40"
+    ],
+    [
+     "15",
+     "ネイティ",
+     "Natu",
+     "Psychic",
+     "https://archives.bulbagarden.net/media/upload/6/6e/NatuMcDonaldPack15.jpg",
+     "40"
+    ],
+    [
+     "16",
+     "サンド",
+     "Sandshrew",
+     "Fighting",
+     "https://archives.bulbagarden.net/media/upload/f/f9/SandshrewMcDonaldPack16.jpg",
+     "40"
+    ],
+    [
+     "17",
+     "ゴマゾウ",
+     "Phanpy",
+     "Fighting",
+     "https://archives.bulbagarden.net/media/upload/f/f3/PhanpyMcDonaldPack17.jpg",
+     "50"
+    ],
+    [
+     "18",
+     "ヨーギラス",
+     "Larvitar",
+     "Fighting",
+     "https://archives.bulbagarden.net/media/upload/2/22/LarvitarMcDonaldPack18.jpg",
+     "50"
+    ]
+   ]
+  },
+  "ja-MCD10": {
+   "ad": "コレクションシート 旅立ちの仲間（マクドナルド）",
+   "seri": "BW",
+   "tarih": "2010/09/18",
+   "etiket": "McDonald's マクドナルド",
+   "kartlar": [
+    [
+     "1",
+     "ツタージャ",
+     "Snivy",
+     "Grass",
+     "https://archives.bulbagarden.net/media/upload/b/b3/SnivyBWPromo1.jpg",
+     "60"
+    ],
+    [
+     "2",
+     "ムンナ",
+     "Munna",
+     "Psychic",
+     "https://archives.bulbagarden.net/media/upload/8/8b/MunnaMcDonaldsCollection7.jpg",
+     "60"
+    ],
+    [
+     "3",
+     "ギアル",
+     "Klink",
+     "Metal",
+     "https://archives.bulbagarden.net/media/upload/6/6a/KlinkMcDonaldsCollection10.jpg",
+     "50"
+    ],
+    [
+     "4",
+     "ポカブ",
+     "Tepig",
+     "Fire",
+     "https://archives.bulbagarden.net/media/upload/7/70/TepigBWPromo2.jpg",
+     "70"
+    ],
+    [
+     "5",
+     "シママ",
+     "Blitzle",
+     "Lightning",
+     "https://archives.bulbagarden.net/media/upload/9/91/BlitzleMcDonaldsCollection6.jpg",
+     "60"
+    ],
+    [
+     "6",
+     "マメパト",
+     "Pidove",
+     "Colorless",
+     "https://archives.bulbagarden.net/media/upload/c/cf/PidoveMcDonaldsCollection11.jpg",
+     "40"
+    ],
+    [
+     "7",
+     "ミジュマル",
+     "Oshawott",
+     "Water",
+     "https://archives.bulbagarden.net/media/upload/2/29/OshawottBWPromo3.jpg",
+     "60"
+    ],
+    [
+     "8",
+     "メグロコ",
+     "Sandile",
+     "Fighting",
+     "https://archives.bulbagarden.net/media/upload/2/29/SandileMcDonaldsCollection8.jpg",
+     "70"
+    ],
+    [
+     "9",
+     "ゾロア",
+     "Zorua",
+     "Darkness",
+     "https://archives.bulbagarden.net/media/upload/8/81/ZoruaMcDonaldsCollection9.jpg",
+     "50"
+    ]
+   ]
+  }
  }
 }

@@ -125,3 +125,10 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Geri tuşu: history.pushState ile site içi geçmiş (görünüm, set, arama, filtreler, açık kart, kaydırma yeri). Logo = anaSayfa(). Hash kullanılmıyor (Supabase şifre sıfırlama hash'i bozulmasın).
 - McDonald's: ja_duzeltme.json yeni anahtarlar `yeniset` (ja-MCD02 ミニマム★パック 18 kart, ja-MCD10 旅立ちの仲間 9 kart; Bulbapedia) ve `etiket` (71 numaralı McDonald's promosu, kartın c[12] alanına yazılır; arama anahtarına girer). Japonca ana sayfada "🍔 McDonald's promoları" düğmesi.
 - Arkadaşlar: Supabase'de `friendships` tablosu (requester, addressee, status pending/accepted; RLS: taraflar görür, istek sadece kendi adına, kabulü sadece alan yapar, iki taraf da silebilir) ve `arkadas_mi(a,b)` fonksiyonu. `collection` okuma kuralı: sahibi VEYA show_collection açık VEYA kabul edilmiş arkadaş. Profil > "Arkadaşlarım" sekmesi (isimle arama, istek gönder/kabul/reddet/geri al, arkadaşlıktan çıkar, koleksiyonu gör = openSeller). Gelen istek sayısı menüde rozet olarak görünür. Günlük yedeğe friendships tablosu henüz eklenmedi.
+
+## 20 Kasım 2026 (gece) — kaynağı kesin olan eksikler tamamlandı
+- Kural (Arda): kaynakta birebir bulunmayan hiçbir bilgi tahminle doldurulmaz.
+- `.github/scripts/ja_tip.json`: 5.639 Pokellector Pokémon kartının enerji tipi (harf kodu G R W L P F D M Y N C). Bulbapedia set listelerinde kart numarası + İngilizce ad birebir eşleşenler. yayin.yml dz bloğunda c[7] boşsa uygulanır. Eşleşmeyen 438 kart boş bırakıldı.
+- `.github/scripts/en_duzeltme.json`: İngilizce katalogda eksik SWSH299 Jirachi V, SWSH300 Unown V, SWSH301 Lugia V (veri TCGdex, resim Bulbapedia'daki promo taraması). yayin.yml'de cards.json'a eklenir.
+- ja_duzeltme.json `sembol`: 7 Japonca set sembolü (web1, E1, E3, E4, E5, PCG1, MC; Bulbapedia'daki Japonca adlı SetSymbol dosyaları). PCG2–PCG9 için sadece İngilizce set sembolü var → eklenmedi.
+- Kaynağı olmadığı için boş: Japonca 1.044 nadirlik (ja-MC Bulbapedia'da boş, ja-M6a "-"), 10.475 Japonca fiyat, 438 tip, 10 sembol, 2 McDonald's set logosu; İngilizce 295 nadirlik (çoğu McDonald's), 132 fiyat.

@@ -183,6 +183,9 @@ def kart_bilgi(href):
 # ---------- 1) TCGdex setleri: resmi olmayan ve hiç olmayan kartlar ----------
 doldurulan = eklenen_no = 0
 tcg_ek = []   # (set index, pokellector kartı)
+tcg_detay = []  # (kart, set kimliği, pokellector kart sayfası): nadirliği/fiyatı/Japonca adı eksik TCGdex kartları
+JP = re.compile(r'[\u3040-\u30ff\u4e00-\u9fff]')
+fiyatli = set(load(f'{VERI}/ozet.json', {'c': {}}).get('c', {}))
 for ps in liste:
     sid = kapsanan.get(ps['num'])
     if not sid or sid not in sid_idx:
@@ -193,11 +196,15 @@ for ps in liste:
     si = sid_idx[sid]
     kartlar = [c for c in kat['cards'] if c[1] == si]
     var = {sade(c[2]) for c in kartlar}
-    resim = {sade(k[0]): k[2] for k in d['kartlar']}
+    resim = {sade(k[0]): k[2] for k in d['kartlar'] if 'placeholder' not in k[2]}
+    sayfa_no = {sade(k[0]): k[3] for k in d['kartlar'] if len(k) > 3}
     for c in kartlar:
-        if not c[13] and resim.get(sade(c[2])):
+        if (not c[13] or 'placeholder' in c[13]) and resim.get(sade(c[2])):
             c[13] = resim[sade(c[2])]
             doldurulan += 1
+        h = sayfa_no.get(sade(c[2]))
+        if h and (not c[3] or c[14] not in fiyatli or not JP.search(c[0] or '')):
+            tcg_detay.append((c, sid, h))
     for k in d['kartlar']:
         if sade(k[0]) not in var:
             var.add(sade(k[0]))
@@ -223,7 +230,9 @@ for ps in liste:
     mevcut_kimlik.add(sid.lower())
 
 # ---------- 3) kart sayfaları (Japonca ad, nadirlik, fiyat) — zaman bütçesiyle ----------
-gerek = [k[3] for _, _, k in tcg_ek if len(k) > 3] + [k[3] for _, ks in yeni_setler for k in ks if len(k) > 3]
+gerek = [k[3] for _, _, k in tcg_ek if len(k) > 3] + [k[3] for _, ks in yeni_setler for k in ks if len(k) > 3] \
+    + [h for _, _, h in tcg_detay]
+gerek = list(dict.fromkeys(gerek))
 hic = [h for h in gerek if h not in ek['kart']]
 eski = sorted((h for h in gerek if h in ek['kart'] and ek['kart'][h][3] < TODAY),
               key=lambda h: ek['kart'][h][3])
@@ -248,6 +257,8 @@ open(f'{VERI}/japonca/ek_kalan.txt', 'w').write(str(kalan))
 
 def kart_yap(sid, k, on=''):
     no, ad, r = k[0], k[1], k[2]
+    if r and 'placeholder' in r:
+        r = ''
     b = ek['kart'].get(k[3]) if len(k) > 3 else None
     ja = (b[0] if b else '') or ad
     nd = b[1] if b else ''
@@ -257,6 +268,21 @@ def kart_yap(sid, k, on=''):
 
 
 fiyat = {}
+detay_nadir = detay_ad = detay_fiyat = 0
+for c, sid, h in tcg_detay:
+    b = ek['kart'].get(h)
+    if not b:
+        continue
+    if not c[3] and b[1]:
+        c[3] = b[1]
+        detay_nadir += 1
+    if b[0] and JP.search(b[0]) and not JP.search(c[0] or ''):
+        c[0] = b[0]
+        detay_ad += 1
+    if b[2] is not None and c[14] not in fiyatli:
+        fiyat.setdefault(sid, {})[c[14]] = b[2]
+        detay_fiyat += 1
+print(f'TCGdex kartları: nadirlik {detay_nadir}, Japonca ad {detay_ad}, fiyat {detay_fiyat} tamamlandı', flush=True)
 for si, sid, k in tcg_ek:
     c, eur = kart_yap(sid, k, 'p')
     c[1] = si
@@ -291,8 +317,11 @@ for i, (s, kartlar) in enumerate(hepsi):
 # resmi hâlâ olmayanlar: aynı adlı başka kartın resmi (temel enerjiler vb.)
 ad_resim = {}
 for c in kat['cards']:
-    if c[13] and c[0] not in ad_resim:
+    if c[13] and 'placeholder' not in c[13] and c[0] not in ad_resim:
         ad_resim[c[0]] = c[13]
+for c in kat['cards']:
+    if c[13] and 'placeholder' in c[13]:
+        c[13] = ''
 for c in kat['cards']:
     if not c[13] and ad_resim.get(c[0]):
         c[13] = ad_resim[c[0]]

@@ -11,12 +11,13 @@ import datetime, html, json, os, re, sys, time, urllib.parse, urllib.request
 VERI = sys.argv[1]
 YOL = f'{VERI}/japonca/ja_en.json'
 UA = {'User-Agent': 'KartBorsa/1.0 (+https://www.kartborsa.com; weekly name list)'}
+SURUM = 2
 BUGUN = datetime.date.today()
 
 eski = {}
 try:
     eski = json.load(open(YOL, encoding='utf-8'))
-    dolu = any(v.get('k') for v in eski.get('lim', {}).values())
+    dolu = any(v.get('k') for v in eski.get('lim', {}).values()) and eski.get('v') == SURUM
     if dolu and (BUGUN - datetime.date.fromisoformat(eski.get('t', '2000-01-01'))).days < 7 and os.environ.get('ZORLA') != '1':
         print('İngilizce ad verisi güncel:', eski.get('t'))
         sys.exit(0)
@@ -62,7 +63,17 @@ try:
         for no, _, ad_en in re.findall(
                 r'<td><a href="/cards/jp/[^/"]+/([^?"]+)\?translate=en">([^<]*)</a></td>\s*<td><a href="[^"]+">([^<]*)</a>', p):
             kartlar[urllib.parse.unquote(no)] = temiz(ad_en)
-        lim[kod] = {'ad': temiz(ad), 'ja': html.unescape(m.group(1)) if m else '', 'k': kartlar}
+        kj = {}
+        if kartlar:
+            time.sleep(0.7)
+            try:
+                pj = get(f'{LIM}/cards/jp/{urllib.parse.quote(kod)}?display=list')
+                for no, _, ad_ja in re.findall(
+                        r'<td><a href="/cards/jp/[^/"]+/([^?"]+)">([^<]*)</a></td>\s*<td><a href="[^"]+">([^<]*)</a>', pj):
+                    kj[urllib.parse.unquote(no)] = temiz(ad_ja)
+            except Exception as e:
+                print('  Japonca liste alınamadı', kod, e)
+        lim[kod] = {'ad': temiz(ad), 'ja': html.unescape(m.group(1)) if m else '', 'k': kartlar, 'kj': kj}
         time.sleep(0.7)
 except Exception as e:
     print('Limitless alınamadı:', e)
@@ -101,16 +112,25 @@ try:
         except Exception as e:
             print('  alınamadı', baslik, e)
             continue
-        basliklar = []
-        for h in re.findall(r'href="/wiki/([^"#]+)"', p):
-            t = urllib.parse.unquote(h).replace('_', ' ')
-            if (f'({baslik} ' in t or t.endswith(f'({baslik})')) and t not in basliklar:
-                basliklar.append(t)
-        m = {}
+        basliklar, satir = [], []
+        for tr in re.findall(r'<tr[^>]*>(.*?)</tr>', p, re.S):
+            hucre = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.S)
+            for h in re.findall(r'href="/wiki/([^"#]+)"', tr):
+                t = urllib.parse.unquote(h).replace('_', ' ')
+                if f'({baslik} ' in t or t.endswith(f'({baslik})'):
+                    no = temiz(hucre[0]) if hucre else ''
+                    satir.append([no.split('/')[0].strip(), t])
+                    if t not in basliklar:
+                        basliklar.append(t)
+                    break
+        m, bilgi = {}, {}
         for i in range(0, len(basliklar), 50):
+            parca = basliklar[i:i + 50]
             r = get(f'{API}?action=query&prop=revisions&rvprop=content&rvslots=main&format=json&redirects=1&titles='
-                    + urllib.parse.quote('|'.join(basliklar[i:i + 50])), js=True)
-            for pg in (r.get('query', {}).get('pages') or {}).values():
+                    + urllib.parse.quote('|'.join(parca)), js=True)
+            q = r.get('query', {})
+            yon = {x['from']: x['to'] for x in q.get('normalized', []) + q.get('redirects', [])}
+            for pg in (q.get('pages') or {}).values():
                 t = pg['revisions'][0]['slots']['main']['*'] if pg.get('revisions') else ''
                 jm = re.search(r'\|\s*jname\s*=\s*([^\n|]+)', t)
                 cm = re.search(r'\|\s*cardname\s*=\s*([^\n|]+)', t)
@@ -118,10 +138,18 @@ try:
                     j_ = re.sub(r'\{\{[^}]*\}\}|<[^>]+>', '', jm.group(1)).strip()
                     e_ = re.sub(r'\{\{[^}]*\}\}|<[^>]+>', '', cm.group(1)).strip()
                     if j_ and e_:
+                        bilgi[pg['title']] = [e_, j_]
                         m.setdefault(j_, [])
                         if e_ not in m[j_]:
                             m[j_].append(e_)
+            for t in parca:
+                son = t
+                for _ in range(3):
+                    son = yon.get(son, son)
+                if son in bilgi:
+                    bilgi[t] = bilgi[son]
             time.sleep(1)
+        bp.setdefault('satir', {})[baslik] = [[no, *bilgi[t]] for no, t in satir if t in bilgi]
         bp['kart'][baslik] = m
         time.sleep(1)
 except Exception as e:
@@ -132,6 +160,6 @@ print('Bulbapedia: kart adı alınan set', sum(1 for v in bp['kart'].values() if
 if not any(v.get('k') for v in lim.values()) and not any(bp.get('kart', {}).values()):
     sys.exit('Hiçbir kaynaktan ad alınamadı; eski veri korunuyor.')
 os.makedirs(f'{VERI}/japonca', exist_ok=True)
-json.dump({'t': BUGUN.isoformat(), 'lim': lim, 'bp': bp}, open(YOL, 'w', encoding='utf-8'),
+json.dump({'v': SURUM, 't': BUGUN.isoformat(), 'lim': lim, 'bp': bp}, open(YOL, 'w', encoding='utf-8'),
           separators=(',', ':'), ensure_ascii=False)
 print('Yazıldı:', YOL, os.path.getsize(YOL) // 1024, 'KB')

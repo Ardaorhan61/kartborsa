@@ -22,6 +22,10 @@ def load(p, d):
 kat = json.load(open(KAT, encoding='utf-8'))
 src = load(f'{VERI}/japonca/ja_en.json', {})
 lim, bp = src.get('lim', {}), src.get('bp', {'setler': [], 'kart': {}})
+# eski setler için Bulbapedia ad listesi depoda (GitHub sunucuları Bulbapedia'ya erişemiyor)
+_bpd = load(f'{SITE}/.github/scripts/ja_bulbapedia_adlar.json', None)
+if _bpd and not any((bp.get('satir') or {}).values()):
+    bp = _bpd
 ek = load(f'{VERI}/japonca/ek.json', {})
 logolar = load(f'{SITE}/.github/scripts/ja_logolar.json', {})
 pl_ad = {p['num']: p['ad'] for p in ek.get('liste', [])}

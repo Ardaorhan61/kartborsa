@@ -108,7 +108,7 @@ jobs:
               for sid, b in bp.items():
                   if sid in var:
                       continue
-                  seri = 'ADV' if sid.startswith('ja-ADV') else 'DP'
+                  seri = b.get('seri') or ('ADV' if sid.startswith('ja-ADV') else 'DP')
                   s = [sid, b['ja'] or b['ad'], seri, b['tarih'], len(b['kart']), '', b['sembol'], 'ja', 'bp']
                   ks = []
                   for no, nd, ecid in b['kart']:

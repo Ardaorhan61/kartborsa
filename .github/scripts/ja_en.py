@@ -10,13 +10,14 @@ import datetime, html, json, os, re, sys, time, urllib.parse, urllib.request
 
 VERI = sys.argv[1]
 YOL = f'{VERI}/japonca/ja_en.json'
-UA = {'User-Agent': 'KartBorsa/1.0 (kartborsa.com; haftalık ad listesi)'}
+UA = {'User-Agent': 'KartBorsa/1.0 (+https://www.kartborsa.com; weekly name list)'}
 BUGUN = datetime.date.today()
 
 eski = {}
 try:
     eski = json.load(open(YOL, encoding='utf-8'))
-    if (BUGUN - datetime.date.fromisoformat(eski.get('t', '2000-01-01'))).days < 7 and os.environ.get('ZORLA') != '1':
+    dolu = any(v.get('k') for v in eski.get('lim', {}).values())
+    if dolu and (BUGUN - datetime.date.fromisoformat(eski.get('t', '2000-01-01'))).days < 7 and os.environ.get('ZORLA') != '1':
         print('İngilizce ad verisi güncel:', eski.get('t'))
         sys.exit(0)
 except SystemExit:
@@ -128,6 +129,8 @@ except Exception as e:
     bp = eski.get('bp', bp)
 print('Bulbapedia: kart adı alınan set', sum(1 for v in bp['kart'].values() if v), flush=True)
 
+if not any(v.get('k') for v in lim.values()) and not any(bp.get('kart', {}).values()):
+    sys.exit('Hiçbir kaynaktan ad alınamadı; eski veri korunuyor.')
 os.makedirs(f'{VERI}/japonca', exist_ok=True)
 json.dump({'t': BUGUN.isoformat(), 'lim': lim, 'bp': bp}, open(YOL, 'w', encoding='utf-8'),
           separators=(',', ':'), ensure_ascii=False)

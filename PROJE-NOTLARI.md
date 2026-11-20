@@ -169,3 +169,11 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - `.github/scripts/ja_en.py`: Limitless TCG (Japonca setlerin İngilizce kart listeleri) ve Bulbapedia'dan (eski setlerde kart sayfasındaki Japonca ad) kaynak verisini toplar → fiyat-verisi dalında `japonca/ja_en.json`. Haftada bir yenilenir; `ZORLA=1` ile hemen yenilenir.
 - `.github/scripts/ja_en_uygula.py`: yayında uygular. Sıra: kartın kendi İngilizce adı (Limitless daha ayrıntılıysa o), Limitless (aynı numara), katalogda aynı Japonca adlı kart, Bulbapedia. Tahmin yok.
 - Sonuç: 22.741 Japonca adlı kartın 22.313'ünde, 244 setin 242'sinde İngilizce ad var. Kalanların çoğu eski setlerde (neo, VS, e-Card, PCG) adı kaynakta makine çevirisi olan ya da zaten İngilizce harf içeren kartlar; ayrıca SV-P/M-P'de numarası Limitless ile eşleşmeyen birkaç promo. Adı olmayan setler: ja-MCD10, ja-S10B.
+
+## 20 Kasım 2026 (gece) — kalan eksiklerin taranması
+- Japonca: kaynakta makine çevirisiyle bozulmuş eski Japonca adlar (neo, e-Card, PCG vb.) Bulbapedia'daki gerçek adlarla değiştiriliyor (ör. "奇妙な" → "ナゾノクサ"). Numaralı setlerde numara, numarasız setlerde Bulbapedia listesindeki sıra (kayma payıyla, %90 doğrulamayla) kullanılıyor.
+- GitHub sunucuları Bulbapedia'ya erişemiyor (403). Eski setlerin ad listesi tarayıcıdan bir kez çekildi ve depoya kondu: `.github/scripts/ja_bulbapedia_adlar.json` (53 set, 3.619 kart). `ja_en.py` bu dosya varken Bulbapedia'yı denemiyor.
+- Limitless'ın Japonca adları da alınıyor (`kj`); katalogda numarası tutmayan kartlar Japonca adla eşleniyor.
+- Sonuç: 22.741 Japonca adlı kartın 22.486'sında İngilizce ad var. Kalan 255 kartın hiçbir ücretsiz kaynakta İngilizce adı yok (çoğu VS ve neo 4 setleri; ayrıca Limitless'ta çevirisi olmayan bazı promo/trainer kartları).
+- `fiyatlar.py`: Pokémon TCG API'de fiyatı boş gelen kartlar artık TCGdex'ten (McDonald's 2014–2018, EX Trainer Kit'ler, promolar). İlk sonuç bir sonraki 06:41 güncellemesinde.
+- Hâlâ açık: Japonca fiyatı olmayan kartlar için ücretli kaynak kararı; PayTR başvurusu; iki hesapla deneme ödemesi; svp-500 ve MEP "Pikachu at the Museum" (ikisi de jumbo/özel kart, resmi kaynakta yok).

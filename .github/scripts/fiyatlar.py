@@ -35,7 +35,11 @@ TCGDEX_SETS = {
     "me55": "30th",       # 30th Celebration
     "me55c": "30th-c",    # 30th Celebration: Classic Collection
     "me6": "me06",        # Delta Reign
+    "mee": "mee",         # Mega Evolution Energies
+    "mep": "mep",         # MEP Black Star Promos
 }
+# Pokémon TCG API'de olan ama yeni kartları eksik setler: eksik kartların fiyatı TCGdex'ten
+TCGDEX_EK = {"svp": "svp"}
 
 
 DEADLINE = time.time() + float(os.environ.get("FIYAT_SURE_DK", "45")) * 60
@@ -239,6 +243,25 @@ for n, sid in enumerate(set_ids, 1):
                 kaynak = f" (TCGdex: {tid})"
             elif sid in TCGDEX_SETS:
                 raise RuntimeError("TCGdex eşleşmesi yok")
+        if got and sid in TCGDEX_EK and site_by_set.get(sid):
+            var_ = {c["id"] for c in got}
+            eksik = [x for x in site_by_set[sid] if x[0] not in var_]
+            if eksik:
+                try:
+                    nolar = {nnum(x[2]) for x in eksik}
+                    tset = fetch(f"{TCGDEX}/sets/{TCGDEX_EK[sid]}", tries=3)
+                    tk = [t for t in tset.get("cards") or [] if nnum(t.get("localId", "")) in nolar]
+                    pairs, _ = match_cards(eksik, tk)
+                    ek_n = 0
+                    for site_id, tcid in pairs.items():
+                        try:
+                            got.append(tcgdex_to_ptcg(site_id, sid, fetch(f"{TCGDEX}/cards/{tcid}", tries=3)))
+                            ek_n += 1
+                        except Exception as e:
+                            print(f"  {tcid}: alınamadı ({e})")
+                    kaynak = f" (+{ek_n} kart TCGdex)"
+                except Exception as e:
+                    print("  TCGdex eksik kart fiyatları alınamadı:", e)
         cards += got
         print(f"[{n}/{len(set_ids)}] {sid}: {len(got)} kart{kaynak}", flush=True)
     except Exception as e:

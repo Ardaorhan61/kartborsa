@@ -149,3 +149,11 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 ## 20 Kasım 2026 (~01:50) — kalite ve kaldığımız yer
 - Kart resimleri: `px(u,w,q)` / `pxImg()` / `cardImg()` — kaynak her zaman en büyük orijinal (imgLarge), wsrv.nl ile WebP'ye çevrilir: ızgarada srcset 240w/480w, detayda 600w/1000w; set logoları 320, semboller 48, listeler 96. Hata olursa orijinal adrese döner. wsrv önbelleği 1 yıl.
 - DURDUK: Arda "devam" yazınca buradan sürdürülecek. Açık işler: (1) ~10.475 Japonca fiyat için ücretli kaynak kararı (Arda'da), (2) PayTR başvurusu (TC kimlik no'yu Arda yazacak) ve iki hesapla deneme ödemesi, (3) Profil Ayarları'na ad/soyad düzenleme önerisi, (4) yeni kayıt formu gerçek bir hesapla henüz denenmedi. Kalan eksiklik tablosu: "KartBorsa – Kalan eksiklikler" (Claude Sheets).
+
+## 20 Kasım 2026 (öğle) — site denetimi
+- İngilizce katalogda eksik bulunan 187 kart eklendi: MEP Black Star Promos (111 kart, yeni set), Mega Evolution Energies (16 kart, yeni set), Scarlet & Violet Black Star Promos'ta 166–225 arası 60 kart. Kaynak TCGdex, resimler Scrydex (yer tutucu resim kontrolü yapılıyor).
+- Bunu `.github/scripts/en_ek.py` yapıyor; `yayin.yml` her yayında depo `cards.json`'unu değiştirmeden yayın kopyasına uyguluyor (yeni promolar da kendiliğinden eklenir). Yeni set eklemek için betikteki EK_SETLER listesine yazılır.
+- Nadirlik düzeltmeleri (TCGdex'te doğrulandı): Ascended Heroes'taki 7 kart "MEGA_ATTACK_RARE" → "Mega Attack Rare"; 30th Celebration Mew R/G/B "Common" → "RGB Rare"; eski setlerdeki 36 temel enerji ve Dragon Vault'taki 3 kart (boştu).
+- `fiyatlar.py`: mep/mee TCGDEX_SETS'e eklendi; SVP'de Pokémon TCG API'de olmayan yeni promoların fiyatı TCGdex'ten (TCGDEX_EK). Fiyatlar ertesi sabah 06:41 güncellemesiyle gelir.
+- Alt bilgide tüm veri kaynakları yazıldı.
+- Kaynakta resmi olmayan için eklenmeyenler: svp-500 Terapagos & Friends, MEP "Pikachu at the Museum". Logosu kaynakta olmayan Japonca setler: ja-MCD02, ja-MCD10. Southern Islands nadirliği boş bırakıldı (kaynak güvenilir değil).

@@ -56,6 +56,20 @@ def pl_en(s):
     return None
 
 
+# ---- Limitless: Japonca ad -> İngilizce ad (tüm setler; %80 ve üzeri aynıysa) ----
+_say = {}
+for v in lim.values():
+    for n, a in (v.get('kj') or {}).items():
+        e = v.get('k', {}).get(n)
+        if e and a:
+            _say.setdefault(jn(a), {}).setdefault(e, 0)
+            _say[jn(a)][e] += 1
+genel_lj = {}
+for a, m in _say.items():
+    e = sorted(m.items(), key=lambda x: -x[1])
+    if e[0][1] / sum(m.values()) >= 0.8:
+        genel_lj[a] = e[0][0]
+
 # ---- set eşleştirme: site seti -> Limitless kodu ----
 lkod = {nn(k): k for k in lim}
 lad = {nn(v['ad']): k for k, v in lim.items()}
@@ -77,7 +91,7 @@ def bp_baslik(s):
     return None
 
 
-set_lim, set_en = {}, {}
+set_lim, set_en, set_lj = {}, {}, {}
 for s in kat['sets']:
     sid = s[0]
     plen = pl_en(s)
@@ -86,6 +100,8 @@ for s in kat['sets']:
         k = ELLE.get(sid) or lkod.get(nn(sid[3:])) or lja.get(jn(s[1])) or (lad.get(nn(plen)) if plen else None)
     if k and lim.get(k, {}).get('k'):
         set_lim[sid] = lim[k]['k']
+        kj = lim[k].get('kj') or {}
+        set_lj[sid] = {jn(a): lim[k]['k'][n] for n, a in kj.items() if lim[k]['k'].get(n)}
     if k and lim.get(k, {}).get('k'):
         set_en[sid] = lim[k]['ad']
     elif ESET.get(sid):
@@ -94,6 +110,58 @@ for s in kat['sets']:
         set_en[sid] = plen
     elif bp_baslik(s):
         set_en[sid] = bp_baslik(s)
+
+# ---- Bulbapedia: kaynakta makine çevirisiyle bozulmuş Japonca adları gerçek adla değiştir ----
+ad_duz = 0
+grup = {}
+for c in kat['cards']:
+    grup.setdefault(c[1], []).append(c)
+for i, s in enumerate(kat['sets']):
+    b = bp_baslik(s)
+    satirlar = bp.get('satir', {}).get(b) if b else None
+    if not satirlar:
+        continue
+    jset = {jn(j) for _, _, j in satirlar}
+    enmap = {}
+    for _, e, j in satirlar:
+        enmap.setdefault(nn(e), set()).add(j)
+    nomap = {}
+    for no, e, j in satirlar:
+        if re.fullmatch(r'\d+', no or '') and sade(no) not in nomap:
+            nomap[sade(no)] = (e, j)
+    kartlar = grup.get(i, [])
+    ayni = top = 0
+    for c in kartlar:
+        c15 = moji(c[15]) if len(c) > 15 and c[15] and not JP.search(c[15]) else ''
+        r = nomap.get(sade(c[2]))
+        if c15 and r:
+            top += 1
+            ayni += nn(r[0]) == nn(c15)
+    numara_ok = top >= 10 and ayni / top >= 0.85
+    jmap = {}
+    for _, e, j in satirlar:
+        jmap.setdefault(jn(j), set()).add(e)
+    for c in kartlar:
+        if jn(c[0]) in jset:
+            if len(c) > 15 and not (c[15] and not JP.search(c[15])):
+                r = nomap.get(sade(c[2]))
+                if numara_ok and r and jn(r[1]) == jn(c[0]):
+                    c[15] = r[0]
+                elif len(jmap.get(jn(c[0]), ())) == 1:
+                    c[15] = next(iter(jmap[jn(c[0])]))
+            continue
+        c15 = moji(c[15]) if len(c) > 15 and c[15] and not JP.search(c[15]) else ''
+        aday = None
+        if numara_ok and nomap.get(sade(c[2])):
+            aday = nomap[sade(c[2])]
+        elif c15 and len(enmap.get(nn(c15), ())) == 1:
+            aday = (c15, next(iter(enmap[nn(c15)])))
+        if aday:
+            c[0] = aday[1]
+            if len(c) > 15 and not c15:
+                c[15] = aday[0]
+            ad_duz += 1
+print('Bulbapedia ile düzeltilen Japonca ad:', ad_duz)
 
 # ---- kartlar ----
 en, nasil = {}, {}
@@ -125,6 +193,13 @@ for c in kat['cards']:
         sid = kat['sets'][c[1]][0]
         if sozluk.get(c[0]):
             en[c[14]], nasil[c[14]] = sozluk[c[0]], 'katalog'
+            continue
+        lj = set_lj.get(sid, {}).get(jn(c[0]))
+        if lj:
+            en[c[14]], nasil[c[14]] = lj, 'limitless-ad'
+            continue
+        if genel_lj.get(jn(c[0])):
+            en[c[14]], nasil[c[14]] = genel_lj[jn(c[0])], 'limitless-ad'
             continue
         b = bp_baslik(kat['sets'][c[1]])
         m = {jn(k): v for k, v in bp.get('kart', {}).get(b, {}).items()} if b else {}

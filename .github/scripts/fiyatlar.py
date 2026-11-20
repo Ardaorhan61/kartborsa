@@ -39,7 +39,8 @@ TCGDEX_SETS = {
     "mep": "mep",         # MEP Black Star Promos
 }
 # Pokémon TCG API'de olan ama yeni kartları eksik setler: eksik kartların fiyatı TCGdex'ten
-TCGDEX_EK = {"svp": "svp"}
+TCGDEX_EK = {"svp": "svp", "mcd14": "2014xy", "mcd15": "2015xy", "mcd16": "2016xy", "mcd17": "2017sm", "mcd18": "2018sm",
+             "tk1a": "tk-ex-latia", "tk1b": "tk-ex-latio", "tk2a": "tk-ex-p", "tk2b": "tk-ex-m"}
 
 
 DEADLINE = time.time() + float(os.environ.get("FIYAT_SURE_DK", "45")) * 60
@@ -243,23 +244,31 @@ for n, sid in enumerate(set_ids, 1):
                 kaynak = f" (TCGdex: {tid})"
             elif sid in TCGDEX_SETS:
                 raise RuntimeError("TCGdex eşleşmesi yok")
-        if got and sid in TCGDEX_EK and site_by_set.get(sid):
-            var_ = {c["id"] for c in got}
-            eksik = [x for x in site_by_set[sid] if x[0] not in var_]
-            if eksik:
+        if got and site_by_set.get(sid) and time.time() < DEADLINE:
+            # Pokémon TCG API'de olmayan ya da fiyatı boş gelen kartlar: aynı kartın fiyatı TCGdex'ten
+            fiyatli = {c["id"] for c in got if (c.get("tcgplayer") or {}).get("prices") or (c.get("cardmarket") or {}).get("prices")}
+            eksik = [x for x in site_by_set[sid] if x[0] not in fiyatli]
+            ek_tid = (TCGDEX_EK.get(sid) or tcgdex_set_id(sid, set_names.get(sid, ""))) if eksik else None
+            if eksik and ek_tid:
                 try:
                     nolar = {nnum(x[2]) for x in eksik}
-                    tset = fetch(f"{TCGDEX}/sets/{TCGDEX_EK[sid]}", tries=3)
+                    tset = fetch(f"{TCGDEX}/sets/{ek_tid}", tries=3)
                     tk = [t for t in tset.get("cards") or [] if nnum(t.get("localId", "")) in nolar]
                     pairs, _ = match_cards(eksik, tk)
-                    ek_n = 0
-                    for site_id, tcid in pairs.items():
+
+                    def ek_bir(item):
                         try:
-                            got.append(tcgdex_to_ptcg(site_id, sid, fetch(f"{TCGDEX}/cards/{tcid}", tries=3)))
-                            ek_n += 1
+                            return tcgdex_to_ptcg(item[0], sid, fetch(f"{TCGDEX}/cards/{item[1]}", tries=3))
                         except Exception as e:
-                            print(f"  {tcid}: alınamadı ({e})")
-                    kaynak = f" (+{ek_n} kart TCGdex)"
+                            print(f"  {item[1]}: alınamadı ({e})")
+                            return None
+                    with ThreadPoolExecutor(max_workers=6) as ex_:
+                        yeni = [c for c in ex_.map(ek_bir, pairs.items())
+                                if c and (c.get("tcgplayer") or c.get("cardmarket"))]
+                    yeni_id = {c["id"] for c in yeni}
+                    got = [c for c in got if c["id"] not in yeni_id] + yeni
+                    if yeni:
+                        kaynak = f" (+{len(yeni)} kart TCGdex: {ek_tid})"
                 except Exception as e:
                     print("  TCGdex eksik kart fiyatları alınamadı:", e)
         cards += got

@@ -67,7 +67,7 @@ for v in lim.values():
 genel_lj = {}
 for a, m in _say.items():
     e = sorted(m.items(), key=lambda x: -x[1])
-    if e[0][1] / sum(m.values()) >= 0.8:
+    if e[0][1] / sum(m.values()) >= 0.5:
         genel_lj[a] = e[0][0]
 
 # ---- set eşleştirme: site seti -> Limitless kodu ----
@@ -130,14 +130,28 @@ for i, s in enumerate(kat['sets']):
         if re.fullmatch(r'\d+', no or '') and sade(no) not in nomap:
             nomap[sade(no)] = (e, j)
     kartlar = grup.get(i, [])
-    ayni = top = 0
-    for c in kartlar:
-        c15 = moji(c[15]) if len(c) > 15 and c[15] and not JP.search(c[15]) else ''
-        r = nomap.get(sade(c[2]))
-        if c15 and r:
-            top += 1
-            ayni += nn(r[0]) == nn(c15)
+
+    def uyum(nm):
+        a = t_ = 0
+        for c in kartlar:
+            c15 = moji(c[15]) if len(c) > 15 and c[15] and not JP.search(c[15]) else ''
+            r = nm.get(sade(c[2]))
+            if c15 and r:
+                t_ += 1
+                a += nn(r[0]) == nn(c15)
+        return a, t_
+    ayni, top = uyum(nomap)
     numara_ok = top >= 10 and ayni / top >= 0.85
+    if not numara_ok:
+        # numarasız eski setler: Bulbapedia listesindeki sıra = katalogdaki numara (kayma payıyla, doğrulanarak)
+        en_iyi = None
+        for kay in range(0, 40):
+            nm = {str(k + 1): (e, j) for k, (_, e, j) in enumerate(satirlar[kay:])}
+            a, t_ = uyum(nm)
+            if t_ >= 10 and a / t_ >= 0.9 and (not en_iyi or a > en_iyi[0]):
+                en_iyi = (a, nm)
+        if en_iyi:
+            nomap, numara_ok = en_iyi[1], True
     jmap = {}
     for _, e, j in satirlar:
         jmap.setdefault(jn(j), set()).add(e)

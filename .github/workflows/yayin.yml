@@ -63,7 +63,6 @@ jobs:
         run: python3 site/.github/scripts/ja_ek.py veri site
 
       - name: Japonca kartların İngilizce adları (Limitless + Bulbapedia, haftada bir)
-        if: github.event_name == 'schedule' || hashFiles('veri/japonca/ja_en.json') == ''
         continue-on-error: true
         id: jaen
         timeout-minutes: 25

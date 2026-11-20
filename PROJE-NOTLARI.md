@@ -163,3 +163,9 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Katalog sayıları önceki günle aynı (kaynağı olmayanlar): JA 1.044 nadirliksiz, 10.475 fiyatsız, 10 sembolsüz, 2 logosuz set (MCD02, MCD10); EN 295 nadirliksiz, 132 fiyatsız. Yer tutucu resim, kartsız set, eksik kartlı set, Japonca olmayan ad: 0.
 - Eksik Japonca set eklendi: **ja-PCG10 ワールドチャンピオンズパック** (World Champions Pack, 2007/07/05, 108 kart). `ja_bulbapedia.json`'a Bulbapedia set listesinden (kart karşılığı EX Power Keepers / ex16, Japonca adlar Bulbapedia kart sayfalarındaki jname); logo `ja_duzeltme.json` logo (Bulbagarden paket resmi), adlar `ad` ("ja-PCG10|no"). `yayin.yml`: bp setlerinde `seri` alanı okunur (yoksa eski kural ADV/DP).
 - TCGdex'te olup sitede görünmeyen BW5a/BW5b aslında var (ja-pl22, ja-BW5). EN'de eksik set yok (B2a = TCG Pocket).
+
+## 20 Kasım 2026 (akşam) — Japonca adların yanına İngilizce adlar
+- Japonca kart ve set adları sitede "ピカチュウ (Pikachu)" biçiminde görünüyor (yalnızca yayın kopyasında; veri dosyaları değişmedi).
+- `.github/scripts/ja_en.py`: Limitless TCG (Japonca setlerin İngilizce kart listeleri) ve Bulbapedia'dan (eski setlerde kart sayfasındaki Japonca ad) kaynak verisini toplar → fiyat-verisi dalında `japonca/ja_en.json`. Haftada bir yenilenir; `ZORLA=1` ile hemen yenilenir.
+- `.github/scripts/ja_en_uygula.py`: yayında uygular. Sıra: kartın kendi İngilizce adı (Limitless daha ayrıntılıysa o), Limitless (aynı numara), katalogda aynı Japonca adlı kart, Bulbapedia. Tahmin yok.
+- Sonuç: 22.741 Japonca adlı kartın 22.313'ünde, 244 setin 242'sinde İngilizce ad var. Kalanların çoğu eski setlerde (neo, VS, e-Card, PCG) adı kaynakta makine çevirisi olan ya da zaten İngilizce harf içeren kartlar; ayrıca SV-P/M-P'de numarası Limitless ile eşleşmeyen birkaç promo. Adı olmayan setler: ja-MCD10, ja-S10B.

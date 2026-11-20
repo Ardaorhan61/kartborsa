@@ -157,3 +157,9 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - `fiyatlar.py`: mep/mee TCGDEX_SETS'e eklendi; SVP'de Pokémon TCG API'de olmayan yeni promoların fiyatı TCGdex'ten (TCGDEX_EK). Fiyatlar ertesi sabah 06:41 güncellemesiyle gelir.
 - Alt bilgide tüm veri kaynakları yazıldı.
 - Kaynakta resmi olmayan için eklenmeyenler: svp-500 Terapagos & Friends, MEP "Pikachu at the Museum". Logosu kaynakta olmayan Japonca setler: ja-MCD02, ja-MCD10. Southern Islands nadirliği boş bırakıldı (kaynak güvenilir değil).
+
+## 20 Kasım 2026 (öğle) — günlük bakım (otomatik görev)
+- Kontrol: GitHub Actions son 24 saatte hatasız (fiyat 04:35, yedek 01:26 UTC başarılı); site, Piyasa, Kart Al, İlan Ver, dil geçişi, kart detayı çalışıyor, konsolda hata yok.
+- Katalog sayıları önceki günle aynı (kaynağı olmayanlar): JA 1.044 nadirliksiz, 10.475 fiyatsız, 10 sembolsüz, 2 logosuz set (MCD02, MCD10); EN 295 nadirliksiz, 132 fiyatsız. Yer tutucu resim, kartsız set, eksik kartlı set, Japonca olmayan ad: 0.
+- Eksik Japonca set eklendi: **ja-PCG10 ワールドチャンピオンズパック** (World Champions Pack, 2007/07/05, 108 kart). `ja_bulbapedia.json`'a Bulbapedia set listesinden (kart karşılığı EX Power Keepers / ex16, Japonca adlar Bulbapedia kart sayfalarındaki jname); logo `ja_duzeltme.json` logo (Bulbagarden paket resmi), adlar `ad` ("ja-PCG10|no"). `yayin.yml`: bp setlerinde `seri` alanı okunur (yoksa eski kural ADV/DP).
+- TCGdex'te olup sitede görünmeyen BW5a/BW5b aslında var (ja-pl22, ja-BW5). EN'de eksik set yok (B2a = TCG Pocket).

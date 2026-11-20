@@ -38,6 +38,11 @@ jobs:
           git clone --depth 1 --branch kart-izi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" izi \
             || mkdir -p izi
 
+      - name: İngilizce katalog eksiklerini tamamla (TCGdex + Scrydex resimleri)
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python3 site/.github/scripts/en_ek.py site/cards.json
+
       - name: Fiyatları güncelle
         if: github.event_name == 'schedule' || hashFiles('veri/ozet.json') == ''
         continue-on-error: true

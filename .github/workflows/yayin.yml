@@ -62,8 +62,15 @@ jobs:
         timeout-minutes: 30
         run: python3 site/.github/scripts/ja_ek.py veri site
 
+      - name: Japonca kartların İngilizce adları (Limitless + Bulbapedia, haftada bir)
+        if: github.event_name == 'schedule' || hashFiles('veri/japonca/ja_en.json') == ''
+        continue-on-error: true
+        id: jaen
+        timeout-minutes: 25
+        run: python3 site/.github/scripts/ja_en.py veri
+
       - name: Fiyat verisini kaydet
-        if: steps.fiyat.outcome == 'success' || steps.japonca.outcome == 'success' || steps.ek.outcome == 'success'
+        if: steps.fiyat.outcome == 'success' || steps.japonca.outcome == 'success' || steps.ek.outcome == 'success' || steps.jaen.outcome == 'success'
         run: |
           cd veri
           rm -rf .git
@@ -320,6 +327,10 @@ jobs:
               json.dump(d, open(p, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
               print('Japonca logo eklenen set:', n)
           PY
+
+      - name: Japonca adların yanına İngilizce adlar
+        continue-on-error: true
+        run: python3 site/.github/scripts/ja_en_uygula.py veri site _site/cards_ja.json
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

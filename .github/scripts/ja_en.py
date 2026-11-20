@@ -6,7 +6,7 @@ Kaynaklar: Limitless TCG (Japonca setlerin İngilizce kart listeleri) ve Bulbape
 her kart sayfasındaki Japonca ad -> İngilizce ad). Sonuç <veri>/japonca/ja_en.json içine yazılır.
 Haftada bir yenilenir (dosya 7 günden yeniyse hiçbir şey yapmaz). Siteye uygulanması: ja_en_uygula.py
 """
-import datetime, html, json, os, re, sys, time, urllib.parse, urllib.request
+import datetime, html, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 VERI = sys.argv[1]
 YOL = f'{VERI}/japonca/ja_en.json'
@@ -15,26 +15,31 @@ SURUM = 2
 BUGUN = datetime.date.today()
 
 eski = {}
+lim_taze = bp_taze = False
 try:
     eski = json.load(open(YOL, encoding='utf-8'))
-    dolu = any(v.get('k') for v in eski.get('lim', {}).values()) and eski.get('v') == SURUM
-    if dolu and (BUGUN - datetime.date.fromisoformat(eski.get('t', '2000-01-01'))).days < 7 and os.environ.get('ZORLA') != '1':
-        print('İngilizce ad verisi güncel:', eski.get('t'))
-        sys.exit(0)
-except SystemExit:
-    raise
+    yeni_mi = (BUGUN - datetime.date.fromisoformat(eski.get('t', '2000-01-01'))).days < 7 and os.environ.get('ZORLA') != '1'
+    lim_taze = yeni_mi and eski.get('v') == SURUM and any(v.get('k') for v in eski.get('lim', {}).values())
+    bp_taze = yeni_mi and eski.get('v') == SURUM and any(eski.get('bp', {}).get('satir', {}).values())
 except Exception:
     pass
+if lim_taze and bp_taze:
+    print('İngilizce ad verisi güncel:', eski.get('t'))
+    sys.exit(0)
 
 
 def get(url, js=False):
-    for t in range(4):
+    for t in range(5):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
                 b = r.read().decode('utf-8', 'replace')
                 return json.loads(b) if js else b
+        except urllib.error.HTTPError as e:
+            if t == 4 or e.code == 404:
+                raise
+            time.sleep(60 if e.code in (403, 429) else 3 * (t + 1))
         except Exception:
-            if t == 3:
+            if t == 4:
                 raise
             time.sleep(3 * (t + 1))
 
@@ -47,6 +52,8 @@ def temiz(s):
 LIM = 'https://limitlesstcg.com'
 lim = {}
 try:
+    if lim_taze:
+        raise RuntimeError('güncel, yeniden okunmadı')
     sp = get(LIM + '/cards/jp')
     setler = re.findall(r'<a href="/cards/jp/([^"/?]+)"><img[^>]*>\s*([^<]*?)\s*<span class="code annotation">', sp)
     print('Limitless Japonca set:', len(setler), flush=True)
@@ -91,6 +98,8 @@ def bp_html(sayfa):
 
 bp = {'setler': [], 'kart': {}}
 try:
+    if bp_taze:
+        raise RuntimeError('güncel, yeniden okunmadı')
     liste = bp_html('List of Japanese Pokémon Trading Card Game expansions')
     for tr in re.findall(r'<tr[^>]*>(.*?)</tr>', liste, re.S):
         a = re.search(r'href="/wiki/([^"#]+_\(TCG\))"', tr)
@@ -154,7 +163,8 @@ try:
         time.sleep(1)
 except Exception as e:
     print('Bulbapedia alınamadı:', e)
-    bp = eski.get('bp', bp)
+    if not any(bp.get('satir', {}).values()):
+        bp = eski.get('bp', bp)
 print('Bulbapedia: kart adı alınan set', sum(1 for v in bp['kart'].values() if v), flush=True)
 
 if not any(v.get('k') for v in lim.values()) and not any(bp.get('kart', {}).values()):

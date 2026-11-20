@@ -9,7 +9,8 @@
   "whatsapp": null,
   "show_collection": false,
   "created_at": "2026-11-16T21:32:03.792274+00:00",
-  "updated_at": "2026-11-16T21:33:39.619844+00:00"
+  "updated_at": "2026-11-16T21:33:39.619844+00:00",
+  "partner": null
  },
  {
   "id": "3ce1d5d7-d228-41fd-829a-e3ac58c08d26",
@@ -21,7 +22,8 @@
   "whatsapp": null,
   "show_collection": true,
   "created_at": "2026-11-16T21:34:43.990404+00:00",
-  "updated_at": "2026-11-18T08:46:23.237673+00:00"
+  "updated_at": "2026-11-19T22:12:34.872562+00:00",
+  "partner": 151
  },
  {
   "id": "e34c904c-9352-4e4a-8501-b5dab4fb9771",
@@ -33,6 +35,20 @@
   "whatsapp": null,
   "show_collection": true,
   "created_at": "2026-11-17T16:46:54.857618+00:00",
-  "updated_at": "2026-11-18T16:02:59.682029+00:00"
+  "updated_at": "2026-11-19T21:45:31.538297+00:00",
+  "partner": 149
+ },
+ {
+  "id": "835925f6-aa6d-4522-aca2-19f552f6e167",
+  "display_name": "emuuz",
+  "city": null,
+  "bio": null,
+  "avatar_url": "https://nhftbsguwnpknksqmqni.supabase.co/storage/v1/object/public/photos/835925f6-aa6d-4522-aca2-19f552f6e167/avatar-mwo30ge9.jpg",
+  "instagram": null,
+  "whatsapp": null,
+  "show_collection": false,
+  "created_at": "2026-11-19T21:43:59.708153+00:00",
+  "updated_at": "2026-11-19T21:48:15.563539+00:00",
+  "partner": 149
  }
 ]

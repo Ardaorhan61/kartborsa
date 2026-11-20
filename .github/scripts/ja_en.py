@@ -23,6 +23,9 @@ try:
     bp_taze = yeni_mi and eski.get('v') == SURUM and any(eski.get('bp', {}).get('satir', {}).values())
 except Exception:
     pass
+# Bulbapedia GitHub sunucularını engelliyor: eski setlerin ad listesi depoda (ja_bulbapedia_adlar.json) duruyor
+if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ja_bulbapedia_adlar.json')):
+    bp_taze = True
 if lim_taze and bp_taze:
     print('İngilizce ad verisi güncel:', eski.get('t'))
     sys.exit(0)

@@ -19,7 +19,7 @@ concurrency:
 jobs:
   yayin:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -47,6 +47,8 @@ jobs:
         if: github.event_name == 'schedule' || hashFiles('veri/ozet.json') == ''
         continue-on-error: true
         id: fiyat
+        env:
+          FIYAT_SURE_DK: "80"   # tüm setler her sabah yenilensin diye (45 dk'ya sığmıyordu)
         run: python3 site/.github/scripts/fiyatlar.py veri site/cards.json
 
       - name: Japonca katalog ve fiyatlar

@@ -177,3 +177,9 @@ Hiçbir parça senin bilgisayarında çalışmıyor; bilgisayar kapalıyken de s
 - Sonuç: 22.741 Japonca adlı kartın 22.486'sında İngilizce ad var. Kalan 255 kartın hiçbir ücretsiz kaynakta İngilizce adı yok (çoğu VS ve neo 4 setleri; ayrıca Limitless'ta çevirisi olmayan bazı promo/trainer kartları).
 - `fiyatlar.py`: Pokémon TCG API'de fiyatı boş gelen kartlar artık TCGdex'ten (McDonald's 2014–2018, EX Trainer Kit'ler, promolar). İlk sonuç bir sonraki 06:41 güncellemesinde.
 - Hâlâ açık: Japonca fiyatı olmayan kartlar için ücretli kaynak kararı; PayTR başvurusu; iki hesapla deneme ödemesi; svp-500 ve MEP "Pikachu at the Museum" (ikisi de jumbo/özel kart, resmi kaynakta yok).
+
+## 21 Kasım 2026
+- 06:41 fiyat güncellemesi başarılı: fiyatsız İngilizce kart 132 → 95. McDonald's 2015–2017, EX Trainer Kit 2 Plusle, MEE (16/16), SVP (225/225), MEP (110/111) artık fiyatlı.
+- Bulunan sorun 1: Pokémon TCG API mcd14, tk1a, tk1b (ve zaman zaman mcd18, tk2b) için bozuk/boş yanıt veriyor → set "alınamadı" sayılıp TCGdex'e hiç geçilmiyordu. `fiyatlar.py`: API hata verirse set TCGdex'ten alınıyor; `tcgdex_set_id` artık `TCGDEX_EK` eşlemesini de kullanıyor. Bu 5 setin 56 kartı TCGdex'te numara+adla eşleşiyor (denendi).
+- Bulunan sorun 2: fiyat adımı 45 dk'ya sığmıyordu, her sabah 179 setin yalnız ~103'ü yenileniyordu. `yayin.yml`: FIYAT_SURE_DK=80, iş süresi 180 dk. Site yayını bu yüzden sabah ~08:00–08:30 arası olabilir.
+- Kontrol (22 Kasım sabahı): mcd14, mcd18, tk1a, tk1b, tk2b fiyatları geldi mi; tüm setlerin fiyat/set/*.json tarihi bugün mü.

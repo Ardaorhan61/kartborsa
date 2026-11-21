@@ -165,6 +165,8 @@ def tcgdex_set_id(sid, set_name):
     global _tcgdex_sets
     if sid in TCGDEX_SETS:
         return TCGDEX_SETS[sid]
+    if sid in TCGDEX_EK:
+        return TCGDEX_EK[sid]
     if _tcgdex_sets is None:
         try:
             _tcgdex_sets = {nn(s["name"]): s["id"] for s in fetch(f"{TCGDEX}/sets", tries=3)}
@@ -230,12 +232,19 @@ for n, sid in enumerate(set_ids, 1):
     got, page = [], 1
     try:
         if sid not in TCGDEX_SETS:
-            while True:
-                d = fetch(f"{API}?q=set.id:{sid}&page={page}&pageSize=250&select=id,set,tcgplayer,cardmarket", tries=3)
-                got += d.get("data", [])
-                if not d.get("data") or len(got) >= d.get("totalCount", 0):
-                    break
-                page += 1
+            try:
+                while True:
+                    d = fetch(f"{API}?q=set.id:{sid}&page={page}&pageSize=250&select=id,set,tcgplayer,cardmarket", tries=3)
+                    got += d.get("data", [])
+                    if not d.get("data") or len(got) >= d.get("totalCount", 0):
+                        break
+                    page += 1
+            except Exception as e:
+                # Pokémon TCG API bu sette bozuk/boş yanıt veriyorsa seti atlama, TCGdex'ten al
+                if not (site_by_set.get(sid) and tcgdex_set_id(sid, set_names.get(sid, ""))):
+                    raise
+                print(f"  Pokémon TCG API hatası ({e}); TCGdex'e geçiliyor", flush=True)
+                got = []
         kaynak = ""
         if not got and site_by_set.get(sid):
             r = fetch_tcgdex(sid, set_names.get(sid, ""), site_by_set[sid])

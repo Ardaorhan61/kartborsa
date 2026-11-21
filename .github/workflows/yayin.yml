@@ -333,6 +333,25 @@ jobs:
         continue-on-error: true
         run: python3 site/.github/scripts/ja_en_uygula.py veri site _site/cards_ja.json
 
+      - name: Japonca fiyatı olmayan kartlar (TCGplayer / tcgcsv.com)
+        if: github.event_name != 'push' || hashFiles('veri/japonca/tcgplayer.json') == ''
+        continue-on-error: true
+        id: jatp
+        timeout-minutes: 15
+        run: python3 site/.github/scripts/ja_tcgplayer.py veri _site
+
+      - name: TCGplayer Japonca fiyatlarını kaydet
+        if: steps.jatp.outcome == 'success'
+        run: |
+          cd veri
+          rm -rf .git
+          git init -q -b fiyat-verisi
+          git config user.name "KartBorsa fiyat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Fiyatlar + TCGplayer Japonca $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

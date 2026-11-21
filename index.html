@@ -421,7 +421,7 @@ function px(u,w,q){if(!u||typeof u!=='string'||/^data:/.test(u)||/wsrv\.nl/.test
   return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&output=webp&q='+(q||80)+'&we';}
 function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loading:'lazy',decoding:'async'},attrs||{}));im.dataset.orj=u;
   im.addEventListener('error',()=>{const o=im.dataset.orj;if(o&&/wsrv\.nl/.test(im.src)){delete im.dataset.orj;im.src=o;}else im.remove();});return im;}
-/* hız 2 (21 Kasım): Pokellector ızgarada önce küçük resmi (.thumb.png) anında gösterir, keskin WebP üstüne gelir; detayda orijinal doğrudan. Kart resimleri kaynak CDN'nin kendi hazır boyutlarından doğrudan gelir (Scrydex small/medium/large, TCGdex low/high) — aracı yok, 3–5 kat hızlı, detayda 734 px.
+/* hız 3: ızgarada en fazla 367 px (iPad ekranında kart başı ~80 KB; önce 734 px PNG ~400 KB seçiliyordu); detayda Scrydex büyük resmi WebP 700 px (önizleme anında); ön yükleme yalnız fareyle. hız 2 (21 Kasım): Pokellector ızgarada önce küçük resmi (.thumb.png) anında gösterir, keskin WebP üstüne gelir; detayda orijinal doğrudan. Kart resimleri kaynak CDN'nin kendi hazır boyutlarından doğrudan gelir (Scrydex small/medium/large, TCGdex low/high) — aracı yok, 3–5 kat hızlı, detayda 734 px.
    Hazır boyutu olmayan kaynaklar (Pokellector, Bulbapedia, eski pokemontcg adresleri) wsrv.nl üzerinden. Hata olursa sırayla yedek adreslere düşer. */
 const YUKLU={};
 function imgYol(c,large){const s=imgSmall(c);let b=null;
@@ -429,7 +429,7 @@ function imgYol(c,large){const s=imgSmall(c);let b=null;
   if(s.includes('pokellector.com'))return large?{src:s}:null;
   if(s.includes('images.scrydex.com'))b=s.replace(/\/(small|medium|large)$/,'');
   else if(!c[13]&&!String(c[14]).startsWith('ja-'))b='https://images.scrydex.com/pokemon/'+c[14];
-  if(b)return large?{src:b+'/large'}:{src:b+'/small',srcset:b+'/small 245w, '+b+'/medium 367w, '+b+'/large 734w'};
+  if(b)return large?{src:px(b+'/large',700,86),dog:b+'/large'}:{src:b+'/small',srcset:b+'/small 245w, '+b+'/medium 367w'};
   return null;}
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
@@ -438,14 +438,14 @@ function cardImg(c,large,src){
   else{const y=imgYol(c,large),kay=imgLarge(c),ok=typeof kay==='string'&&/^(https?:|img\/)/.test(kay);
     const at={alt,loading:large?'eager':'lazy',decoding:'async'};if(large)at.fetchpriority='high';
     if(y){if(y.srcset){at.srcset=y.srcset;at.sizes='(max-width:600px) 46vw, 190px';}at.src=y.src;im=el('img',at);
-      if(ok)yedek.push(px(kay,large?800:320,large?86:80));const o=large?kay:imgSmall(c);if(o&&!/scrydex/.test(o))yedek.push(o);}
+      if(y.dog)yedek.push(y.dog);if(ok)yedek.push(px(kay,large?800:320,large?86:80));const o=large?kay:imgSmall(c);if(o&&!/scrydex/.test(o))yedek.push(o);}
     else if(ok){Object.assign(at,large?{srcset:px(kay,600,86)+' 600w, '+px(kay,1000,86)+' 1000w',sizes:'(max-width:680px) 92vw, 300px'}:{srcset:px(kay,240,78)+' 240w, '+px(kay,480,80)+' 480w',sizes:'(max-width:600px) 46vw, 190px'});
       at.src=px(kay,large?800:320,large?86:80);im=el('img',at);yedek.push(large?kay:imgSmall(c));}
     else im=el('img',Object.assign(at,{src:imgSmall(c)}));
     if(!String(c[14]).startsWith('ja-'))yedek.push('https://images.scrydex.com/pokemon/'+c[14]+'/'+(large?'large':'small'));
     if(!large&&!y&&/pokellector\.com\/.*\.png$/.test(imgSmall(c))){box.style.backgroundImage='url("'+imgSmall(c).replace(/\.png$/,'.thumb.png')+'")';box.style.backgroundSize='cover';}
     if(large&&YUKLU[c[14]]){box.style.backgroundImage='url("'+YUKLU[c[14]]+'")';box.style.backgroundSize='cover';box.classList.add('onizle');}
-    if(!large&&y){const on=()=>{const i=new Image();i.decoding='async';i.src=imgYol(c,true).src;};box.addEventListener('pointerenter',on,{once:true});box.addEventListener('touchstart',on,{once:true,passive:true});}}
+    if(!large&&y)box.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse'||box.dataset.on)return;box.dataset.on=1;const i=new Image();i.decoding='async';i.src=imgYol(c,true).src;});}
   im.addEventListener('load',()=>{im.classList.add('ok');if(c&&!large&&!src&&im.currentSrc)YUKLU[c[14]]=im.currentSrc;});
   im.addEventListener('error',()=>{const cur=im.currentSrc||im.src;let n;while((n=yedek.shift())&&n===cur);
     if(n){im.removeAttribute('srcset');im.removeAttribute('sizes');im.src=n;}else im.remove();});

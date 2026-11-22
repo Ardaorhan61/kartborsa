@@ -352,6 +352,22 @@ jobs:
           git commit -qm "Fiyatlar + TCGplayer Japonca $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
 
+      - name: Cyberpunk TCG kataloğu ve fiyatları (TCGplayer / tcgcsv.com)
+        continue-on-error: true
+        id: cp
+        timeout-minutes: 10
+        run: python3 site/.github/scripts/cyberpunk.py veri _site
+      - name: Cyberpunk fiyatlarını kaydet
+        if: steps.cp.outcome == 'success'
+        run: |
+          cd veri
+          rm -rf .git
+          git init -q -b fiyat-verisi
+          git config user.name "KartBorsa fiyat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Fiyatlar + Cyberpunk $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

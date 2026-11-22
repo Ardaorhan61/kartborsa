@@ -292,6 +292,19 @@ if not cards:
 print(f"Gelen: {len(cards)} kart, {len(set_ids) - len(failed)} set. ", end="")
 print(f"Alınamayan setler ({len(failed)}): {', '.join(failed)}")
 
+# Kaynak hatası olduğunda (ör. Pokémon TCG API çökünce TCGdex'e geçildiğinde) fiyatı gelmeyen
+# kartların son bilinen fiyatı en fazla ESKI_GUN gün korunur; böylece Piyasa'dan birden kaybolmazlar.
+ESKI_GUN = 14
+CUTOFF = (datetime.datetime.strptime(TODAY, "%Y-%m-%d") - datetime.timedelta(days=ESKI_GUN)).strftime("%Y-%m-%d")
+site_ids = {x[-1] for x in site.get("cards", [])}
+old_ozet = load(f"{OUT}/ozet.json", {"c": {}})["c"]
+
+
+def yakin(rec):
+    h = [x for x in (rec or {}).get("h", []) if x[1] is not None or x[2] is not None]
+    return bool(h) and h[-1][0] >= CUTOFF
+
+
 by_set = {}
 for c in cards:
     sid = (c.get("set") or {}).get("id") or c["id"].rsplit("-", 1)[0]
@@ -319,6 +332,13 @@ for sid, lst in by_set.items():
             hist.append([TODAY, usd_main, eur_trend])
         hist = hist[-KEEP_DAYS:]
         rec = {"h": hist}
+        eski = False
+        if not t and not m and (prev.get("t") or prev.get("m")) and yakin(prev):
+            # bu çalıştırmada fiyat gelmedi: son bilinen fiyat korunur
+            eski = True
+            for k in ("t", "v", "tu", "m", "mu"):
+                if k in prev:
+                    rec[k] = prev[k]
         if t:
             rec["t"] = t
             rec["v"] = main_v
@@ -330,9 +350,16 @@ for sid, lst in by_set.items():
         if usd_main is not None or eur_trend is not None:
             before = hist[-2] if len(hist) >= 2 else [None, None, None]
             ozet[cid] = [usd_main, eur_trend, m[4] if m else None, m[5] if m else None, before[1], before[2], before[0]]
+        elif eski and cid in old_ozet:
+            ozet[cid] = old_ozet[cid]
+    # kaynakta bu kez eşleşmeyen kartların kaydı (geçmişi) silinmesin
+    for cid, rec in old["c"].items():
+        if cid not in out["c"] and cid in site_ids:
+            out["c"][cid] = rec
+            if cid in old_ozet and yakin(rec):
+                ozet[cid] = old_ozet[cid]
     json.dump(out, open(path, "w"), separators=(",", ":"))
 
-old_ozet = load(f"{OUT}/ozet.json", {"c": {}})["c"]
 for cid, v in old_ozet.items():
     if cid.rsplit("-", 1)[0] in failed and cid not in ozet:
         ozet[cid] = v

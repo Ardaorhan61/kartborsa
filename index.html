@@ -344,6 +344,44 @@ body.oyun-cp .logo .dot{background:#fcee0a;color:#000}
 @media (max-width:640px){#oyunSec{margin:0 2px}#oyunSec button{padding:5px 8px;font-size:12px}}
 .derfiyat{margin-top:14px;padding:12px;border:1px solid var(--line,#2a2f3a);border-radius:12px;background:var(--panel2,rgba(255,255,255,.03))}.dergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.dersat{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:13px}.dersat b{color:var(--accent,#ffcb3d)}.dersite{color:var(--ok,#3fb950);font-weight:700}
 </style>
+<style id="ozellikler2">
+/* 23 Kasım 2026: koleksiyon grafiği, paylaşım, Arıyorum, takas, alarm, bildirim, set analizi, deste kurucu */
+.k2kutu{margin-bottom:14px}.k2ust{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.k2ust .big{font:700 30px "Space Grotesk",Inter,sans-serif;margin:4px 0}.k2don{margin:0!important;align-items:center}
+.k2graf{width:100%;height:auto;display:block;margin-top:8px}
+.k2f{font-weight:700;font-size:13px}.k2f.up,.k2bas.up{color:#3fb950}.k2f.down,.k2bas.down{color:#f85149}
+.k2iki{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.k2iki{grid-template-columns:1fr}}
+.k2bas{font-weight:700;margin-bottom:6px}
+.k2sat{display:flex;align-items:center;gap:10px;padding:6px 4px;border-radius:10px;cursor:pointer}.k2sat:hover{background:rgba(255,255,255,.04)}
+.k2sat .k2img,.k2kb .k2img{flex:0 0 auto}.k2img{border-radius:6px;overflow:hidden}.k2img .fb{font-size:9px}
+.k2ad{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k2yok{width:34px;height:47px;border-radius:6px;background:rgba(255,255,255,.06)}
+.k2islem{margin-top:14px;padding:12px}.k2butonlar{display:flex;gap:8px;flex-wrap:wrap}.k2bilgi{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.k2kb{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+.k2chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.k2chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);font-size:13px;color:inherit;cursor:pointer}
+.k2chip.var{border-color:#3fb950;color:#3fb950}.k2chip button{border:0;background:transparent;color:inherit;cursor:pointer;font-size:15px;padding:0}
+.k2takasg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.k2takas{padding:12px}.k2takas.k2esles{border-color:#3fb950;box-shadow:0 0 0 1px #3fb950}.k2tust{display:flex;gap:12px}
+.k2rozet{display:inline-block;background:#3fb950;color:#06200d;font-weight:700;font-size:12px;padding:2px 8px;border-radius:999px;margin-bottom:4px}
+.k2arayan{font-size:12px;font-weight:700;color:var(--accent,#ffcb3d);margin-top:4px}
+.k2bild{display:flex;gap:12px;align-items:center;margin-bottom:8px;cursor:pointer}.k2bild.yeni{border-color:var(--accent,#ffcb3d)}.k2bik{font-size:24px}
+.k2tablo{display:grid;gap:2px;font-size:14px}.k2tr{display:grid;grid-template-columns:2fr .6fr 1fr 1fr 1fr;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.03)}
+.k2th{font-weight:700;color:var(--muted,#9aa1c3);background:transparent}
+.k2setbtn{margin-left:auto}
+.k2dkur{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}@media(max-width:760px){.k2dkur{grid-template-columns:1fr}.k2dkur .k2panel{order:-1}}
+.k2panel{position:sticky;top:76px;max-height:calc(100vh - 90px);overflow:auto}@media(max-width:760px){.k2panel{position:static;max-height:none}}
+.k2durum{margin:10px 0 4px;font-weight:700}.k2durum.iyi{color:#3fb950}.k2durum.kotu{color:#f0b429}.k2hata{margin:4px 0 0 18px;color:#f0b429}
+.k2leg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}.k2legk{cursor:pointer;text-align:center}.k2legk .k2img{width:100%}
+.k2legbos{border:2px dashed rgba(255,255,255,.15);border-radius:8px;aspect-ratio:5/7;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted,#9aa1c3)}
+.k2dsat{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:8px;font-size:14px}.k2dsat.hata{background:rgba(248,81,73,.12)}
+.k2dmal{flex:0 0 22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.k2dad{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k2dadet{display:flex;align-items:center;gap:6px}.k2dadet button{width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;font-weight:700}
+.k2dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.k2dkart{position:relative;cursor:pointer;border-radius:10px;padding:4px;transition:transform .12s}.k2dkart:hover{transform:translateY(-2px)}.k2dkart.var{background:rgba(252,238,10,.08);box-shadow:0 0 0 1px rgba(252,238,10,.4)}
+.k2dkart .k2img{width:100%}.k2dsay{position:absolute;top:8px;right:8px;background:#fcee0a;color:#000;font-weight:800;border-radius:999px;padding:1px 8px;font-size:13px}
+.k2kayit{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+</style>
 </head>
 <body>
 <header><div class="bar">
@@ -2313,6 +2351,479 @@ rehberKur();
   try{if(CAT){refreshAll();formKurGuvenli();}else{await window.__katalog;formKurGuvenli();}}catch(e){}
   setInterval(async()=>{if(USER&&document.visibilityState==='visible'){const once=tkSayi();await teklifleriYukle();if(tkSayi()!==once){updateNav();if($('#v-profil').classList.contains('on')&&profTab==='teklifler')drawProfil();}}},90000);
 })();
+})();
+</script>
+<script id="ozellikler2-js">
+/* ===== 23 Kasım 2026: koleksiyon değeri grafiği, paylaşım görselleri, Arıyorum, takas, fiyat alarmı, bildirimler, set analizi, Cyberpunk deste kurucu ===== */
+(function(){
+'use strict';
+const VAR={aranan:null,takas:null,alarm:null,bildirim:null,deste:null};
+let ARANAN=[],TAKAS=[],ALARM=[],BILDIRIM=[];
+const tabloYok=e=>!!e&&(e.code==='42P01'||e.code==='PGRST205'||e.code==='PGRST202'||/does not exist|schema cache|Could not find/i.test(e.message||''));
+const bekle=ms=>new Promise(r=>setTimeout(r,ms));
+const kartId=c=>c[14];
+const isCp=c=>!!c&&String(c[14]).startsWith('cp-');
+const ekle=(p,...k)=>{p.append(...k.flat().filter(x=>x!=null&&x!==false));return p;};
+const sidOf=id=>String(id).slice(0,String(id).lastIndexOf('-'));
+const profilGerekli=()=>{if(!USER){needLogin('Bunun için giriş yap');return false;}if(!PROFILE){toast('Önce profilini oluştur');profTab='ayarlar';go('profil');return false;}return true;};
+const hataYaz=e=>toast((e&&e.message)?('Olmadı: '+e.message):'Bir şeyler ters gitti');
+const kartAdi=c=>c[0];
+const setAdi=c=>(setOf(c)||[])[1]||'';
+const fiyatTL=id=>{try{const mv=mainValue(OZET&&OZET.c[id]);return mv?mv.tl:null;}catch(e){return null;}};
+const tarih=d=>{try{return new Date(d).toLocaleDateString('tr-TR',{day:'numeric',month:'short'});}catch(e){return '';}};
+function kartAc(id){const i=BYID[id];if(i==null){toast('Kart bulunamadı');return;}const c=CAT.cards[i];if(dilOf(c)!==DIL)dilDegistir(dilOf(c));openCard(i);}
+function kartKucuk(id,w){const i=BYID[id];if(i==null)return el('div',{class:'k2yok'});const c=CAT.cards[i];const b=cardImg(c,false);b.classList.add('k2img');if(w)b.style.width=w+'px';return b;}
+
+/* ---------- veri ---------- */
+async function tabloDene(ad,sorgu){try{const r=await sorgu;if(r.error){if(tabloYok(r.error)){VAR[ad]=false;return null;}console.warn(ad,r.error);VAR[ad]=VAR[ad]??true;return null;}VAR[ad]=true;return r.data||[];}catch(e){console.warn(ad,e);return null;}}
+async function genelYukle(){if(!SB)return;
+  const[a,t]=await Promise.all([tabloDene('aranan',SB.from('aranan').select('*').eq('active',true).order('created_at',{ascending:false}).limit(3000)),
+    tabloDene('takas',SB.from('takas').select('*').eq('status','active').order('created_at',{ascending:false}).limit(1000)),
+    VAR.alarm===null?tabloDene('alarm',SB.from('fiyat_alarm').select('id').limit(1)):null,VAR.bildirim===null?tabloDene('bildirim',SB.from('bildirimler').select('id').limit(1)):null]);
+  if(a)ARANAN=a;if(t)TAKAS=t;}
+async function kullaniciYukle(){if(!SB||!USER){ALARM=[];BILDIRIM=[];return;}
+  const[al,bi,ab,tb]=await Promise.all([tabloDene('alarm',SB.from('fiyat_alarm').select('*').order('created_at',{ascending:false})),
+    tabloDene('bildirim',SB.from('bildirimler').select('*').order('created_at',{ascending:false}).limit(100)),
+    VAR.aranan!==false?SB.from('aranan').select('*').eq('owner',USER.id):null,
+    VAR.takas!==false?SB.from('takas').select('*').eq('owner',USER.id):null]);
+  if(al)ALARM=al;if(bi)BILDIRIM=bi;
+  const birlestir=(liste,yeni)=>{if(!yeni||!yeni.data)return liste;const m=new Map(liste.map(x=>[x.id,x]));yeni.data.forEach(x=>m.set(x.id,x));return [...m.values()];};
+  ARANAN=birlestir(ARANAN,ab);TAKAS=birlestir(TAKAS,tb);}
+const okunmamis=()=>BILDIRIM.filter(b=>!b.okundu).length;
+const benimAranan=id=>USER&&ARANAN.find(a=>a.owner===USER.id&&a.card_id===id);
+const arayanlar=id=>ARANAN.filter(a=>a.card_id===id&&a.active);
+const takasKart=id=>TAKAS.filter(t=>t.card_id===id&&t.status==='active');
+
+/* ---------- menü ve görünümler ---------- */
+function gorunumKur(){
+  if(!$('#v-takas')){$('main').append(el('section',{class:'view',id:'v-takas'}));const nb=el('button',{'data-v':'takas',id:'navTakas'},'Takas');nb.addEventListener('click',()=>go('takas'));const pb=$('#navProfil');pb.parentNode.insertBefore(nb,pb);}
+  if(!$('#v-deste')){$('main').append(el('section',{class:'view',id:'v-deste'}));const nb=el('button',{'data-v':'deste',id:'navDeste'},'Desteler');nb.addEventListener('click',()=>go('deste'));const pb=$('#navProfil');pb.parentNode.insertBefore(nb,pb);}
+  menuGuncelle();}
+function menuGuncelle(){const d=$('#navDeste');if(d)d.style.display=DIL==='cp'?'':'none';const t=$('#navTakas');if(t)t.style.display=(VAR.takas===false&&VAR.aranan===false)?'none':'';
+  const p=$('#navProfil');if(p){p.querySelectorAll('.bdc').forEach(x=>x.remove());const n=USER?okunmamis():0;if(n)p.append(el('span',{class:'cartcount bdc',title:n+' yeni bildirim'},'🔔'+n));}}
+const _go2=window.go;
+window.go=function(v){const r=_go2.apply(this,arguments);try{if(v==='takas')drawTakasSayfa();if(v==='deste')drawDeste();menuGuncelle();}catch(e){console.warn('go2',e);}return r;};
+const _un2=window.updateNav;
+window.updateNav=function(){const r=_un2.apply(this,arguments);try{menuGuncelle();kullaniciTetik();}catch(e){}return r;};
+let sonKullanici=undefined;
+function kullaniciTetik(){const u=USER?USER.id:null;if(u===sonKullanici)return;sonKullanici=u;kullaniciYukle().then(()=>{menuGuncelle();}).catch(()=>{});}
+const _dd2=window.dilDegistir;
+window.dilDegistir=function(d){const r=_dd2.apply(this,arguments);try{menuGuncelle();if(d!=='cp'&&$('#v-deste')&&$('#v-deste').classList.contains('on'))go('katalog');}catch(e){}return r;};
+
+/* ---------- 1: koleksiyon değeri grafiği ---------- */
+async function koleksiyonGecmisi(list){
+  const sids=[...new Set(list.map(x=>sidOf(x.card_id)))];const sp={};
+  await Promise.all(sids.map(async s=>{try{sp[s]=await setPrices(s);}catch(e){sp[s]=null;}}));
+  const kurGun=g=>{const k=KUR&&KUR.gecmis&&KUR.gecmis[g];return k?{USD:k[0],EUR:k[1]}:{USD:KUR.USD,EUR:KUR.EUR};};
+  const seri={};const gunler=new Set();
+  list.forEach(x=>{const d=sp[sidOf(x.card_id)];const k=d&&d.c&&d.c[x.card_id];if(!k||!k.h||!k.h.length)return;
+    const m={};k.h.forEach(h=>{const g=h[0];const kr=kurGun(g);const v=h[1]!=null?h[1]*kr.USD:(h[2]!=null?h[2]*kr.EUR:null);if(v!=null){m[g]=v;gunler.add(g);}});
+    if(Object.keys(m).length)seri[x.card_id]={m,qty:(seri[x.card_id]?seri[x.card_id].qty:0)+x.qty};});
+  const g=[...gunler].sort();if(!g.length)return null;
+  const kartlar=Object.entries(seri).map(([id,s])=>{const deger=[];let son=null;const ilk=g.find(d=>s.m[d]!=null);
+    g.forEach(d=>{if(s.m[d]!=null)son=s.m[d];deger.push(son!=null?son:s.m[ilk]);});return{id,qty:s.qty,deger};});
+  const toplam=g.map((d,j)=>kartlar.reduce((t,k)=>t+k.deger[j]*k.qty,0));
+  return{gunler:g,toplam,kartlar};}
+function cizgiGrafik(gunler,deger){
+  const W=640,H=200,P=36;const mn=Math.min(...deger),mx=Math.max(...deger);const pay=(mx-mn)||Math.max(1,mx*0.05);
+  const lo=mn-pay*0.15,hi=mx+pay*0.15;const x=j=>P+(gunler.length<2?0:(W-P-10)*j/(gunler.length-1)),y=v=>10+(H-40)*(1-(v-lo)/(hi-lo));
+  const pts=deger.map((v,j)=>x(j).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+  const art=deger[deger.length-1]>=deger[0];const renk=art?'#3fb950':'#f85149';
+  const ns='http://www.w3.org/2000/svg';const s=document.createElementNS(ns,'svg');s.setAttribute('viewBox',`0 0 ${W} ${H}`);s.setAttribute('class','k2graf');
+  const add=(t,a)=>{const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);s.append(e);return e;};
+  const gr=add('linearGradient',{id:'k2g',x1:0,y1:0,x2:0,y2:1});const st1=document.createElementNS(ns,'stop');st1.setAttribute('offset','0');st1.setAttribute('stop-color',renk);st1.setAttribute('stop-opacity','.35');const st2=document.createElementNS(ns,'stop');st2.setAttribute('offset','1');st2.setAttribute('stop-color',renk);st2.setAttribute('stop-opacity','0');gr.append(st1,st2);
+  [hi-(hi-lo)*0.1,(hi+lo)/2,lo+(hi-lo)*0.1].forEach(v=>{add('line',{x1:P,x2:W-10,y1:y(v),y2:y(v),stroke:'rgba(255,255,255,.08)'});const t=add('text',{x:2,y:y(v)+4,fill:'#9aa1c3','font-size':11});t.textContent=Math.round(v).toLocaleString('tr-TR');});
+  add('polygon',{points:`${x(0)},${H-30} ${pts} ${x(deger.length-1)},${H-30}`,fill:'url(#k2g)'});
+  add('polyline',{points:pts,fill:'none',stroke:renk,'stroke-width':3,'stroke-linejoin':'round','stroke-linecap':'round'});
+  deger.forEach((v,j)=>{const c=add('circle',{cx:x(j),cy:y(v),r:gunler.length>40?0:3.5,fill:renk});const ti=document.createElementNS(ns,'title');ti.textContent=tarih(gunler[j])+': '+tl(v);c.append(ti);});
+  const yaz=(j,anchor)=>{const t=add('text',{x:x(j),y:H-10,fill:'#9aa1c3','font-size':11,'text-anchor':anchor});t.textContent=tarih(gunler[j]);};
+  yaz(0,'start');if(gunler.length>1)yaz(gunler.length-1,'end');
+  return s;}
+let K2DONEM=30;
+async function koleksiyonGrafikKutusu(area){
+  if(!COLL||!COLL.length||!KUR)return;
+  const kutu=el('div',{class:'card k2kutu'},el('div',{class:'muted small',text:'Koleksiyon değeri hesaplanıyor…'}));area.prepend(kutu);
+  let G;try{G=await koleksiyonGecmisi(COLL);}catch(e){console.warn(e);}
+  kutu.innerHTML='';
+  if(!G||G.gunler.length<2){kutu.append(el('b',{},'📈 Koleksiyonunun değeri'),el('div',{class:'muted small',style:'margin-top:6px',text:'Grafik için en az iki günlük fiyat geçmişi gerekiyor; birkaç gün içinde burada görünecek.'}));return;}
+  const ciz=()=>{const n=G.gunler.length;const bas=Math.max(0,n-(K2DONEM===0?n:K2DONEM));const gs=G.gunler.slice(bas),ts=G.toplam.slice(bas);
+    const fark=ts[ts.length-1]-ts[0],yuzde=ts[0]?fark/ts[0]*100:0;
+    const degisim=G.kartlar.map(k=>({id:k.id,fark:(k.deger[n-1]-k.deger[bas])*k.qty,yuzde:k.deger[bas]?(k.deger[n-1]-k.deger[bas])/k.deger[bas]*100:0})).filter(k=>Math.abs(k.fark)>=0.5);
+    const kaz=degisim.filter(k=>k.fark>0).sort((a,b)=>b.fark-a.fark).slice(0,5),kay=degisim.filter(k=>k.fark<0).sort((a,b)=>a.fark-b.fark).slice(0,5);
+    const satir=k=>{const i=BYID[k.id];const c=i!=null?CAT.cards[i]:null;return el('div',{class:'k2sat',onclick:()=>kartAc(k.id)},kartKucuk(k.id,34),el('div',{style:'flex:1;min-width:0'},el('div',{class:'k2ad',text:c?c[0]:k.id}),el('div',{class:'muted small',text:c?setAdi(c):''})),el('div',{class:'k2f '+(k.fark>0?'up':'down'),text:(k.fark>0?'+':'')+tl(k.fark)+' · %'+Math.abs(k.yuzde).toLocaleString('tr-TR',{maximumFractionDigits:1})}));};
+    kutu.innerHTML='';
+    kutu.append(el('div',{class:'k2ust'},el('div',{},el('b',{},'📈 Koleksiyonunun değeri'),el('div',{class:'big',text:tl(ts[ts.length-1])}),
+        el('div',{class:'k2f '+(fark>=0?'up':'down'),text:`${fark>=0?'▲':'▼'} ${tl(Math.abs(fark))} (%${Math.abs(yuzde).toLocaleString('tr-TR',{maximumFractionDigits:1})}) · ${tarih(gs[0])} – ${tarih(gs[gs.length-1])}`})),
+      el('div',{class:'subtabs k2don'},...[[7,'7 gün'],[30,'30 gün'],[0,'Tümü']].map(([d,t])=>el('button',{class:K2DONEM===d?'on':'',onclick:()=>{K2DONEM=d;ciz();}},t)),
+        el('button',{class:'btn',style:'margin-left:6px',onclick:()=>koleksiyonPaylas(G)},'📤 Paylaş'))),
+      cizgiGrafik(gs,ts),
+      el('div',{class:'muted small',style:'margin:4px 0 10px',text:'Bugünkü koleksiyonundaki kartların o günlerdeki piyasa değeri (o günün döviz kuruyla). Fiyat geçmişi olmayan kartlar dahil değil.'}),
+      el('div',{class:'k2iki'},el('div',{},el('div',{class:'k2bas up',text:'🚀 En çok kazandıranlar'}),...(kaz.length?kaz.map(satir):[el('div',{class:'muted small',text:'Bu dönemde değeri artan kart yok.'})])),
+        el('div',{},el('div',{class:'k2bas down',text:'📉 En çok kaybettirenler'}),...(kay.length?kay.map(satir):[el('div',{class:'muted small',text:'Bu dönemde değeri düşen kart yok.'})]))));};
+  ciz();}
+const _dcl2=window.drawColl;
+window.drawColl=function(area){const r=_dcl2.apply(this,arguments);try{koleksiyonGrafikKutusu(area);}catch(e){console.warn('k2',e);}return r;};
+
+/* ---------- 2: paylaşılabilir görseller ---------- */
+function resimYukle(u){return new Promise(res=>{if(!u){res(null);return;}const im=new Image();im.crossOrigin='anonymous';im.referrerPolicy='no-referrer';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u;setTimeout(()=>res(null),12000);});}
+async function kartResmi(c){
+  if(isCp(c)){const u=String(imgLarge(c)||'');const k=await resimYukle(u.replace('_in_1000x1000','_400w'));return k||await resimYukle(u);}
+  const u=imgLarge(c);if(!u||/^data:/.test(u))return null;
+  return await resimYukle(px(u,500,85))||await resimYukle(u);}
+function yuvarlak(x,X,Y,W,H,R){x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+W,Y,X+W,Y+H,R);x.arcTo(X+W,Y+H,X,Y+H,R);x.arcTo(X,Y+H,X,Y,R);x.arcTo(X,Y,X+W,Y,R);x.closePath();}
+function sigdir(x,t,mw){t=String(t||'');if(x.measureText(t).width<=mw)return t;while(t.length>1&&x.measureText(t+'…').width>mw)t=t.slice(0,-1);return t+'…';}
+function tuvalTemel(baslik){const cv=document.createElement('canvas');cv.width=1080;cv.height=1350;const x=cv.getContext('2d');
+  const cp=DIL==='cp';const g=x.createLinearGradient(0,0,1080,1350);g.addColorStop(0,cp?'#1a1a06':'#151a33');g.addColorStop(1,cp?'#0b1c22':'#0b0d1a');x.fillStyle=g;x.fillRect(0,0,1080,1350);
+  x.fillStyle=cp?'#fcee0a':'#ffcb3d';x.font='700 54px "Space Grotesk", Inter, Arial';x.fillText('⚡ KartBorsa',60,100);
+  x.fillStyle='#c9cee8';x.font='500 34px Inter, Arial';x.fillText(sigdir(x,baslik,960),60,152);
+  x.fillStyle='#9aa1c3';x.font='500 30px Inter, Arial';x.fillText('www.kartborsa.com',60,1300);
+  x.textAlign='right';x.fillText(new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}),1020,1300);x.textAlign='left';
+  return{cv,x,cp};}
+function kartCiz(x,im,c,X,Y,W,H){x.save();yuvarlak(x,X,Y,W,H,18);x.fillStyle='rgba(255,255,255,.06)';x.fill();x.clip();
+  if(im){const r=Math.min(W/im.width,H/im.height);const w=im.width*r,h=im.height*r;x.drawImage(im,X+(W-w)/2,Y+(H-h)/2,w,h);}
+  else{x.fillStyle='#c9cee8';x.font='600 26px Inter, Arial';x.textAlign='center';x.fillText(sigdir(x,c?c[0]:'',W-20),X+W/2,Y+H/2);x.textAlign='left';}
+  x.restore();}
+async function paylasimGoster(cv,dosya,metin){
+  const blob=await new Promise(r=>{try{cv.toBlob(r,'image/png');}catch(e){r(null);}});
+  const b=$('#modalBody');b.innerHTML='';$('#modal').classList.add('on');
+  if(!blob){b.append(el('div',{class:'card muted',text:'Görsel hazırlanamadı (bazı kart resimleri paylaşıma izin vermiyor).'}));return;}
+  const url=URL.createObjectURL(blob);const file=new File([blob],dosya,{type:'image/png'});
+  const pay=navigator.canShare&&navigator.canShare({files:[file]});
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:10px'},el('h2',{text:'📤 Paylaşım görseli'}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('img',{src:url,alt:'Paylaşım görseli',style:'width:100%;max-width:420px;display:block;margin:0 auto;border-radius:14px'}),
+    el('div',{style:'display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px'},
+      pay?el('button',{class:'btn',onclick:async()=>{try{await navigator.share({files:[file],text:metin});}catch(e){}}},'📤 Paylaş (Instagram, WhatsApp…)'):null,
+      el('a',{class:'btn'+(pay?' sec':''),href:url,download:dosya},'⬇️ Görseli indir')),
+    el('div',{class:'muted small',style:'text-align:center;margin-top:8px',text:'Instagram hikâyesi ve gönderisi için 1080×1350 boyutunda.'}));}
+async function koleksiyonPaylas(G){
+  toast('Görsel hazırlanıyor…');
+  const ad=(PROFILE&&PROFILE.display_name)||'Koleksiyonum';
+  const{cv,x,cp}=tuvalTemel(ad+' · Koleksiyonum');
+  const t=collTotals();const n=G?G.gunler.length:0;let fark=null,yuz=null;
+  if(G&&n>1){const bas=Math.max(0,n-7);fark=G.toplam[n-1]-G.toplam[bas];yuz=G.toplam[bas]?fark/G.toplam[bas]*100:null;}
+  x.fillStyle='#ffffff';x.font='700 96px "Space Grotesk", Inter, Arial';x.fillText(tl(t.value),60,290);
+  x.fillStyle='#9aa1c3';x.font='500 32px Inter, Arial';x.fillText(`${t.qty.toLocaleString('tr-TR')} kart · piyasa değeri`,60,340);
+  if(fark!=null){x.fillStyle=fark>=0?'#3fb950':'#f85149';x.font='700 34px Inter, Arial';x.fillText(`${fark>=0?'▲':'▼'} ${tl(Math.abs(fark))}${yuz!=null?' (%'+Math.abs(yuz).toLocaleString('tr-TR',{maximumFractionDigits:1})+')':''} · son 7 gün`,60,392);}
+  const en=COLL.map(c=>({c,v:fiyatTL(c.card_id)})).filter(r=>r.v!=null&&BYID[r.c.card_id]!=null).sort((a,b)=>b.v-a.v);
+  const tek=[];const gor=new Set();for(const r of en){if(gor.has(r.c.card_id))continue;gor.add(r.c.card_id);tek.push(r);if(tek.length>=6)break;}
+  x.fillStyle=cp?'#fcee0a':'#ffcb3d';x.font='700 34px Inter, Arial';x.fillText('En değerli kartlarım',60,470);
+  const resimler=await Promise.all(tek.map(r=>kartResmi(CAT.cards[BYID[r.c.card_id]])));
+  const W=300,H=380,GX=30,X0=60,Y0=500;
+  tek.forEach((r,j)=>{const c=CAT.cards[BYID[r.c.card_id]];const X=X0+(j%3)*(W+GX),Y=Y0+Math.floor(j/3)*(H+80);kartCiz(x,resimler[j],c,X,Y,W,H);
+    x.fillStyle='#eef0fa';x.font='600 24px Inter, Arial';x.fillText(sigdir(x,c[0],W),X,Y+H+30);x.fillStyle=cp?'#fcee0a':'#ffcb3d';x.font='700 26px Inter, Arial';x.fillText(tl(r.v),X,Y+H+62);});
+  if(!tek.length){x.fillStyle='#9aa1c3';x.font='500 30px Inter, Arial';x.fillText('Fiyatı olan kart yok.',60,540);}
+  await paylasimGoster(cv,'kartborsa-koleksiyonum.png',`KartBorsa'daki koleksiyonum: ${tl(t.value)} 🔥 www.kartborsa.com`);}
+async function kartPaylas(i){
+  toast('Görsel hazırlanıyor…');const c=CAT.cards[i];const id=kartId(c);
+  const{cv,x,cp}=tuvalTemel(setAdi(c)+' · #'+c[2]);
+  const im=await kartResmi(c);kartCiz(x,im,c,190,200,700,880);
+  x.fillStyle='#ffffff';x.font='700 52px "Space Grotesk", Inter, Arial';x.fillText(sigdir(x,c[0],960),60,1150);
+  const v=fiyatTL(id);let mv=null;try{mv=mainValue(OZET&&OZET.c[id]);}catch(e){}
+  x.fillStyle=cp?'#fcee0a':'#ffcb3d';x.font='700 56px Inter, Arial';x.fillText(v!=null?'Piyasa: '+tl(v):'Piyasa fiyatı henüz yok',60,1222);
+  if(mv&&mv.prev){const p=(mv.tl-mv.prev)/mv.prev*100;if(Math.abs(p)>=0.05){x.textAlign='right';x.fillStyle=p>0?'#3fb950':'#f85149';x.font='700 40px Inter, Arial';x.fillText(`${p>0?'▲':'▼'} %${Math.abs(p).toLocaleString('tr-TR',{maximumFractionDigits:1})}`,1020,1222);x.textAlign='left';}}
+  await paylasimGoster(cv,'kartborsa-'+String(c[0]).replace(/[^\w]+/g,'-').toLowerCase()+'.png',`${c[0]} – ${v!=null?tl(v):''} · KartBorsa www.kartborsa.com`);}
+
+/* ---------- kart detayına eklenenler: Arıyorum, alarm, takas, paylaş ---------- */
+const _ocn3=window.openCardNow;
+window.openCardNow=function(i){const r=_ocn3.apply(this,arguments);try{kartEkleri(i);}catch(e){console.warn('kartEkleri',e);}return r;};
+function kartEkleri(i){const c=CAT.cards[i];if(!c)return;const id=kartId(c);const b=$('#modalBody');if(!b||b.querySelector('.k2islem'))return;
+  const kutu=el('div',{class:'k2islem card'});
+  const ar=arayanlar(id),tk=takasKart(id),ben=benimAranan(id),al=ALARM.filter(a=>a.card_id===id);
+  const bilgi=[];if(ar.length)bilgi.push(`🔍 ${ar.length} kişi bu kartı arıyor`);if(tk.length)bilgi.push(`🔁 ${tk.length} takas ilanında`);
+  ekle(kutu,el('div',{class:'k2butonlar'},
+    VAR.aranan!==false?el('button',{class:'btn'+(ben&&ben.active?'':' sec'),onclick:()=>arananForm(i)},ben&&ben.active?'🔍 Arıyorum ✓':'🔍 Bu kartı arıyorum'):null,
+    VAR.alarm!==false?el('button',{class:'btn'+(al.some(a=>a.active)?'':' sec'),onclick:()=>alarmForm(i)},al.some(a=>a.active)?'⏰ Alarm kurulu ✓':'⏰ Fiyat alarmı'):null,
+    VAR.takas!==false?el('button',{class:'btn sec',onclick:()=>takasForm(i)},'🔁 Takasa koy'):null,
+    el('button',{class:'btn sec',onclick:()=>kartPaylas(i)},'📤 Paylaş')),
+    bilgi.length?el('div',{class:'small k2bilgi'},...bilgi.map(t=>el('a',{href:'#',onclick:e=>{e.preventDefault();closeModal();TKS.sekme=t.startsWith('🔍')?'aranan':'takas';TKS.q=c[0];go('takas');}},t))):null);
+  const ms=b.querySelector('.derfiyat');if(ms)ms.after(kutu);else b.append(kutu);}
+
+function kucukModal(baslik,...icerik){const b=$('#modalBody');b.innerHTML='';$('#modal').classList.add('on');
+  ekle(b,el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:baslik}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),...icerik);return b;}
+function kartBaslik(i){const c=CAT.cards[i];return el('div',{class:'k2kb'},kartKucuk(kartId(c),70),el('div',{},el('b',{text:c[0]}),el('div',{class:'muted small',text:setAdi(c)+' · #'+c[2]}),
+  el('div',{class:'small',text:fiyatTL(kartId(c))!=null?'Piyasa değeri ≈ '+tl(fiyatTL(kartId(c))):'Piyasa değeri yok'})));}
+
+/* ---------- 5: Arıyorum ---------- */
+function arananForm(i){if(!profilGerekli())return;const c=CAT.cards[i],id=kartId(c),ben=benimAranan(id);
+  const mx=el('input',{type:'number',min:1,placeholder:'İsteğe bağlı, ör. 500',value:ben&&ben.max_price?ben.max_price:''});
+  const nt=el('input',{maxlength:200,placeholder:'İsteğe bağlı, ör. sadece Near Mint',value:ben&&ben.note?ben.note:''});
+  kucukModal('🔍 Bu kartı arıyorum',kartBaslik(i),
+    el('div',{class:'muted small',style:'margin:10px 0',text:'Biri bu kartı satışa ya da takasa koyduğunda sana site içinde (🔔) ve e-postayla haber veririz. Aradığın kartlar "Takas" sayfasındaki "Aranan kartlar" listesinde herkese görünür, satıcılar sana ulaşabilir.'}),
+    el('label',{},'En fazla ödeyeceğin fiyat (₺)'),mx,el('label',{},'Not'),nt,
+    el('div',{style:'display:flex;gap:8px;margin-top:14px;flex-wrap:wrap'},
+      el('button',{class:'btn',onclick:async()=>{const row={card_id:id,card_name:c[0],set_name:setAdi(c),max_price:mx.value?Math.round(+mx.value):null,note:nt.value.trim()||null,active:true};
+        const r=ben?await SB.from('aranan').update(row).eq('id',ben.id).select().single():await SB.from('aranan').insert(row).select().single();
+        if(r.error)return hataYaz(r.error);ARANAN=ARANAN.filter(a=>a.id!==r.data.id).concat(r.data);toast('Aranan kartlara eklendi 🔍');openCard(i);}},ben?'Kaydet':'Aramaya başla'),
+      ben?el('button',{class:'btn sec',onclick:async()=>{const r=await SB.from('aranan').delete().eq('id',ben.id);if(r.error)return hataYaz(r.error);ARANAN=ARANAN.filter(a=>a.id!==ben.id);toast('Aramadan kaldırıldı');openCard(i);}},'Aramayı bırak'):null));}
+
+/* ---------- 7: fiyat alarmı ---------- */
+function alarmForm(i){if(!profilGerekli())return;const c=CAT.cards[i],id=kartId(c),v=fiyatTL(id);
+  const yon=el('select',{},el('option',{value:'alti'},'Fiyat bu değerin altına düşünce'),el('option',{value:'ustu'},'Fiyat bu değerin üstüne çıkınca'));
+  const hd=el('input',{type:'number',min:1,value:v?Math.max(1,Math.round(v*0.9)):''});
+  yon.addEventListener('change',()=>{if(v)hd.value=Math.max(1,Math.round(v*(yon.value==='alti'?0.9:1.1)));});
+  const mevcut=ALARM.filter(a=>a.card_id===id);
+  kucukModal('⏰ Fiyat alarmı',kartBaslik(i),
+    el('div',{class:'muted small',style:'margin:10px 0',text:'Fiyatlar her sabah güncellenir. Kartın piyasa değeri hedefe ulaştığında sana site içinde (🔔) ve e-postayla haber veririz; alarm bir kez çalar.'}),
+    v==null?el('div',{class:'small',style:'color:var(--danger,#f85149);margin-bottom:8px',text:'Bu kartın şu an piyasa fiyatı yok; fiyatı geldiğinde alarm kontrol edilir.'}):null,
+    el('label',{},'Ne zaman haber verelim?'),yon,el('label',{},'Hedef fiyat (₺)'),hd,
+    el('div',{style:'display:flex;gap:8px;margin-top:14px'},el('button',{class:'btn',onclick:async()=>{const h=Math.round(+hd.value);if(!h||h<1)return toast('Hedef fiyatı yaz');
+      const r=await SB.from('fiyat_alarm').upsert({card_id:id,card_name:c[0],hedef:h,yon:yon.value,active:true,tetiklendi_at:null,owner:USER.id},{onConflict:'owner,card_id,yon'}).select().single();
+      if(r.error)return hataYaz(r.error);ALARM=ALARM.filter(a=>a.id!==r.data.id).concat(r.data);toast('Alarm kuruldu ⏰');openCard(i);}},'Alarmı kur')),
+    mevcut.length?el('div',{style:'margin-top:16px'},el('b',{},'Bu karttaki alarmların'),...mevcut.map(a=>alarmSatir(a,()=>alarmForm(i)))):null);}
+function alarmSatir(a,sonra){const v=fiyatTL(a.card_id);const ulasti=v!=null&&(a.yon==='alti'?v<=a.hedef:v>=a.hedef);
+  return el('div',{class:'k2sat'},kartKucuk(a.card_id,40),el('div',{style:'flex:1;min-width:0'},el('div',{class:'k2ad',text:a.card_name}),
+      el('div',{class:'muted small',text:`${a.yon==='alti'?'≤':'≥'} ${tl(a.hedef)} · şu an ${v!=null?tl(v):'fiyat yok'}`}),
+      el('div',{class:'small',style:'color:'+(a.active?(ulasti?'#3fb950':'var(--muted,#9aa1c3)'):'#ffcb3d'),text:a.active?(ulasti?'🎯 Hedefe ulaştı, yarın sabah bildirim gelir':'Aktif'):'✅ Çaldı'+(a.tetiklendi_at?' · '+tarih(a.tetiklendi_at):'')})),
+    el('div',{style:'display:flex;flex-direction:column;gap:6px'},
+      !a.active?el('button',{class:'btn sec',onclick:async()=>{const r=await SB.from('fiyat_alarm').update({active:true,tetiklendi_at:null}).eq('id',a.id).select().single();if(r.error)return hataYaz(r.error);Object.assign(a,r.data);toast('Alarm yeniden kuruldu');sonra();}},'Yeniden kur'):null,
+      el('button',{class:'btn sec',onclick:async()=>{const r=await SB.from('fiyat_alarm').delete().eq('id',a.id);if(r.error)return hataYaz(r.error);ALARM=ALARM.filter(x=>x.id!==a.id);toast('Alarm silindi');sonra();}},'Sil')));}
+
+/* ---------- 6: takas ---------- */
+function takasForm(i){if(!profilGerekli())return;const c=CAT.cards[i],id=kartId(c);const istenen=[];
+  const cond=el('select',{},...['Mint','Near Mint','Excellent','Good','Played','Hasarlı'].map(x=>el('option',x==='Near Mint'?{selected:''}:{},x)));
+  const lang=el('select',{},...['İngilizce','Japonca','Türkçe','Korece','Çince','Diğer'].map(x=>el('option',{},x)));lang.value=dilOf(c)==='ja'?'Japonca':'İngilizce';
+  const nt=el('textarea',{maxlength:300,placeholder:'ör. Charizard ex ya da aynı değerde herhangi bir Mega kart; ya da "teklife açığım"'});
+  const city=el('input',{maxlength:40,value:(PROFILE&&PROFILE.city)||''});
+  const chips=el('div',{class:'k2chips'});
+  const cizChips=()=>{chips.innerHTML='';istenen.forEach((k,j)=>{const cc=CAT.cards[BYID[k]];chips.append(el('span',{class:'k2chip'},cc?cc[0]+' · '+setAdi(cc):k,el('button',{type:'button',onclick:()=>{istenen.splice(j,1);cizChips();}},'×')));});};
+  const picker=cardPicker(j=>{const k=kartId(CAT.cards[j]);if(istenen.length>=12)return toast('En fazla 12 kart');if(!istenen.includes(k))istenen.push(k);picker.input.value='';cizChips();},'İstediğin kartı yaz, listeden seç');
+  kucukModal('🔁 Takasa koy',kartBaslik(i),
+    el('div',{class:'muted small',style:'margin:10px 0',text:'Bu kartını takasa koyuyorsun. Karşılığında istediğin kartları seç ya da ne istediğini yaz. İlgilenenler profilindeki WhatsApp / Instagram üzerinden sana ulaşır.'}),
+    el('div',{class:'row'},el('div',{},el('label',{},'Kartın durumu'),cond),el('div',{},el('label',{},'Dil'),lang)),
+    el('label',{},'Karşılığında istediğin kartlar (en fazla 12)'),picker,chips,
+    el('label',{},'Not / ne istediğin'),nt,el('label',{},'Şehir'),city,
+    el('div',{style:'display:flex;gap:8px;margin-top:14px'},el('button',{class:'btn',onclick:async()=>{
+      if(!istenen.length&&!nt.value.trim())return toast('İstediğin bir kart seç ya da not yaz');
+      const r=await SB.from('takas').insert({card_id:id,card_name:c[0],set_name:setAdi(c),cond:cond.value,lang:lang.value,istenen,istenen_not:nt.value.trim()||null,city:city.value.trim()||null}).select().single();
+      if(r.error)return hataYaz(r.error);TAKAS.unshift(r.data);toast('Takas ilanın yayında 🔁');closeModal();TKS.sekme='takas';TKS.q='';go('takas');}},'Takas ilanını yayınla')));}
+
+/* ---------- Takas sayfası: takas ilanları + aranan kartlar ---------- */
+const TKS={sekme:'takas',q:'',bende:false};
+async function drawTakasSayfa(){const v=$('#v-takas');if(!v)return;
+  if(VAR.takas===null||VAR.aranan===null){v.innerHTML='';v.append(el('div',{class:'card muted',text:'Yükleniyor…'}));await genelYukle();}
+  v.innerHTML='';
+  const q=el('input',{placeholder:'Kart ya da şehir ara…',value:TKS.q});
+  const bende=el('label',{class:'chk',style:'margin:0'},el('input',{type:'checkbox',...(TKS.bende?{checked:''}:{})}),TKS.sekme==='takas'?' Sadece istenen kartı bende olanlar':' Sadece koleksiyonumda olanlar');
+  v.append(el('div',{class:'hero'},el('div',{},el('h2',{text:'🔁 Takas ve aranan kartlar'}),el('div',{class:'muted small',text:'Kartını başka kartla değiştir ya da aradığın kartı yaz; biri satışa koyunca haber verelim.'})),
+    el('div',{class:'row',style:'flex:1;max-width:620px;align-items:center'},q,bende)));
+  v.append(el('div',{class:'subtabs',style:'margin:4px 0 14px'},
+    el('button',{class:TKS.sekme==='takas'?'on':'',onclick:()=>{TKS.sekme='takas';drawTakasSayfa();}},`🔁 Takas ilanları (${TAKAS.filter(t=>t.status==='active'&&BYID[t.card_id]!=null&&dilOf(CAT.cards[BYID[t.card_id]])===DIL).length})`),
+    el('button',{class:TKS.sekme==='aranan'?'on':'',onclick:()=>{TKS.sekme='aranan';drawTakasSayfa();}},`🔍 Aranan kartlar (${new Set(ARANAN.filter(a=>a.active&&BYID[a.card_id]!=null&&dilOf(CAT.cards[BYID[a.card_id]])===DIL).map(a=>a.card_id)).size})`)));
+  const liste=el('div');v.append(liste);
+  const ciz=()=>{liste.innerHTML='';TKS.q=q.value;TKS.bende=bende.querySelector('input').checked;(TKS.sekme==='takas'?takasListe:arananListe)(liste);};
+  let zm;q.addEventListener('input',()=>{clearTimeout(zm);zm=setTimeout(ciz,200);});bende.querySelector('input').addEventListener('change',ciz);ciz();}
+const koleksiyonumda=()=>new Set((COLL||[]).map(x=>x.card_id));
+function takasListe(area){
+  if(VAR.takas===false){area.append(el('div',{class:'card muted',text:'Takas ilanları çok yakında açılıyor.'}));return;}
+  const q=norm(TKS.q),bende=koleksiyonumda();
+  let a=TAKAS.filter(t=>t.status==='active'&&BYID[t.card_id]!=null&&dilOf(CAT.cards[BYID[t.card_id]])===DIL);
+  if(q)a=a.filter(t=>norm(`${t.card_name} ${t.set_name||''} ${t.city||''} ${(t.istenen||[]).map(k=>{const i=BYID[k];return i!=null?CAT.cards[i][0]:'';}).join(' ')} ${t.istenen_not||''}`).includes(q));
+  if(TKS.bende)a=a.filter(t=>(t.istenen||[]).some(k=>bende.has(k)));
+  if(!a.length){area.append(el('div',{class:'card muted',text:'Henüz takas ilanı yok. Bir kartın detayında "🔁 Takasa koy" ile ilk ilanı sen ver!'}));return;}
+  const g=el('div',{class:'k2takasg'});
+  a.forEach(t=>{const i=BYID[t.card_id],c=CAT.cards[i];const benAriyorum=!!benimAranan(t.card_id);const eslesen=(t.istenen||[]).filter(k=>bende.has(k));
+    const p=(typeof PROFILES!=='undefined'&&PROFILES[t.owner])||null;
+    g.append(el('div',{class:'card k2takas'+(benAriyorum?' k2esles':'')},
+      el('div',{class:'k2tust'},el('div',{style:'cursor:pointer',onclick:()=>kartAc(t.card_id)},kartKucuk(t.card_id,110)),
+        el('div',{style:'flex:1;min-width:0'},benAriyorum?el('div',{class:'k2rozet',text:'🎯 Aradığın kart!'}):null,
+          el('b',{text:t.card_name}),el('div',{class:'muted small',text:`${t.set_name||''} · ${t.cond}${t.lang?' · '+t.lang:''}`}),
+          el('div',{class:'small',style:'margin-top:4px',text:fiyatTL(t.card_id)!=null?'Piyasa ≈ '+tl(fiyatTL(t.card_id)):''}),
+          el('div',{class:'small muted',style:'margin-top:4px',text:`${p&&p.display_name?p.display_name:'Kullanıcı'}${t.city?' · '+t.city:''} · ${tarih(t.created_at)}`}))),
+      el('div',{class:'small',style:'margin-top:10px;font-weight:700',text:'Karşılığında istiyor:'}),
+      el('div',{class:'k2chips'},...(t.istenen||[]).map(k=>{const j=BYID[k];const cc=j!=null?CAT.cards[j]:null;return el('span',{class:'k2chip'+(bende.has(k)?' var':''),style:'cursor:pointer',title:bende.has(k)?'Bu kart koleksiyonunda var':'',onclick:()=>kartAc(k)},(bende.has(k)?'✓ ':'')+(cc?cc[0]:k));})),
+      t.istenen_not?el('div',{class:'small',style:'margin-top:6px',text:'“'+t.istenen_not+'”'}):null,
+      eslesen.length?el('div',{class:'small',style:'margin-top:6px;color:#3fb950',text:`İstediği kartlardan ${eslesen.length} tanesi koleksiyonunda var!`}):null,
+      el('div',{style:'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap'},
+        USER&&t.owner===USER.id?el('button',{class:'btn sec',onclick:()=>takasKapat(t)},'İlanı kapat'):el('button',{class:'btn',onclick:()=>openSeller(t.owner)},'Profil ve iletişim'))));});
+  area.append(g);}
+async function takasKapat(t){const r=await SB.from('takas').update({status:'closed'}).eq('id',t.id).select().single();if(r.error)return hataYaz(r.error);Object.assign(t,r.data);toast('Takas ilanı kapatıldı');if($('#v-takas').classList.contains('on'))drawTakasSayfa();else drawProfil();}
+function arananListe(area){
+  if(VAR.aranan===false){area.append(el('div',{class:'card muted',text:'Aranan kartlar çok yakında açılıyor.'}));return;}
+  const q=norm(TKS.q),bende=koleksiyonumda();const grup=new Map();
+  ARANAN.filter(a=>a.active&&BYID[a.card_id]!=null&&dilOf(CAT.cards[BYID[a.card_id]])===DIL).forEach(a=>{if(!grup.has(a.card_id))grup.set(a.card_id,[]);grup.get(a.card_id).push(a);});
+  let a=[...grup.entries()];if(q)a=a.filter(([id,l])=>norm(`${l[0].card_name} ${l[0].set_name||''}`).includes(q));if(TKS.bende)a=a.filter(([id])=>bende.has(id));
+  a.sort((x,y)=>y[1].length-x[1].length||(fiyatTL(y[0])||0)-(fiyatTL(x[0])||0));
+  if(!a.length){area.append(el('div',{class:'card muted',text:'Henüz aranan kart yok. Bir kartın detayında "🔍 Bu kartı arıyorum" ile ekleyebilirsin.'}));return;}
+  const g=el('div',{class:'cgrid'});
+  a.slice(0,300).forEach(([id,l])=>{const i=BYID[id];const t=tileFor(i);const mx=l.map(x=>x.max_price).filter(Boolean);
+    t.append(el('div',{class:'k2arayan'},`🔍 ${l.length} kişi arıyor`+(mx.length?` · en fazla ${tl(Math.max(...mx))}`:''),
+      bende.has(id)&&!(USER&&l.every(x=>x.owner===USER.id))?el('button',{class:'btn',style:'margin-top:6px;width:100%',onclick:e=>{e.stopPropagation();go('ver');setTimeout(()=>{try{pickForListing(i);}catch(er){}},300);}},'Bende var → ilan ver'):null));
+    g.append(t);});
+  area.append(g);}
+
+/* ---------- profil sekmeleri: bildirimler, aradıklarım, alarmlarım, takaslarım ---------- */
+const BENIM={bildirimler:drawBildirimler,aradiklarim:drawAradiklarim,alarmlar:drawAlarmlar,takaslarim:drawTakaslarim};
+const _dp3=window.drawProfil;
+window.drawProfil=async function(){const ben=BENIM[profTab]?profTab:null;if(ben)profTab='ilanlar';
+  try{await _dp3.apply(this,arguments);}finally{if(ben)profTab=ben;}
+  try{const area=$('#profArea'),st=area&&area.querySelector('.subtabs');if(!st||!USER||!PROFILE)return;
+    const n=okunmamis();const bs={};
+    const ekle=(k,t,kosul)=>{if(!kosul)return;const b=el('button',{class:profTab===k?'on':'',onclick:async()=>{profTab=k;await kullaniciYukle();drawProfil();}},t);st.append(b);bs[k]=b;};
+    ekle('bildirimler','🔔 Bildirimler'+(n?' ('+n+')':''),VAR.bildirim!==false);
+    ekle('aradiklarim','🔍 Aradıklarım',VAR.aranan!==false);ekle('alarmlar','⏰ Fiyat Alarmlarım',VAR.alarm!==false);ekle('takaslarim','🔁 Takaslarım',VAR.takas!==false);
+    if(ben&&bs[ben]){[...st.children].forEach(x=>x.classList.toggle('on',x===bs[ben]));const sub=st.nextElementSibling;sub.innerHTML='';BENIM[ben](sub);}
+  }catch(e){console.warn('profil2',e);}};
+function bildirimAc(bd){closeModal();const u=String(bd.link||'');const m=u.match(/[?&]kart=([^&#]+)/);if(m){kartAc(decodeURIComponent(m[1]));return;}
+  if(/sayfa=takas/.test(u)){TKS.sekme='takas';go('takas');return;}if(bd.card_id&&BYID[bd.card_id]!=null)kartAc(bd.card_id);}
+function drawBildirimler(area){
+  if(!BILDIRIM.length){area.append(el('div',{class:'card muted',text:'Henüz bildirimin yok. Aradığın bir kart satışa ya da takasa konunca veya fiyat alarmın çalınca burada görünür.'}));return;}
+  const yeni=BILDIRIM.filter(b=>!b.okundu).map(b=>b.id);
+  area.append(el('div',{style:'display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px'},el('button',{class:'btn sec',onclick:async e=>{const bt=e.currentTarget;if(!bt.dataset.emin){bt.dataset.emin='1';bt.textContent='Emin misin? Tekrar bas';return;}const r=await SB.from('bildirimler').delete().eq('user_id',USER.id);if(r.error)return hataYaz(r.error);BILDIRIM=[];menuGuncelle();drawProfil();}},'Tümünü temizle')));
+  const ik={aranan:'🔍',alarm:'⏰',takas:'🔁',sistem:'ℹ️'};
+  BILDIRIM.forEach(b=>area.append(el('div',{class:'card k2bild'+(b.okundu?'':' yeni'),onclick:()=>bildirimAc(b)},el('div',{class:'k2bik',text:ik[b.tur]||'🔔'}),
+    el('div',{style:'flex:1;min-width:0'},el('b',{text:b.baslik}),b.metin?el('div',{class:'small muted',text:b.metin}):null,el('div',{class:'small muted',text:new Date(b.created_at).toLocaleString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})})),
+    b.card_id&&BYID[b.card_id]!=null?kartKucuk(b.card_id,44):null)));
+  if(yeni.length){SB.from('bildirimler').update({okundu:true}).in('id',yeni).then(r=>{if(!r.error){BILDIRIM.forEach(b=>{if(yeni.includes(b.id))b.okundu=true;});menuGuncelle();}});}}
+function drawAradiklarim(area){const l=ARANAN.filter(a=>USER&&a.owner===USER.id).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(!l.length){area.append(el('div',{class:'card muted',text:'Aradığın kart yok. Bir kartın detayında "🔍 Bu kartı arıyorum" düğmesine bas; biri satışa ya da takasa koyunca haber verelim.'}));return;}
+  l.forEach(a=>{const sat=active().filter(x=>x.card_id===a.card_id&&(!x.kind||x.kind==='kart')).sort((x,y)=>x.price-y.price);const tk=takasKart(a.card_id).filter(t=>!USER||t.owner!==USER.id);
+    area.append(el('div',{class:'card k2sat',style:'margin-bottom:10px'},el('div',{style:'cursor:pointer',onclick:()=>kartAc(a.card_id)},kartKucuk(a.card_id,56)),
+      el('div',{style:'flex:1;min-width:0'},el('b',{text:a.card_name}),el('div',{class:'muted small',text:`${a.set_name||''}${a.max_price?' · en fazla '+tl(a.max_price):''}${a.note?' · '+a.note:''}`}),
+        el('div',{class:'small',style:'margin-top:4px;color:'+(sat.length||tk.length?'#3fb950':'var(--muted,#9aa1c3)'),text:sat.length?`🛒 Satışta: ${sat.length} ilan, en ucuz ${tl(sat[0].price)}`:(tk.length?`🔁 ${tk.length} takas ilanında`:'Şu an satışta değil')})),
+      el('div',{style:'display:flex;flex-direction:column;gap:6px'},sat.length?el('button',{class:'btn',onclick:()=>kartAc(a.card_id)},'İlanları gör'):null,
+        el('button',{class:'btn sec',onclick:async()=>{const r=await SB.from('aranan').delete().eq('id',a.id);if(r.error)return hataYaz(r.error);ARANAN=ARANAN.filter(x=>x.id!==a.id);drawProfil();}},'Kaldır'))));});}
+function drawAlarmlar(area){const l=ALARM.slice().sort((a,b)=>(b.active-a.active)||new Date(b.created_at)-new Date(a.created_at));
+  if(!l.length){area.append(el('div',{class:'card muted',text:'Fiyat alarmın yok. Bir kartın detayında "⏰ Fiyat alarmı" ile kart istediğin fiyata gelince haber al.'}));return;}
+  area.append(el('div',{class:'muted small',style:'margin-bottom:10px',text:'Alarmlar her sabah fiyatlar güncellendikten sonra kontrol edilir; hedefe ulaşan alarm bir kez çalar ve bildirim gelir.'}));
+  l.forEach(a=>{const s=alarmSatir(a,()=>drawProfil());s.classList.add('card');s.style.marginBottom='10px';s.querySelector('.k2img')?.addEventListener('click',()=>kartAc(a.card_id));area.append(s);});}
+function drawTakaslarim(area){const l=TAKAS.filter(t=>USER&&t.owner===USER.id).sort((a,b)=>(a.status>b.status?1:-1)||new Date(b.created_at)-new Date(a.created_at));
+  if(!l.length){area.append(el('div',{class:'card muted',text:'Takas ilanın yok. Bir kartın detayında "🔁 Takasa koy" ile ilan verebilirsin.'}));return;}
+  l.forEach(t=>area.append(el('div',{class:'card k2sat',style:'margin-bottom:10px;opacity:'+(t.status==='active'?1:.6)},el('div',{style:'cursor:pointer',onclick:()=>kartAc(t.card_id)},kartKucuk(t.card_id,56)),
+    el('div',{style:'flex:1;min-width:0'},el('b',{text:t.card_name}),el('div',{class:'muted small',text:`${t.cond} · ${(t.istenen||[]).length} kart istiyor${t.istenen_not?' · '+t.istenen_not:''}`}),el('div',{class:'small muted',text:(t.status==='active'?'Yayında':'Kapalı')+' · '+tarih(t.created_at)})),
+    el('div',{style:'display:flex;flex-direction:column;gap:6px'},t.status==='active'?el('button',{class:'btn sec',onclick:()=>takasKapat(t)},'Kapat'):null,
+      el('button',{class:'btn sec',onclick:async()=>{const r=await SB.from('takas').delete().eq('id',t.id);if(r.error)return hataYaz(r.error);TAKAS=TAKAS.filter(x=>x.id!==t.id);drawProfil();}},'Sil')))));}
+
+/* ---------- 8: set değeri ve booster analizi ---------- */
+function setDugmesi(){try{if(catSet!==null&&CAT){const b=$('#catCrumb');const satir=b&&b.firstElementChild;if(satir&&!b.querySelector('.k2setbtn'))satir.append(el('button',{class:'btn sec k2setbtn',onclick:()=>setAnalizi(catSet)},'📊 Set değeri ve booster analizi'));}}catch(e){}}
+try{const cb=$('#catCrumb');if(cb)new MutationObserver(setDugmesi).observe(cb,{childList:true,subtree:true});}catch(e){}
+let CPK=null;async function cpKapali(){if(CPK)return CPK;try{CPK=await fetch('cp_kapali.json').then(r=>r.ok?r.json():{k:[]});}catch(e){CPK={k:[]};}return CPK;}
+async function setAnalizi(si){const s=CAT.sets[si];const kartlar=[];CAT.cards.forEach((c,i)=>{if(c[1]===si)kartlar.push(i);});
+  const b=kucukModal('📊 '+s[1],el('div',{class:'muted',text:'Hesaplanıyor…'}));
+  const bende=koleksiyonumda();const RS=c=>c[3]||'Nadirlik yok';
+  const gr=new Map();let top=0,fiyatli=0,eksik=0,eksikFiyat=0,eksikSay=0;
+  kartlar.forEach(i=>{const c=CAT.cards[i],v=fiyatTL(kartId(c));const r=RS(c);if(!gr.has(r))gr.set(r,{say:0,fiyat:[],seviye:typeof rarSeviye==='function'?rarSeviye(c[3]):0});const g=gr.get(r);g.say++;
+    if(v!=null){g.fiyat.push(v);top+=v;fiyatli++;}if(!bende.has(kartId(c))){eksikSay++;if(v!=null)eksikFiyat+=v;else eksik++;}});
+  const med=a=>{if(!a.length)return null;const x=a.slice().sort((p,q)=>p-q);const m=Math.floor(x.length/2);return x.length%2?x[m]:(x[m-1]+x[m])/2;};
+  const satirlar=[...gr.entries()].sort((a,b)=>(a[1].seviye-b[1].seviye)||((med(a[1].fiyat)||0)-(med(b[1].fiyat)||0)));
+  const enDeg=kartlar.map(i=>({i,v:fiyatTL(kartId(CAT.cards[i]))})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v).slice(0,10);
+  let paket=null;if(isCp(CAT.cards[kartlar[0]]||[])){const k=await cpKapali();const gid=String(s[0]).replace(/^cp-/,'');paket=(k.k||[]).filter(p=>String(p.g)===gid&&p.p);}
+  b.innerHTML='';
+  ekle(b,el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:'📊 '+s[1]}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('div',{class:'mtiles',style:'margin-bottom:14px'},
+      el('div',{class:'mtile'},el('div',{class:'muted small',text:'Setin tamamı (her karttan 1)'}),el('div',{class:'big',text:tl(top)}),el('div',{class:'muted small',text:`${fiyatli} / ${kartlar.length} kartın fiyatı var`})),
+      USER?el('div',{class:'mtile'},el('div',{class:'muted small',text:'Seti tamamlamanın kalan maliyeti'}),el('div',{class:'big',text:tl(eksikFiyat)}),el('div',{class:'muted small',text:`${eksikSay} eksik kart${eksik?' · '+eksik+' tanesinin fiyatı yok':''}`})):null,
+      el('div',{class:'mtile'},el('div',{class:'muted small',text:'Ortalama kart değeri'}),el('div',{class:'big',text:fiyatli?tl(top/fiyatli):'—'}),el('div',{class:'muted small',text:'medyan '+(med(kartlar.map(i=>fiyatTL(kartId(CAT.cards[i]))).filter(v=>v!=null))!=null?tl(med(kartlar.map(i=>fiyatTL(kartId(CAT.cards[i]))).filter(v=>v!=null))):'—')}))),
+    el('h3',{style:'font-size:17px;margin:6px 0 8px',text:'Nadirliğe göre değer'}),
+    el('div',{class:'k2tablo'},el('div',{class:'k2tr k2th'},el('span',{},'Nadirlik'),el('span',{},'Kart'),el('span',{},'Ortalama'),el('span',{},'Medyan'),el('span',{},'En yüksek')),
+      ...satirlar.map(([r,g])=>el('div',{class:'k2tr'},el('span',{},el('b',{text:r})),el('span',{text:String(g.say)}),el('span',{text:g.fiyat.length?tl(g.fiyat.reduce((a,b)=>a+b,0)/g.fiyat.length):'—'}),el('span',{text:g.fiyat.length?tl(med(g.fiyat)):'—'}),el('span',{text:g.fiyat.length?tl(Math.max(...g.fiyat)):'—'})))),
+    el('div',{class:'muted small',style:'margin:8px 0 14px',text:'Bir paketten hangi nadirlik çıkarsa o kartın değeri ortalama ne kadar, bu tablodan görebilirsin. Üreticiler resmi çıkma oranlarını yayınlamadığı için "paket başına beklenen değer" hesaplamıyoruz; tahmini oran kullanmak seni yanıltabilir.'}),
+    paket&&paket.length?el('div',{},el('h3',{style:'font-size:17px;margin:6px 0 8px',text:'📦 Kapalı ürün fiyatları (TCGplayer)'}),...paket.map(p=>el('div',{class:'k2sat'},el('div',{style:'flex:1',text:p.a}),el('b',{text:KUR?tl(p.p*KUR.USD):'$'+p.p})))):null,
+    el('h3',{style:'font-size:17px;margin:14px 0 8px',text:'💎 En değerli 10 kart'}),
+    ...enDeg.map(x=>{const c=CAT.cards[x.i];return el('div',{class:'k2sat',onclick:()=>openCard(x.i)},kartKucuk(kartId(c),40),el('div',{style:'flex:1;min-width:0'},el('div',{class:'k2ad',text:c[0]}),el('div',{class:'muted small',text:(c[3]||'')+' · #'+c[2]+(bende.has(kartId(c))?' · ✓ sende var':'')})),el('b',{text:tl(x.v)}));}));}
+
+/* ---------- 9: Cyberpunk deste kurucu ---------- */
+const DST={ad:'Yeni deste',legends:[],kartlar:{},id:null,q:'',tur:'',renk:''};
+const RAMn=c=>{const r=c&&c[17]&&c[17].ram;const m=String(r||'').match(/\d+/);return m?+m[0]:0;};
+const cpKart=id=>{const i=BYID[id];return i!=null?CAT.cards[i]:null;};
+const adN=c=>String(c[0]).replace(/\s*\([^)]*\)\s*$/,'');
+let CPAD=null,CPADN=0;function cpAdlar(){if(CPAD&&CPADN===CAT.cards.length)return CPAD;CPAD={};CPADN=CAT.cards.length;CAT.cards.forEach((c,j)=>{if(isCp(c))(CPAD[adN(c)]=CPAD[adN(c)]||[]).push(j);});return CPAD;}
+function desteDurum(){const L=DST.legends.map(cpKart).filter(Boolean);const ram={};L.forEach(c=>{const r=c[17]&&c[17].r;if(r)ram[r]=(ram[r]||0)+RAMn(c);});
+  const ana=Object.entries(DST.kartlar).filter(([id,n])=>n>0&&cpKart(id));const toplam=ana.reduce((t,[,n])=>t+n,0);
+  const adSay={};ana.forEach(([id,n])=>{const a=adN(cpKart(id));adSay[a]=(adSay[a]||0)+n;});
+  const hatalar=[];
+  if(DST.legends.length!==3)hatalar.push(`Tam 3 Legend gerekir (şu an ${DST.legends.length}).`);
+  if(new Set(L.map(c=>c[0].split(' - ')[0])).size!==L.length)hatalar.push('Legend\'ların isimleri farklı olmalı.');
+  if(toplam<40||toplam>50)hatalar.push(`Destede Legend'lar hariç 40–50 kart olmalı (şu an ${toplam}).`);
+  Object.entries(adSay).forEach(([a,n])=>{if(n>3)hatalar.push(`"${a}" kartından en fazla 3 kopya olabilir (şu an ${n}).`);});
+  const ramHata=[];ana.forEach(([id])=>{const c=cpKart(id);const r=c[17]&&c[17].r;const g=RAMn(c);if(g>(ram[r]||0))ramHata.push(id);});
+  if(ramHata.length)hatalar.push(`${ramHata.length} kart RAM sınırını aşıyor (Legend'ların ${Object.entries(ram).map(([r,v])=>r+' '+v).join(', ')||'RAM'}'i yetmiyor).`);
+  let deger=0,fiyatsiz=0;[...DST.legends.map(id=>[id,1]),...ana].forEach(([id,n])=>{const v=fiyatTL(id);if(v!=null)deger+=v*n;else fiyatsiz+=n;});
+  const bende={};(COLL||[]).forEach(x=>{bende[x.card_id]=(bende[x.card_id]||0)+x.qty;});
+  let eksikDeger=0,eksikSay=0;[...DST.legends.map(id=>[id,1]),...ana].forEach(([id,n])=>{const e=Math.max(0,n-(bende[id]||0));if(e){eksikSay+=e;const v=fiyatTL(id);if(v!=null)eksikDeger+=v*e;}});
+  return{L,ram,ana,toplam,hatalar,ramHata:new Set(ramHata),deger,fiyatsiz,eksikDeger,eksikSay};}
+function desteKodla(){const p=id=>String(id).split('-').pop();return encodeURIComponent(DST.ad.slice(0,60))+'~'+DST.legends.map(p).join('.')+'~'+Object.entries(DST.kartlar).filter(([,n])=>n>0).map(([id,n])=>p(id)+(n>1?'x'+n:'')).join('.');}
+function desteCoz(s){const pid={};CAT.cards.forEach(c=>{if(isCp(c))pid[String(c[14]).split('-').pop()]=c[14];});const[a,l,k]=String(s).split('~');
+  DST.ad=decodeURIComponent(a||'Paylaşılan deste').slice(0,60);DST.legends=(l||'').split('.').map(x=>pid[x]).filter(Boolean).slice(0,3);DST.kartlar={};
+  (k||'').split('.').forEach(x=>{const m=x.match(/^(\d+)(?:x(\d+))?$/);if(m&&pid[m[1]])DST.kartlar[pid[m[1]]]=Math.min(9,+(m[2]||1));});DST.id=null;}
+const yerelDesteler=()=>{try{return JSON.parse(localStorage.getItem('kb_desteler')||'[]');}catch(e){return [];}};
+function yerelKaydet(){try{const l=yerelDesteler().filter(d=>d.yid!==DST.yid);DST.yid=DST.yid||('d'+Date.now());l.unshift({yid:DST.yid,ad:DST.ad,legends:DST.legends,kartlar:DST.kartlar,t:Date.now()});localStorage.setItem('kb_desteler',JSON.stringify(l.slice(0,50)));return true;}catch(e){return false;}}
+function desteEkle(id){const c=cpKart(id);if(!c)return;
+  if(c[4]==='Legend'){if(DST.legends.includes(id))return toast('Bu Legend zaten destede');if(DST.legends.length>=3)return toast('En fazla 3 Legend');
+    const ad=c[0].split(' - ')[0];if(DST.legends.some(x=>cpKart(x)[0].split(' - ')[0]===ad))return toast('Aynı isimde iki Legend olamaz');DST.legends.push(id);}
+  else{const ad=adN(c);const say=Object.entries(DST.kartlar).filter(([k])=>cpKart(k)&&adN(cpKart(k))===ad).reduce((t,[,n])=>t+n,0);if(say>=3)return toast('Aynı karttan en fazla 3 kopya');DST.kartlar[id]=(DST.kartlar[id]||0)+1;}
+  drawDeste(true);}
+function drawDeste(sadecePanel){const v=$('#v-deste');if(!v||!CAT)return;
+  if(DIL!=='cp'){v.innerHTML='';v.append(el('div',{class:'card muted',text:'Deste kurucu Cyberpunk TCG için. Üstten 🌆 Cyberpunk\'a geç.'}));return;}
+  const D=desteDurum();
+  const panel=el('div',{class:'card k2panel'},
+    el('div',{style:'display:flex;gap:8px;align-items:center;flex-wrap:wrap'},(()=>{const i=el('input',{value:DST.ad,maxlength:60,style:'flex:1;min-width:160px;font-weight:700'});i.addEventListener('input',()=>{DST.ad=i.value||'Deste';});return i;})()),
+    el('div',{class:'k2durum '+(D.hatalar.length?'kotu':'iyi'),text:D.hatalar.length?'⚠️ Deste kurallara uymuyor':'✅ Deste kurallara uygun (turnuvaya hazır)'}),
+    D.hatalar.length?el('ul',{class:'small k2hata'},...D.hatalar.map(h=>el('li',{text:h}))):null,
+    el('div',{class:'mtiles',style:'margin:10px 0'},el('div',{class:'mtile'},el('div',{class:'muted small',text:'Kart (Legend hariç)'}),el('div',{class:'big',text:D.toplam+' / 40–50'})),
+      el('div',{class:'mtile'},el('div',{class:'muted small',text:'Destenin piyasa değeri'}),el('div',{class:'big',text:tl(D.deger)}),D.fiyatsiz?el('div',{class:'muted small',text:D.fiyatsiz+' kartın fiyatı yok'}):null),
+      USER?el('div',{class:'mtile'},el('div',{class:'muted small',text:'Koleksiyonunda eksik'}),el('div',{class:'big',text:D.eksikSay+' kart'}),el('div',{class:'muted small',text:'≈ '+tl(D.eksikDeger)})):null),
+    el('div',{class:'small',style:'margin-bottom:6px'},el('b',{},'RAM sınırı: '),Object.keys(D.ram).length?Object.entries(D.ram).map(([r,n])=>`${r} ${n}`).join(' · '):'Legend seç'),
+    el('b',{},'Legend\'lar ('+DST.legends.length+'/3)'),
+    el('div',{class:'k2leg'},...[0,1,2].map(j=>{const id=DST.legends[j];const c=id&&cpKart(id);return c?el('div',{class:'k2legk',title:'Çıkarmak için dokun',onclick:()=>{DST.legends.splice(j,1);drawDeste(true);}},kartKucuk(id),el('div',{class:'small',text:c[0]})):el('div',{class:'k2legbos',text:'Legend '+(j+1)});})),
+    ...['Unit','Program','Gear'].map(tur=>{const l=D.ana.filter(([id])=>cpKart(id)[4]===tur).sort((a,b)=>(+(cpKart(a[0])[17]||{}).m||0)-(+(cpKart(b[0])[17]||{}).m||0));if(!l.length)return null;
+      return el('div',{},el('b',{text:`${tur} (${l.reduce((t,[,n])=>t+n,0)})`}),...l.map(([id,n])=>{const c=cpKart(id),a=c[17]||{};return el('div',{class:'k2dsat'+(D.ramHata.has(id)?' hata':'')},
+        el('span',{class:'k2dmal',text:a.m!=null?String(a.m):'–'}),el('span',{class:'k2dad',style:'cursor:pointer',onclick:()=>openCard(BYID[id]),text:c[0]}),el('span',{class:'muted small',text:(a.r||'')+' '+(a.ram||'')}),
+        el('span',{class:'k2dadet'},el('button',{onclick:()=>{DST.kartlar[id]=Math.max(0,n-1);if(!DST.kartlar[id])delete DST.kartlar[id];drawDeste(true);}},'−'),el('b',{text:String(n)}),el('button',{onclick:()=>desteEkle(id)},'+')));}));}),
+    el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-top:12px'},
+      el('button',{class:'btn',onclick:desteKaydet},'💾 Kaydet'),
+      el('button',{class:'btn sec',onclick:async()=>{const u=location.origin+location.pathname+'?deste='+desteKodla();try{if(navigator.share)await navigator.share({title:DST.ad,text:'KartBorsa\'da kurduğum Cyberpunk TCG destesi',url:u});else{await navigator.clipboard.writeText(u);toast('Deste bağlantısı kopyalandı');}}catch(e){try{await navigator.clipboard.writeText(u);toast('Deste bağlantısı kopyalandı');}catch(e2){prompt('Bağlantıyı kopyala:',u);}}}},'🔗 Paylaş'),
+      el('button',{class:'btn sec',onclick:()=>{const satir=[`${DST.ad}`,'Legends:',...DST.legends.map(id=>'1 '+cpKart(id)[0]),'',...D.ana.map(([id,n])=>n+' '+cpKart(id)[0])].join('\n');navigator.clipboard.writeText(satir).then(()=>toast('Deste listesi kopyalandı'),()=>prompt('Listeyi kopyala:',satir));}},'📋 Listeyi kopyala'),
+      el('button',{class:'btn sec',onclick:()=>{DST.ad='Yeni deste';DST.legends=[];DST.kartlar={};DST.id=null;DST.yid=null;drawDeste();}},'Yeni deste')));
+  if(sadecePanel&&v.querySelector('.k2panel')){v.querySelector('.k2panel').replaceWith(panel);if(DST._listele)DST._listele();return;}
+  v.innerHTML='';
+  const q=el('input',{placeholder:'Kart ara: ad, etiket (Arasaka, Netrunner…)',value:DST.q});
+  const tur=el('select',{},el('option',{value:''},'Tüm türler'),...['Legend','Unit','Program','Gear'].map(x=>el('option',{value:x},x)));tur.value=DST.tur;
+  const renk=el('select',{},el('option',{value:''},'Tüm renkler'),...['Kırmızı','Mavi','Sarı','Yeşil'].map(x=>el('option',{value:x},x)));renk.value=DST.renk;
+  const sadeceUygun=el('label',{class:'chk',style:'margin:0'},el('input',{type:'checkbox'}),' Sadece RAM\'e uyanlar');
+  const sonuc=el('div',{class:'k2dgrid'});
+  const listele=()=>{DST.q=q.value;DST.tur=tur.value;DST.renk=renk.value;const qq=norm(q.value);const D2=desteDurum();sonuc.innerHTML='';const gor=new Set();let n=0;
+    for(let i=0;i<CAT.cards.length&&n<120;i++){const c=CAT.cards[i];if(!isCp(c))continue;if(tur.value&&c[4]!==tur.value)continue;if(renk.value&&(c[17]||{}).r!==renk.value)continue;
+      if(qq&&!CAT.keys[i].includes(qq))continue;if(sadeceUygun.querySelector('input').checked&&c[4]!=='Legend'&&RAMn(c)>(D2.ram[(c[17]||{}).r]||0))continue;
+      const anahtar=adN(c)+'|'+c[4];if(gor.has(anahtar))continue;gor.add(anahtar);n++;
+      const sec=(cpAdlar()[adN(c)]||[i]).slice().sort((a,b)=>(fiyatTL(kartId(CAT.cards[a]))??1e12)-(fiyatTL(kartId(CAT.cards[b]))??1e12));
+      const id=kartId(CAT.cards[sec[0]]);const adet=c[4]==='Legend'?(DST.legends.includes(id)?1:0):Object.entries(DST.kartlar).filter(([k])=>cpKart(k)&&adN(cpKart(k))===adN(c)).reduce((t,[,m])=>t+m,0);
+      sonuc.append(el('div',{class:'k2dkart'+(adet?' var':''),title:'Desteye eklemek için dokun',onclick:()=>desteEkle(id)},kartKucuk(id),adet?el('span',{class:'k2dsay',text:'×'+adet}):null,
+        el('div',{class:'small k2ad',text:adN(c)}),el('div',{class:'muted small',text:`${c[4]} · ${(c[17]||{}).r||''} ${(c[17]||{}).ram||''} · ${fiyatTL(id)!=null?tl(fiyatTL(id)):'—'}`})));}
+    if(!n)sonuc.append(el('div',{class:'muted',text:'Kart bulunamadı.'}));};
+  DST._listele=listele;
+  let zm;q.addEventListener('input',()=>{clearTimeout(zm);zm=setTimeout(listele,200);});[tur,renk,sadeceUygun.querySelector('input')].forEach(x=>x.addEventListener('change',listele));
+  const kayitli=el('div',{class:'k2kayit'});desteListesi(kayitli);
+  v.append(el('div',{class:'hero'},el('div',{},el('h2',{text:'🃏 Cyberpunk deste kurucu'}),el('div',{class:'muted small',text:'Resmi kurallar: tam 3 farklı isimli Legend, Legend hariç 40–50 kart, aynı karttan en fazla 3 kopya, kartlar Legend\'ların renk başına RAM toplamını aşamaz.'}))),
+    kayitli,el('div',{class:'k2dkur'},el('div',{},el('div',{class:'row',style:'gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap'},q,tur,renk,sadeceUygun),
+      el('div',{class:'muted small',style:'margin-bottom:8px',text:'Karta dokununca desteye eklenir (Legend\'lar Legend alanına). Aynı kartın en ucuz baskısı seçilir.'}),sonuc),panel));
+  listele();}
+async function desteKaydet(){
+  if(USER&&PROFILE&&VAR.deste!==false){const row={ad:DST.ad||'Deste',legends:DST.legends,kartlar:DST.kartlar,herkese_acik:true};
+    const r=DST.id?await SB.from('desteler').update(row).eq('id',DST.id).select().single():await SB.from('desteler').insert(row).select().single();
+    if(!r.error){DST.id=r.data.id;toast('Deste hesabına kaydedildi 💾');desteListesi($('#v-deste .k2kayit'));return;}
+    if(tabloYok(r.error))VAR.deste=false;else return hataYaz(r.error);}
+  if(yerelKaydet()){toast('Deste bu cihaza kaydedildi 💾');desteListesi($('#v-deste .k2kayit'));}else toast('Kaydedilemedi');}
+async function desteListesi(kutu){if(!kutu)return;let hesap=[];
+  if(USER&&VAR.deste!==false){const r=await SB.from('desteler').select('*').eq('owner',USER.id).order('updated_at',{ascending:false});if(r.error){if(tabloYok(r.error))VAR.deste=false;}else{VAR.deste=true;hesap=r.data||[];}}
+  const yerel=yerelDesteler();kutu.innerHTML='';if(!hesap.length&&!yerel.length)return;
+  kutu.append(el('b',{class:'small'},'Kayıtlı destelerin: '),...hesap.map(d=>el('button',{class:'k2chip',onclick:()=>{DST.ad=d.ad;DST.legends=d.legends||[];DST.kartlar=d.kartlar||{};DST.id=d.id;DST.yid=null;drawDeste();}},'☁️ '+d.ad)),
+    ...yerel.map(d=>el('button',{class:'k2chip',onclick:()=>{DST.ad=d.ad;DST.legends=d.legends||[];DST.kartlar=d.kartlar||{};DST.id=null;DST.yid=d.yid;drawDeste();}},'📱 '+d.ad)));}
+
+/* ---------- açılış: bağlantılar (?kart=, ?sayfa=takas, ?deste=) ve veriler ---------- */
+(async()=>{try{
+  for(let i=0;i<60&&(!CAT||!SB);i++)await bekle(250);
+  gorunumKur();
+  await genelYukle();menuGuncelle();
+  kullaniciTetik();
+  const p=new URLSearchParams(location.search);const kart=p.get('kart'),sayfa=p.get('sayfa'),deste=p.get('deste');
+  if(!kart&&!deste&&!['takas','aranan','bildirimler','alarmlar'].includes(sayfa))return;
+  try{history.replaceState(history.state,'',location.pathname);}catch(e){}
+  try{await window.__ikinciDil;}catch(e){}
+  if(kart){for(let i=0;i<20&&BYID[kart]==null;i++)await bekle(300);kartAc(kart);}
+  else if(deste){if(DIL!=='cp')dilDegistir('cp');for(let i=0;i<20&&!CAT.cards.some(isCp);i++)await bekle(300);desteCoz(deste);go('deste');}
+  else if(sayfa==='takas'||sayfa==='aranan'){TKS.sekme=sayfa;go('takas');}
+  else{for(let i=0;i<20&&!USER;i++)await bekle(300);if(!USER){go('profil');return;}await kullaniciYukle();profTab=sayfa;go('profil');}
+}catch(e){console.warn('oz2 açılış',e);}})();
 })();
 </script>
 </body>

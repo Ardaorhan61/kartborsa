@@ -40,7 +40,7 @@ jobs:
             || mkdir -p veri
 
       - name: Kart izlerini hesapla
-        run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json
+        run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json veri/cyberpunk/cards_cp.json
 
       - name: İzleri kaydet
         run: |

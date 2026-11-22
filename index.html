@@ -366,7 +366,7 @@ body.oyun-cp .logo .dot{background:#fcee0a;color:#000}
       <div class="row" style="margin-top:10px">
         <select id="cSet"><option value="">Tüm setler</option></select>
         <select id="cRar"><option value="">Tüm nadirlikler</option></select>
-        <select id="cSup"><option value="">Tüm türler</option><option>Pokémon</option><option>Trainer</option><option>Energy</option></select>
+        <select id="cSup"><option value="">Tüm türler</option><option>Pokémon</option><option>Trainer</option></select>
         <label style="display:flex;align-items:center;gap:8px;margin:0;color:var(--text);flex:0 0 auto"><input type="checkbox" id="cStock" style="width:auto"> Sadece satışta olanlar</label>
       </div>
     </div>
@@ -579,7 +579,8 @@ async function loadCatalog(){
   const DOSYA={en:'cards.json',ja:'cards_ja.json',cp:'cards_cp.json'},ilk=DOSYA[DIL],digerleri=Object.keys(DOSYA).filter(k=>k!==DIL).map(k=>DOSYA[k]);
   const A=await al(ilk);if(!A||!A.cards){if(DIL!=='en'){DIL='en';try{localStorage.setItem('kb_dil','en');}catch(e){}return loadCatalog();}throw new Error(ilk+' bulunamadı');}
   const ekle=D=>{if(D.pfx){const P=D.pfx,ac=u=>typeof u==='string'&&u.charCodeAt(0)===126?P[+u[1]]+u.slice(2):u;for(const c of D.cards)c[13]=ac(c[13]);for(const x of D.sets){x[5]=ac(x[5]);x[6]=ac(x[6]);}}
-    const o=CAT.sets.length,b=CAT.cards.length;for(const x of D.sets)CAT.sets.push(x);for(const c of D.cards){c[1]+=o;CAT.cards.push(c);}return b;};
+    const enS=new Set(),kalS=new Set();D.cards=D.cards.filter(c=>{if(c[4]==='Energy'){enS.add(c[1]);return false;}kalS.add(c[1]);return true;});
+    const yeni=[];const o=CAT.sets.length,b=CAT.cards.length;D.sets.forEach((x,k)=>{if(enS.has(k)&&!kalS.has(k))return;yeni[k]=o+(CAT.sets.length-o);CAT.sets.push(x);});for(const c of D.cards){c[1]=yeni[c[1]];CAT.cards.push(c);}return b;};
   const bitir=b=>{CAT.keys=CAT.keys||[];for(let i=b;i<CAT.cards.length;i++){const c=CAT.cards[i];CAT.keys[i]=(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase();BYID[c[14]]=i;}};
   CAT={sets:[],cards:[],keys:[],lite:A.lite,built:A.built,v:A.v};bitir(ekle(A));
   dilKur();infoLine();runCat();
@@ -927,15 +928,16 @@ function taraIzRenk(d){const N=256*352,gr=new Float64Array(N),cb=new Float64Arra
   for(let i=0;i<N;i++){const R=d[i*4],G=d[i*4+1],B=d[i*4+2];gr[i]=R*0.299+G*0.587+B*0.114;cb[i]=-0.168736*R-0.331264*G+0.5*B;cr[i]=0.5*R-0.418688*G-0.081312*B;}
   return [...taraIzGri(gr),...taraPhash(taraKucult(cb),44,32),...taraPhash(taraKucult(cr),44,32)];}
 function taraPc(x){x-=(x>>>1)&0x55555555;x=(x&0x33333333)+((x>>>2)&0x33333333);return (((x+(x>>>4))&0x0F0F0F0F)*0x01010101)>>>24;}
+function taraOyunda(i){const c=CAT&&CAT.cards[i];return !!c&&(DIL==='cp')===String(c[14]).startsWith('cp-');}
 async function taraIzleriYukle(){
-  if(TARA.iz)return TARA.iz;
+  const oy=DIL==='cp';if(TARA.iz&&TARA.izOyun===oy)return TARA.iz;
   let r=await fetch('tara/izler2.json',{cache:'no-cache'}).catch(()=>null);let K=8;
   if(!r||!r.ok){r=await fetch('tara/izler.json',{cache:'no-cache'});K=4;}
   if(!r.ok)throw new Error('iz yok');const j=await r.json();
   const idx=[],ids=Object.keys(j.d);const h=new Uint32Array(ids.length*K);let n=0;
-  for(const id of ids){const i=BYID[id];if(i===undefined)continue;const s=j.d[id];if(s.length<K*8)continue;idx.push(i);
+  for(const id of ids){const i=BYID[id];if(i===undefined||!taraOyunda(i))continue;const s=j.d[id];if(s.length<K*8)continue;idx.push(i);
     for(let k=0;k<K;k++)h[n*K+k]=parseInt(s.slice(k*8,k*8+8),16);n++;}
-  TARA.iz={idx,h:h.subarray(0,n*K),n,K};return TARA.iz;}
+  TARA.iz={idx,h:h.subarray(0,n*K),n,K};TARA.izOyun=oy;return TARA.iz;}
 function taraIzKes(src,sx,sy,sw,sh,aci){const c=document.createElement('canvas');c.width=256;c.height=352;const x=c.getContext('2d',{willReadFrequently:true});
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#808080';x.fillRect(0,0,256,352);
   x.translate(128,176);x.scale(256/sw,352/sh);if(aci)x.rotate(-aci*Math.PI/180);x.drawImage(src,-(sx+sw/2),-(sy+sh/2));
@@ -1032,6 +1034,7 @@ function taraEslestir(ustMetin,altMetin,tumMetin){
     if(!TARA.isimler){TARA.isimler=new Map();CAT.cards.forEach((c,i)=>{const k=taraNorm(c[0]);if(!TARA.isimler.has(k))TARA.isimler.set(k,[]);TARA.isimler.get(k).push(i);});}
     const ek=[];for(const [k,ids] of TARA.isimler)if(k.length>=4&&taraIsimPuani(k,isimMetni)>0)ek.push(...ids);
     aday=[...new Set([...aday,...ek])];}
+  aday=aday.filter(taraOyunda);
   const sonuc=aday.map(i=>{const c=CAT.cards[i],s=CAT.sets[c[1]]||[];const ad=taraNorm(c[0]);
     const ip=Math.max(taraIsimPuani(ad,ust),taraIsimPuani(ad,tum)*0.9);
     const no=nos.find(x=>x[0]===taraNo(c[2]));const top=no&&s[4]&&no[1]===s[4];const topVar=!!s[4]&&nos.some(x=>x[1]===s[4]);
@@ -1045,7 +1048,7 @@ async function taraOku(kaynak,kartCercevesi,durum,ara){
   const birlestir=ocr=>{const m=new Map();
     for(const g of gor.liste)m.set(g.i,{i:g.i,d:g.d,ip:0,no:false,top:false});
     for(const o of (ocr?ocr.liste:[])){const x=m.get(o.i)||{i:o.i,d:99};Object.assign(x,{ip:o.ip,no:o.no,top:o.top});m.set(o.i,x);}
-    const l=[...m.values()].map(x=>({...x,p:Math.max(0,52-x.d)+(x.no?10:0)+(x.top?6:0)+x.ip*8}));
+    const l=[...m.values()].filter(x=>taraOyunda(x.i)).map(x=>({...x,p:Math.max(0,52-x.d)+(x.no?10:0)+(x.top?6:0)+x.ip*8}));
     l.sort((a,b)=>b.p-a.p);const b0=l[0],b1=l[1];
     const emin=!!b0&&(b0.d<=22||(b0.no&&b0.top&&b0.d<=40)||(b0.d<=32&&(!b1||b1.d-b0.d>=8)));
     return {liste:l.slice(0,12),bulunanNo:ocr&&ocr.bulunanNo,emin};};
@@ -2230,7 +2233,7 @@ function oyunGuncelle(){const cp=DIL==='cp';
   const d=$('#dilSec');if(d)d.style.display=cp?'none':'';if(!cp)store.set('kb_pdil',DIL);
   document.body.classList.toggle('oyun-cp',cp);
   const h=document.querySelector('#v-katalog .hero h2');if(h)h.textContent=cp?'Tüm Cyberpunk TCG kartları':DIL==='ja'?'Tüm Japonca Pokémon kartları':'Tüm Pokémon kartları';
-  const su=$('#cSup');if(su&&su.dataset.oyun!==String(cp)){const v=su.value,ops=cp?['Legend','Unit','Program','Gear']:['Pokémon','Trainer','Energy'];su.dataset.oyun=String(cp);su.innerHTML='';su.append(el('option',{value:''},'Tüm türler'),...ops.map(x=>el('option',{value:x},x)));su.value=ops.includes(v)?v:'';}
+  const su=$('#cSup');if(su&&su.dataset.oyun!==String(cp)){const v=su.value,ops=cp?['Legend','Unit','Program','Gear']:['Pokémon','Trainer'];su.dataset.oyun=String(cp);su.innerHTML='';su.append(el('option',{value:''},'Tüm türler'),...ops.map(x=>el('option',{value:x},x)));su.value=ops.includes(v)?v:'';}
   if(cp)$('#cq').placeholder='Kart adını yaz: ör. Johnny Silverhand, Judy Álvarez, Mantis Blades…';
   document.title=cp?'KartBorsa – Cyberpunk TCG Kartları':'KartBorsa – Pokémon Kartları';}
 const _dk=window.dilKur;window.dilKur=function(){const r=_dk.apply(this,arguments);try{oyunKur();oyunGuncelle();}catch(e){console.warn('oyun',e);}return r;};

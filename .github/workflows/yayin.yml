@@ -44,7 +44,7 @@ jobs:
         run: python3 site/.github/scripts/en_ek.py site/cards.json
 
       - name: Fiyatları güncelle
-        if: github.event_name == 'schedule' || hashFiles('veri/ozet.json') == ''
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || hashFiles('veri/ozet.json') == ''
         continue-on-error: true
         id: fiyat
         env:

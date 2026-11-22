@@ -8,7 +8,7 @@
 <script>
 /* hız: veriler sürüm numarasıyla istenir (her yayında değişir), tarayıcı ve service worker önbelleğe alır */
 window.SURUM='__SURUM__';
-(function(){try{var ja=localStorage.getItem('kb_dil')==='ja';if(window.SURUM.indexOf('__')<0){[ja?'cards_ja.json':'cards.json','fiyat/ozet.json'].forEach(function(u){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href=u+'?v='+window.SURUM;document.head.appendChild(l);});}}catch(e){}})();
+(function(){try{var kd=localStorage.getItem('kb_dil');if(window.SURUM.indexOf('__')<0){[kd==='ja'?'cards_ja.json':kd==='cp'?'cards_cp.json':'cards.json','fiyat/ozet.json'].forEach(function(u){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href=u+'?v='+window.SURUM;document.head.appendChild(l);});}}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
@@ -333,6 +333,15 @@ details.rehber li{margin-bottom:6px}
 details.rehber td{font-size:14px}
 .sss{padding:10px 0;border-top:1px solid var(--line)}.sss b{display:block;margin-bottom:4px}
 @media(max-width:600px){nav button{padding:7px 9px;font-size:13px}.revozet{gap:14px}.cevap{margin-left:0}}
+
+#oyunSec{display:flex;gap:3px;background:var(--panel2);border-radius:999px;padding:3px;margin:0 0 0 10px;flex:0 0 auto}
+#oyunSec button{border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:999px;font:700 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+#oyunSec button.on{background:var(--accent);color:#14161c}
+#oyunSec button[data-o=cp].on{background:#fcee0a;color:#000;box-shadow:0 0 12px rgba(252,238,10,.45)}
+body.oyun-cp{--accent:#fcee0a;--accent2:#00e5ff}
+body.oyun-cp .logo .dot{background:#fcee0a;color:#000}
+.cpmetin .small{margin-top:4px;line-height:1.5}
+@media (max-width:640px){#oyunSec{margin:0 2px}#oyunSec button{padding:5px 8px;font-size:12px}}
 </style>
 </head>
 <body>
@@ -436,7 +445,7 @@ details.rehber td{font-size:14px}
   </section>
 </main>
 
-<footer><div class="kbfoot">⚡ KartBorsa · koleksiyoncular için kart pazarı</div>Kart bilgileri ve görselleri Pokémon TCG API (pokemontcg.io), TCGdex, Scrydex, Pokellector ve Bulbapedia'dan; piyasa fiyatları TCGplayer ve Cardmarket'ten gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır. · <a href="gizlilik.html">Gizlilik</a></footer>
+<footer><div class="kbfoot">⚡ KartBorsa · koleksiyoncular için kart pazarı</div>Kart bilgileri ve görselleri Pokémon TCG API (pokemontcg.io), TCGdex, Scrydex, Pokellector ve Bulbapedia'dan; piyasa fiyatları TCGplayer ve Cardmarket'ten gelir. Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e aittir. Cyberpunk TCG kart bilgileri, görselleri ve fiyatları TCGplayer'dan (tcgcsv.com) gelir; Cyberpunk ve kart görselleri CD PROJEKT RED ve WeirdCo'ya aittir. Bu site resmi değildir. İlanlar kullanıcılar tarafından açılır; alışverişte ödeme ve kargo alıcı ile satıcı arasındadır. · <a href="gizlilik.html">Gizlilik</a></footer>
 
 <div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
 <div class="toast" id="toast"></div>
@@ -480,6 +489,7 @@ function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loadi
    Hazır boyutu olmayan kaynaklar (Pokellector, Bulbapedia, eski pokemontcg adresleri) wsrv.nl üzerinden. Hata olursa sırayla yedek adreslere düşer. */
 const YUKLU={};
 function imgYol(c,large){const s=imgSmall(c);let b=null;
+  if(s.includes('tcgplayer-cdn.tcgplayer.com')){b=s.replace(/_(in_\d+x\d+|\d+w)\.jpg$/,'');return large?{src:b+'_in_1000x1000.jpg'}:{src:b+'_200w.jpg',srcset:b+'_200w.jpg 200w, '+b+'_400w.jpg 400w'};}
   if(s.includes('assets.tcgdex.net')){b=s.replace(/\/(low|high)\.webp$/,'');return large?{src:b+'/high.webp'}:{src:b+'/low.webp',srcset:b+'/low.webp 245w, '+b+'/high.webp 600w'};}
   if(s.includes('pokellector.com'))return large?{src:s}:null;
   if(s.includes('images.scrydex.com'))b=s.replace(/\/(small|medium|large)$/,'');
@@ -515,6 +525,7 @@ const MAL={G:'Grass',R:'Fire',W:'Water',L:'Lightning',P:'Psychic',F:'Fighting',D
 function maliyet(k){if(!k)return null;const b=el('span',{style:'display:inline-flex;gap:2px',title:'Saldırı maliyeti'});for(const h of String(k)){const t=MAL[h];if(!t)return el('span',{class:'muted',text:'['+k+']'});b.append(el('span',{class:'tdot',style:'margin:0;width:14px;height:14px;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(255,255,255,.2) 45%,rgba(0,0,0,.15) 70%),var(--t-'+t+')',title:TIP_TR[t]}));}return b;}
 function tipDot(t){return t&&TIP_TR[t]?el('span',{class:'tdot',style:'background:var(--t-'+t+')',title:TIP_TR[t]}):null;}
 function rarSeviye(r){if(!r)return 0;const x=String(r).toLowerCase().trim();
+  if(/^iconic |^nova rare$/.test(x))return 4;if(/^epic$/.test(x))return 3;
   if(/secret|hyper|special illustration|ultra rare|gold|crown|shiny ultra|^ur$|^sar$|^ssr$|^hr$|^sr$|^csr$/.test(x))return 4;
   if(/double|illustration|\bex\b|gx|vmax|vstar|break|prism|ace spec|radiant|amazing|shiny|lv\.x|legend|prime|star|^rr$|^rrr$|^ar$|^chr$|^k$|^s$/.test(x))return 3;
   if(/rare|holo|promo|^r$|レア/.test(x))return 2;if(/uncommon|^u$/.test(x))return 1;return 0;}
@@ -530,12 +541,12 @@ function vitrin(){const kart=[],yuk=[];let n=0;
   if(one.length<3){one=[];for(let i=CAT.cards.length-1;i>=0&&one.length<3;i--){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&rarSeviye(c[3])>=3&&i!==g)one.push(i);}}
   const ss=CAT.sets.filter(x=>setDil(x)===DIL).length,il=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).length;
   const ara=q=>{const once=$('#cq').value;$('#cq').value=q;runCat();if(!once){try{history.pushState(Object.assign({},history.state||{kb:1},{q,v:'katalog',card:null,y:0}),'');}catch(e){}}window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
-  const oneri=DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
+  const oneri=DIL==='cp'?['Johnny Silverhand','Judy','Panam','Adam Smasher','Lucy','Mantis Blades']:DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
   const fan=el('div',{class:'kbfan'});[one[1],one[0],one[2]].filter(x=>x!=null).forEach(i=>fan.append(tileFor(i)));
   fan.append(el('div',{class:'lbl',text:kart.length?'💎 Katalogun en değerli kartları':'✨ Öne çıkan kartlar'}));
   const hero=el('div',{class:'kbhero'},
     el('div',{},el('h2',{},'Kartını bul, ',el('em',{},'değerini gör'),', güvenle al-sat.'),
-      el('div',{class:'muted',text:(DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
+      el('div',{class:'muted',text:(DIL==='cp'?'Cyberpunk TCG kartları':DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
       el('div',{class:'kbchips'},el('span',{class:'kbchip'},'🃏 ',el('b',{text:n.toLocaleString('tr-TR')}),' kart'),el('span',{class:'kbchip'},'📦 ',el('b',{text:String(ss)}),' set'),el('span',{class:'kbchip'},'🏷️ ',el('b',{text:String(il)}),' ilan')),
       el('div',{class:'muted small',style:'margin-bottom:6px'},'Popüler aramalar:'),
       el('div',{class:'kbara'},...oneri.map(q=>el('button',{type:'button',onclick:()=>ara(q)},q)),DIL==='ja'?el('button',{type:'button',style:'border-color:#ffc72c;color:#ffc72c',onclick:()=>ara('mcdonald')},'🍔 McDonald\'s promoları'):null)),fan);
@@ -565,19 +576,19 @@ const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2
 async function loadCatalog(){
   /* hız: önce seçili dilin kataloğu, diğer dil sayfa çizildikten sonra arka planda */
   const al=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const ilk=DIL==='ja'?'cards_ja.json':'cards.json',iki=DIL==='ja'?'cards.json':'cards_ja.json';
-  const A=await al(ilk);if(!A||!A.cards)throw new Error(ilk+' bulunamadı');
+  const DOSYA={en:'cards.json',ja:'cards_ja.json',cp:'cards_cp.json'},ilk=DOSYA[DIL],digerleri=Object.keys(DOSYA).filter(k=>k!==DIL).map(k=>DOSYA[k]);
+  const A=await al(ilk);if(!A||!A.cards){if(DIL!=='en'){DIL='en';try{localStorage.setItem('kb_dil','en');}catch(e){}return loadCatalog();}throw new Error(ilk+' bulunamadı');}
   const ekle=D=>{if(D.pfx){const P=D.pfx,ac=u=>typeof u==='string'&&u.charCodeAt(0)===126?P[+u[1]]+u.slice(2):u;for(const c of D.cards)c[13]=ac(c[13]);for(const x of D.sets){x[5]=ac(x[5]);x[6]=ac(x[6]);}}
     const o=CAT.sets.length,b=CAT.cards.length;for(const x of D.sets)CAT.sets.push(x);for(const c of D.cards){c[1]+=o;CAT.cards.push(c);}return b;};
   const bitir=b=>{CAT.keys=CAT.keys||[];for(let i=b;i<CAT.cards.length;i++){const c=CAT.cards[i];CAT.keys[i]=(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase();BYID[c[14]]=i;}};
   CAT={sets:[],cards:[],keys:[],lite:A.lite,built:A.built,v:A.v};bitir(ekle(A));
   dilKur();infoLine();runCat();
-  window.__ikinciDil=new Promise(res=>{const bos=window.requestIdleCallback||(f=>setTimeout(f,600));bos(()=>res(),{timeout:2500});}).then(()=>al(iki)).then(B=>{if(!B||!B.cards)return;bitir(ekle(B));
+  window.__ikinciDil=new Promise(res=>{const bos=window.requestIdleCallback||(f=>setTimeout(f,600));bos(()=>res(),{timeout:2500});}).then(async()=>{let yuklenen=0;for(const f of digerleri){const B=await al(f);if(B&&B.cards){bitir(ekle(B));yuklenen++;}}if(!yuklenen)return;
     try{if(typeof rebuildStock==='function')rebuildStock();infoLine();if($('#v-katalog').classList.contains('on'))runCat();if(LIST&&LIST.length)refreshAll();}catch(e){console.warn(e);}});
 }
 /* ---------- İngilizce / Japonca ---------- */
-let DIL=(()=>{try{return localStorage.getItem('kb_dil')==='ja'?'ja':'en';}catch(e){return 'en';}})();
-const setDil=s=>s&&s[7]==='ja'?'ja':'en', dilOf=c=>setDil(CAT.sets[c[1]]);
+let DIL=(()=>{try{const d=localStorage.getItem('kb_dil');return d==='ja'||d==='cp'?d:'en';}catch(e){return 'en';}})();
+const setDil=s=>s&&(s[7]==='ja'||s[7]==='cp')?s[7]:'en', dilOf=c=>setDil(CAT.sets[c[1]]);
 const KAPAK={};function setKapak(i){if(i in KAPAK)return KAPAK[i];let u='';for(const c of CAT.cards)if(c[1]===i&&c[13]){u=c[13];break;}return KAPAK[i]=u;}
 function dilKur(){
   const temizle=id=>{const s=$(id);if(!s)return null;const ilk=s.options[0];s.innerHTML='';if(ilk)s.append(ilk);return s;};
@@ -595,7 +606,7 @@ function dilDegistir(d){if(d===DIL)return;DIL=d;try{localStorage.setItem('kb_dil
   nav.parentNode.insertBefore(d,nav);})();
 function infoLine(){if(!CAT)return;const ss=CAT.sets.filter(s=>setDil(s)===DIL),last=ss[ss.length-1];
   const a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL);let n=0;for(const c of CAT.cards)if(dilOf(c)===DIL)n++;
-  $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':'');}
+  $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':DIL==='cp'?'Cyberpunk TCG · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':DIL==='cp'?'Cyberpunk kartları hazırlanıyor; kısa süre sonra burada olacak.':'');}
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
     el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
@@ -1763,7 +1774,7 @@ function kapaliResim(l,large){
   const si=kapaliSet(l),box=el('div',{class:'cimg kpimg'});
   const s=si!=null?CAT.sets[si]:null,u=s&&(s[5]||s[6]);
   box.append(u?pxImg(u,320,85,{alt:s[1]}):el('div',{class:'fb',text:'📦'}));return box;}
-const ilanDilUygun=l=>{if(isKapali(l))return (l.lang==='Japonca')===(DIL==='ja');const i=BYID[l.card_id];return i!=null&&dilOf(CAT.cards[i])===DIL;};
+const ilanDilUygun=l=>{if(isKapali(l)){const si=kapaliSet(l);if(si!=null)return setDil(CAT.sets[si])===DIL;if(DIL==='cp')return false;return (l.lang==='Japonca')===(DIL==='ja');}const i=BYID[l.card_id];return i!=null&&dilOf(CAT.cards[i])===DIL;};
 
 /* ---------- satıcı puanları ---------- */
 function revOzet(id){const a=REVS.filter(r=>r.seller===id);const n=a.length,ort=n?a.reduce((s,r)=>s+r.rating,0)/n:0;
@@ -2066,7 +2077,7 @@ function condSecenek(list,sec){const s=$('#lCond');const v=s.value;s.innerHTML='
 function modKur(m){MOD=m;$('#lMod').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   document.querySelectorAll('#lForm .kartalan').forEach(x=>x.style.display=m==='kart'?'':'none');$('#kAlan').style.display=m==='kapali'?'':'none';
   condSecenek(m==='kapali'?KAPALI_DURUM:KART_DURUM,m==='kapali'?'Jelatinli':'Near Mint');$('#lCond').parentNode.style.display=(m==='kart'&&$('#gVar').checked)?'none':'';
-  if(m==='kapali'){$('#lLang').value=DIL==='ja'?'Japonca':'İngilizce';kapaliOnizle();}
+  if(m==='kapali'){kSetDoldur();$('#lLang').value=DIL==='ja'?'Japonca':'İngilizce';kapaliOnizle();}
   else{const p=$('#lCardPrev');if(picked!=null)pickForListing(picked);else{p.innerHTML='';p.append(el('div',{class:'muted',text:'Seçtiğin kart burada görünecek.'}));}}}
 function kapaliOnizle(){if(MOD!=='kapali')return;const p=$('#lCardPrev');p.innerHTML='';const si=setById($('#kSet').value);const s=si!=null?CAT.sets[si]:null;
   p.append(photoBlob?el('div',{class:'cimg kpimg'},el('img',{src:URL.createObjectURL(photoBlob),alt:'',class:'ok'})):kapaliResim({card_id:'kapali:'+$('#kSet').value}),
@@ -2205,6 +2216,44 @@ window.drawSettings=function(area){const r=_ds.apply(this,arguments);
   if(!USER){go('profil');toast('Önce giriş yap');return;}
   if(s==='teklifler'){await teklifleriYukle();profTab='teklifler';go('profil');}
   else if(s==='degerlendirmeler'){await openSeller(USER.id);const k=$('#yorumKutu');if(k)k.scrollIntoView();}})();
+
+/* ---------- Pokémon / Cyberpunk oyun seçimi ---------- */
+const CP_RENK={'Mavi':'#3d9bf0','Yeşil':'#5fbd58','Kırmızı':'#f2683a','Sarı':'#f7d02c'};
+const isCp=c=>!!c&&String(c[14]).startsWith('cp-');
+try{VAR_TR.foil='Foil';}catch(e){}
+function oyunKur(){if($('#oyunSec'))return;const d=$('#dilSec');if(!d)return;
+  const o=el('div',{id:'oyunSec',title:'Kart oyunu'});
+  [['pk','⚡ Pokémon'],['cp','🌆 Cyberpunk']].forEach(([k,t])=>{const b=el('button',{onclick:()=>{if(k==='cp')dilDegistir('cp');else dilDegistir(store.get('kb_pdil','en')==='ja'?'ja':'en');}},t);b.dataset.o=k;o.append(b);});
+  d.parentNode.insertBefore(o,d);}
+function oyunGuncelle(){const cp=DIL==='cp';
+  document.querySelectorAll('#oyunSec button').forEach(b=>b.classList.toggle('on',(b.dataset.o==='cp')===cp));
+  const d=$('#dilSec');if(d)d.style.display=cp?'none':'';if(!cp)store.set('kb_pdil',DIL);
+  document.body.classList.toggle('oyun-cp',cp);
+  const h=document.querySelector('#v-katalog .hero h2');if(h)h.textContent=cp?'Tüm Cyberpunk TCG kartları':DIL==='ja'?'Tüm Japonca Pokémon kartları':'Tüm Pokémon kartları';
+  const su=$('#cSup');if(su&&su.dataset.oyun!==String(cp)){const v=su.value,ops=cp?['Legend','Unit','Program','Gear']:['Pokémon','Trainer','Energy'];su.dataset.oyun=String(cp);su.innerHTML='';su.append(el('option',{value:''},'Tüm türler'),...ops.map(x=>el('option',{value:x},x)));su.value=ops.includes(v)?v:'';}
+  if(cp)$('#cq').placeholder='Kart adını yaz: ör. Johnny Silverhand, Judy Álvarez, Mantis Blades…';
+  document.title=cp?'KartBorsa – Cyberpunk TCG Kartları':'KartBorsa – Pokémon Kartları';}
+const _dk=window.dilKur;window.dilKur=function(){const r=_dk.apply(this,arguments);try{oyunKur();oyunGuncelle();}catch(e){console.warn('oyun',e);}return r;};
+const _dd=window.dilDegistir;window.dilDegistir=function(d){const r=_dd.apply(this,arguments);try{oyunKur();oyunGuncelle();}catch(e){}return r;};
+const _ocn2=window.openCardNow;
+window.openCardNow=function(i){const r=_ocn2.apply(this,arguments);
+  try{const c=CAT.cards[i];if(isCp(c)){const a=c[17]||{},b=$('#modalBody'),dl=b.querySelector('dl.kv');b.style.setProperty('--mc',CP_RENK[a.r]||'var(--accent)');
+    if(dl){const dd=(k,v)=>{if(v==null||v==='')return;dl.append(el('dt',{},k),el('dd',{},v));};
+      dd('Maliyet',a.m);dd('Güç',a.g);dd('RAM',a.ram);dd('Eddies simgesi',a.e?'Var':'Yok');dd('Etiketler',a.t&&a.t.length?a.t.join(' · '):null);
+      if(a.x)dl.after(el('div',{class:'atk cpmetin'},el('b',{text:'Kart metni'}),...a.x.split('\n').filter(Boolean).map(s=>el('div',{class:'small',text:s}))));}}}catch(e){console.warn('cp detay',e);}
+  return r;};
+const _pl=window.priceLinks;
+window.priceLinks=function(c){if(!isCp(c))return _pl.apply(this,arguments);const a=c[17]||{},q=encodeURIComponent('Cyberpunk TCG '+c[0]);
+  return el('div',{style:'display:flex;gap:14px;flex-wrap:wrap;margin-top:4px'},el('a',{href:a.u||('https://www.tcgplayer.com/search/cyberpunk-tcg/product?q='+q),target:'_blank',rel:'noopener'},'TCGplayer ↗'),
+    el('a',{href:'https://www.ebay.com/sch/i.html?_nkw='+q+'&LH_Sold=1&LH_Complete=1',target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));};
+const _tf2=window.tileFor;
+window.tileFor=function(i){const t=_tf2.apply(this,arguments);try{const c=CAT.cards[i];if(isCp(c)){const a=c[17]||{};if(CP_RENK[a.r])t.style.setProperty('--tc',CP_RENK[a.r]);}}catch(e){}return t;};
+function kSetDoldur(){const s=$('#kSet');if(!s||!CAT||s.dataset.n===String(CAT.sets.length)+DIL)return;const v=s.value;s.innerHTML='';
+  s.append(el('option',{value:'-'},'Set yok / karışık ürün'));
+  const og={cp:el('optgroup',{label:'Cyberpunk TCG setleri'}),en:el('optgroup',{label:'Pokémon · İngilizce setler'}),ja:el('optgroup',{label:'Pokémon · Japonca setler'})};
+  CAT.sets.slice().sort((a,b)=>String(b[3]||'').localeCompare(String(a[3]||''))).forEach(x=>og[setDil(x)].append(el('option',{value:x[0]},x[1])));
+  const sira=DIL==='cp'?['cp','en','ja']:DIL==='ja'?['ja','en','cp']:['en','ja','cp'];sira.forEach(k=>s.append(og[k]));
+  s.value=[...s.options].some(o=>o.value===v)?v:'-';s.dataset.n=String(CAT.sets.length)+DIL;}
 rehberKur();
 (async()=>{try{await window.__ilan;}catch(e){}
   try{await yorumlariYukle();}catch(e){console.warn(e);}

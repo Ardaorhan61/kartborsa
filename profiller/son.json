@@ -76,5 +76,44 @@
   "created_at": "2026-11-20T17:40:53.515865+00:00",
   "updated_at": "2026-11-20T17:41:09.500935+00:00",
   "partner": 5
+ },
+ {
+  "id": "930159eb-d8cb-4f8e-8313-cdf6c7d37801",
+  "display_name": "Zeynep İpekli",
+  "city": null,
+  "bio": null,
+  "avatar_url": null,
+  "instagram": null,
+  "whatsapp": null,
+  "show_collection": false,
+  "created_at": "2026-11-21T15:20:16.339249+00:00",
+  "updated_at": "2026-11-21T15:26:43.829752+00:00",
+  "partner": 151
+ },
+ {
+  "id": "1706d3ec-d09e-4424-b071-90e6c5775d58",
+  "display_name": "POKEMONFEDAİSİ59",
+  "city": null,
+  "bio": null,
+  "avatar_url": null,
+  "instagram": null,
+  "whatsapp": null,
+  "show_collection": true,
+  "created_at": "2026-11-21T15:29:40.717229+00:00",
+  "updated_at": "2026-11-21T15:30:22.856827+00:00",
+  "partner": 23
+ },
+ {
+  "id": "4a213d93-cbae-4545-8c37-289e10236e57",
+  "display_name": "Ardos",
+  "city": "İstanbul",
+  "bio": null,
+  "avatar_url": null,
+  "instagram": null,
+  "whatsapp": null,
+  "show_collection": false,
+  "created_at": "2026-11-21T20:14:55.861733+00:00",
+  "updated_at": "2026-11-21T20:14:55.861733+00:00",
+  "partner": null
  }
 ]

@@ -20,6 +20,12 @@ while True:
     start += 1000
 
 profiles = json.loads(get(f"{URL}/rest/v1/profiles?select=*&order=created_at.asc&limit=10000", H))
+# satıcı değerlendirmeleri herkese açık; teklifler gizli olduğu için bu anahtarla okunamaz
+try:
+    reviews = json.loads(get(f"{URL}/rest/v1/reviews?select=*&order=created_at.asc&limit=100000", H))
+except Exception as e:
+    print("Değerlendirmeler alınamadı:", e)
+    reviews = None
 
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3)))
 os.makedirs(f"{OUT}/ilanlar", exist_ok=True)
@@ -31,6 +37,11 @@ os.makedirs(f"{OUT}/profiller", exist_ok=True)
 pdata = json.dumps(profiles, ensure_ascii=False, indent=1)
 open(f"{OUT}/profiller/son.json", "w").write(pdata)
 open(f"{OUT}/profiller/{now:%Y-%m-%d}.json", "w").write(pdata)
+if reviews is not None:
+    os.makedirs(f"{OUT}/degerlendirmeler", exist_ok=True)
+    rvdata = json.dumps(reviews, ensure_ascii=False, indent=1)
+    open(f"{OUT}/degerlendirmeler/son.json", "w").write(rvdata)
+    open(f"{OUT}/degerlendirmeler/{now:%Y-%m-%d}.json", "w").write(rvdata)
 for pr in profiles:
     u = pr.get("avatar_url") or ""
     if "/photos/" in u:
@@ -55,6 +66,7 @@ active = [r for r in rows if r.get("status") == "active"]
 rows_l = [r for r in rows if 'id' in r]
 summary = (f"Yedek: {now:%d.%m.%Y %H:%M}\n"
            f"Profil: {len(profiles)}\n"
+           f"Değerlendirme: {len(reviews) if reviews is not None else 'alınamadı'}\n"
            f"Toplam ilan: {len([r for r in rows if 'id' in r])} (yayında {len(active)}, satıldı {len(rows_l)-len(active)})\n"
            f"Satıştaki kart adedi: {sum(r.get('qty', 0) for r in active)}\n"
            f"Bu yedekte yeni indirilen fotoğraf: {saved}\n")

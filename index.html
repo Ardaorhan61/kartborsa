@@ -2077,7 +2077,7 @@ function condSecenek(list,sec){const s=$('#lCond');const v=s.value;s.innerHTML='
 function modKur(m){MOD=m;$('#lMod').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   document.querySelectorAll('#lForm .kartalan').forEach(x=>x.style.display=m==='kart'?'':'none');$('#kAlan').style.display=m==='kapali'?'':'none';
   condSecenek(m==='kapali'?KAPALI_DURUM:KART_DURUM,m==='kapali'?'Jelatinli':'Near Mint');$('#lCond').parentNode.style.display=(m==='kart'&&$('#gVar').checked)?'none':'';
-  if(m==='kapali'){kSetDoldur();$('#lLang').value=DIL==='ja'?'Japonca':'İngilizce';kapaliOnizle();}
+  if(m==='kapali'){kSetDoldur();cpAdListesi();$('#lLang').value=DIL==='ja'?'Japonca':'İngilizce';kapaliOnizle();}
   else{const p=$('#lCardPrev');if(picked!=null)pickForListing(picked);else{p.innerHTML='';p.append(el('div',{class:'muted',text:'Seçtiğin kart burada görünecek.'}));}}}
 function kapaliOnizle(){if(MOD!=='kapali')return;const p=$('#lCardPrev');p.innerHTML='';const si=setById($('#kSet').value);const s=si!=null?CAT.sets[si]:null;
   p.append(photoBlob?el('div',{class:'cimg kpimg'},el('img',{src:URL.createObjectURL(photoBlob),alt:'',class:'ok'})):kapaliResim({card_id:'kapali:'+$('#kSet').value}),
@@ -2254,6 +2254,40 @@ function kSetDoldur(){const s=$('#kSet');if(!s||!CAT||s.dataset.n===String(CAT.s
   CAT.sets.slice().sort((a,b)=>String(b[3]||'').localeCompare(String(a[3]||''))).forEach(x=>og[setDil(x)].append(el('option',{value:x[0]},x[1])));
   const sira=DIL==='cp'?['cp','en','ja']:DIL==='ja'?['ja','en','cp']:['en','ja','cp'];sira.forEach(k=>s.append(og[k]));
   s.value=[...s.options].some(o=>o.value===v)?v:'-';s.dataset.n=String(CAT.sets.length)+DIL;}
+
+/* ---------- Cyberpunk: kapalı ürün fiyatları (booster, kutu, deste) ---------- */
+let CPK=null;
+const cpKapaliAl=()=>CPK||(CPK=fetch('cp_kapali.json').then(r=>r.ok?r.json():{k:[]}).catch(()=>({k:[]})));
+const cpTur=a=>/booster box case|case/i.test(a)?'Diğer':/booster box|display/i.test(a)&&!/starter/i.test(a)?'Booster kutusu':/booster pack/i.test(a)?'Booster paketi':/starter deck display/i.test(a)?'Diğer':/starter deck/i.test(a)?'Hazır deste':'Diğer';
+const cpResim=(u,b)=>u?u.replace(/_in_1000x1000\.jpg$/,b?'_in_1000x1000.jpg':'_400w.jpg'):'';
+const cpUsd=x=>x!=null&&KUR?tlx(usdTL(x)):'—';
+function cpKapaliIlanlar(k){return active().filter(l=>isKapali(l)&&l.card_id==='kapali:cp-'+k.g);}
+function cpKapaliAc(k){const b=$('#modalBody');b.innerHTML='';$('#modal').classList.add('on');const ilan=cpKapaliIlanlar(k);
+  b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:k.a}),el('button',{class:'btn sec',onclick:closeModal},'Kapat')),
+    el('div',{class:'detail'},el('div',{},el('div',{class:'cimg kpimg'},k.r?el('img',{src:cpResim(k.r,true),alt:k.a,class:'ok'}):el('div',{class:'fb',text:'📦'}))),
+      el('div',{},el('dl',{class:'kv'},el('dt',{},'Ürün türü'),el('dd',{text:cpTur(k.a)}),el('dt',{},'Set'),el('dd',{text:k.s}),el('dt',{},'Çıkış'),el('dd',{text:k.t?fmtDate(k.t.replace(/-/g,'/')):'—'})),
+        el('div',{class:'mtiles',style:'margin-top:12px'},
+          el('div',{class:'mtile'},el('div',{class:'muted small',text:'TCGplayer (ABD) piyasa'}),el('div',{class:'big',text:cpUsd(k.p)}),el('div',{class:'muted small',text:k.p!=null?'$'+k.p.toLocaleString('tr-TR'):'Bugün fiyat yok'})),
+          k.d!=null?el('div',{class:'mtile'},el('div',{class:'muted small',text:'En düşük ilan (TCGplayer)'}),el('div',{class:'big',text:cpUsd(k.d)}),el('div',{class:'muted small',text:'$'+k.d.toLocaleString('tr-TR')})):null),
+        el('div',{class:'buybox'},el('div',{class:'muted small'},'Sitedeki ilanlar'),el('div',{style:'font:700 20px "Space Grotesk",Inter',text:ilan.length?`${ilan.length} ilan · en düşük ${tl(Math.min(...ilan.map(l=>l.price)))}`:'Bu setten kapalı ürün ilanı yok'}),
+          el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'},el('button',{class:'btn',onclick:()=>{closeModal();cpKapaliIlanVer(k);}},'Bu üründen ilan ver'),
+            k.u?el('a',{class:'btn sec',href:k.u,target:'_blank',rel:'noopener'},'TCGplayer ↗'):null)),
+        ...ilan.map(l=>listingRow(l,true)),
+        el('div',{class:'muted small',style:'margin-top:10px',text:'Fiyat TCGplayer\'ın günlük verisinden gelir ve dolar kuruyla TL\'ye çevrilir; Türkiye\'deki satış fiyatları farklı olabilir.'}))));}
+function cpKapaliIlanVer(k){go('ver');setTimeout(()=>{try{modKur('kapali');kSetDoldur();const s=$('#kSet');if([...s.options].some(o=>o.value==='cp-'+k.g))s.value='cp-'+k.g;
+  $('#kTur').value=cpTur(k.a);$('#kAd').value=k.a;$('#lLang').value='İngilizce';if(k.p!=null&&KUR)$('#lPrice').placeholder='Piyasa ≈ '+Math.round(usdTL(k.p));kapaliOnizle();$('#lPrice').focus();}catch(e){console.warn(e);}},60);}
+async function cpKapaliBolum(area){const d=await cpKapaliAl();if(DIL!=='cp'||!d.k||!d.k.length||!area.isConnected||area.querySelector('#cpKapali'))return;
+  const g=el('div',{class:'cgrid'});
+  d.k.forEach(k=>{const im=el('div',{class:'cimg kpimg'},k.r?el('img',{src:cpResim(k.r),alt:k.a,loading:'lazy',class:'ok'}):el('div',{class:'fb',text:'📦'}));
+    if(k.p!=null&&KUR)im.append(el('span',{class:'badge',text:tlx(usdTL(k.p))}));const n=cpKapaliIlanlar(k).length;if(n)im.append(el('span',{class:'badge qtyb',text:n+' ilan'}));
+    g.append(el('div',{class:'ctile',onclick:()=>cpKapaliAc(k)},im,el('div',{class:'cname',text:k.a}),el('div',{class:'cset',text:k.s})));});
+  const bol=el('div',{id:'cpKapali',class:'setsec'},el('h3',{},el('span',{class:'t',text:'📦 Kapalı ürünler · booster, kutu, deste'}),el('span',{class:'muted small',text:'TCGplayer piyasa fiyatı'})),g);
+  const ilkSeri=area.querySelector('.series');if(ilkSeri)ilkSeri.before(bol);else area.append(bol);}
+const _dc3=window.drawCat;
+window.drawCat=function(){const r=_dc3.apply(this,arguments);try{if(DIL==='cp'){const a=$('#catArea');if(a&&a.querySelector('.kbhero'))cpKapaliBolum(a);}}catch(e){console.warn(e);}return r;};
+async function cpAdListesi(){if(DIL!=='cp')return;const d=await cpKapaliAl();const ad=$('#kAd');if(!ad||$('#cpAdlar'))return;
+  ad.setAttribute('list','cpAdlar');ad.after(el('datalist',{id:'cpAdlar'},...[...new Set((d.k||[]).map(k=>k.a))].map(a=>el('option',{value:a}))));}
+
 rehberKur();
 (async()=>{try{await window.__ilan;}catch(e){}
   try{await yorumlariYukle();}catch(e){console.warn(e);}

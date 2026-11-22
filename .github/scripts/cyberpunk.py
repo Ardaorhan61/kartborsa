@@ -89,6 +89,7 @@ os.makedirs(f"{VERI}/set", exist_ok=True)
 
 # ---- katalog ----
 fiyat = {}
+kapali = []   # kapalı ürünler (booster, kutu, deste): ad, set, resim, TCGplayer fiyatı
 try:
     gruplar = fetch(f"{BASE}/groups")["results"]
 
@@ -104,6 +105,16 @@ try:
         gid = g["groupId"]
         for x in fiyatlar:
             fiyat.setdefault(x["productId"], []).append(x)
+        for p in urunler:
+            if ext(p).get("Number"):
+                continue
+            fy = {x.get("subTypeName"): x for x in fiyat.get(p["productId"], [])}
+            x = fy.get("Normal") or next(iter(fy.values()), None)
+            usd = r2((x.get("marketPrice") or x.get("midPrice"))) if x else None
+            kapali.append({"a": p["name"], "s": g["name"], "g": gid, "i": p["productId"], "p": usd,
+                           "d": r2(x.get("lowPrice")) if x else None, "u": p.get("url"),
+                           "r": f"{RESIM}{p['productId']}_in_1000x1000.jpg" if p.get("imageCount", 1) else "",
+                           "t": (g.get("publishedOn") or "")[:10]})
         kart_urun = [p for p in urunler if ext(p).get("Number")]
         if not kart_urun:
             continue
@@ -125,12 +136,19 @@ try:
                             f"cp-{gid}-{p['productId']}", "", "cp", ayr])
     kat = {"sets": setler, "cards": kartlar, "built": TODAY, "v": 1}
     json.dump(kat, open(TAM_YOL, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+    kapali.sort(key=lambda k: (k["t"], k["s"], k["a"]), reverse=True)
+    json.dump({"u": TODAY, "k": kapali}, open(f"{KLASOR}/kapali.json", "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
     print(f"Cyberpunk TCG: {len(setler)} set, {len(kartlar)} kart (TCGplayer)", flush=True)
 except Exception as hata:
     kat = load(TAM_YOL, None)
     if not kat:
         raise SystemExit(f"tcgcsv.com okunamadı ve kayıtlı katalog yok: {hata}")
     print(f"tcgcsv.com okunamadı ({hata}); kayıtlı katalog kullanılıyor, fiyatlar güncellenmedi", flush=True)
+
+# ---- kapalı ürünler (sitede Cyberpunk ana sayfasında ve İlan Ver'de) ----
+kp = load(f"{KLASOR}/kapali.json", {"u": TODAY, "k": []})
+json.dump(kp, open(f"{SITE}/cp_kapali.json", "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+print(f"Cyberpunk kapalı ürün: {len(kp['k'])} ({sum(1 for k in kp['k'] if k['p'])} fiyatlı)", flush=True)
 
 # ---- sitenin kullandığı kısa biçim ----
 site = json.loads(json.dumps(kat))

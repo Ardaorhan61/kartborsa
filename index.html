@@ -733,13 +733,13 @@ $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 const DETAY={};
 async function kartDetay(c){
-  if(!CAT.lite||Array.isArray(c[9]))return;
+  if(Array.isArray(c[9]))return;
   const sid=c[14].slice(0,c[14].lastIndexOf('-'));
   try{DETAY[sid]=DETAY[sid]||fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>r.ok?r.json():{});const d=await DETAY[sid];
     CAT.cards.forEach(x=>{const v=d[x[14]];if(v&&x[14].slice(0,x[14].lastIndexOf('-'))===sid){x[9]=v[0]||[];x[10]=v[1]||[];x[11]=v[2]||[];}});}catch(e){DETAY[sid]=null;}
   if(!Array.isArray(c[9])){c[9]=[];c[10]=[];if(!Array.isArray(c[11]))c[11]=[];}
 }
-async function openCard(i){const c=CAT.cards[i];if(CAT.lite&&!Array.isArray(c[9])){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await kartDetay(c);}openCardNow(i);}
+async function openCard(i){const c=CAT.cards[i];if(!Array.isArray(c[9])){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await kartDetay(c);}openCardNow(i);}
 function openCardNow(i){
   const c=CAT.cards[i],s=setOf(c),st=stockOf(c[14]);
   const b=$('#modalBody');b.innerHTML='';b.style.setProperty('--mc',c[7]&&TIP_TR[c[7]]?'var(--t-'+c[7]+')':'var(--accent)');

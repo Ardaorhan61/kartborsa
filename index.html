@@ -342,6 +342,7 @@ body.oyun-cp{--accent:#fcee0a;--accent2:#00e5ff}
 body.oyun-cp .logo .dot{background:#fcee0a;color:#000}
 .cpmetin .small{margin-top:4px;line-height:1.5}
 @media (max-width:640px){#oyunSec{margin:0 2px}#oyunSec button{padding:5px 8px;font-size:12px}}
+.derfiyat{margin-top:14px;padding:12px;border:1px solid var(--line,#2a2f3a);border-radius:12px;background:var(--panel2,rgba(255,255,255,.03))}.dergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.dersat{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:13px}.dersat b{color:var(--accent,#ffcb3d)}.dersite{color:var(--ok,#3fb950);font-weight:700}
 </style>
 </head>
 <body>
@@ -690,6 +691,19 @@ function priceLinks(c){const s=setOf(c),q=encodeURIComponent(`${c[0]} ${s[1]} ${
     el('a',{href:`https://www.tcgplayer.com/search/pokemon/product?q=${q}`,target:'_blank',rel:'noopener'},'TCGplayer ↗'),
     el('a',{href:`https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=${encodeURIComponent(c[0])}`,target:'_blank',rel:'noopener'},'Cardmarket ↗'),
     el('a',{href:`https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1`,target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));}
+function derBolum(c){try{const s=setOf(c)||[],cp=String(c[14]).startsWith('cp-'),ja=!cp&&s[7]==='ja';
+  const ing=x=>{const m=String(x||'').match(/\(([^()]*[A-Za-z][^()]*)\)\s*$/);return m?m[1]:String(x||'');};
+  const ad=ja?ing(c[0]):c[0],setAd=ja?ing(s[1]):(s[1]||''),no=String(c[2]||'').replace(/^0+(?=\d)/,'');
+  const temel=cp?`${ad} Cyberpunk TCG`:ja?`${ad} ${no} Japanese ${/[A-Za-z]/.test(setAd)?setAd:''}`:`${ad} ${no} ${setAd}`;
+  const ebay=g=>`https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent((temel+' '+g).replace(/\s+/g,' ').trim())}&LH_Sold=1&LH_Complete=1`;
+  const ilan=(typeof LIST!=='undefined'?LIST:[]).filter(l=>l.card_id===c[14]&&l.grade_co&&l.status==='active'&&l.qty>0);
+  const enUcuz={};for(const l of ilan){const k=l.grade_co+(l.grade!=null?' '+(+l.grade):'');if(!enUcuz[k]||l.price<enUcuz[k])enUcuz[k]=l.price;}
+  const notlar=['PSA 10','PSA 9','PSA 8','CGC 10','CGC 9.5','BGS 9.5','BGS 10'];for(const k of Object.keys(enUcuz))if(!notlar.includes(k))notlar.push(k);
+  const sat=g=>el('div',{class:'dersat'},el('b',{text:g}),enUcuz[g]!=null?el('span',{class:'dersite',text:'Sitede: '+tl(enUcuz[g])}):el('span',{class:'muted small',text:'Sitede ilan yok'}),el('a',{href:ebay(g),target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));
+  return el('div',{class:'derfiyat'},el('div',{style:'display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline'},el('b',{},'🏅 Dereceli (graded) fiyatlar'),
+      el('a',{class:'small',href:`https://www.pricecharting.com/search-products?q=${encodeURIComponent(temel.replace(/\s+/g,' ').trim())}&type=prices`,target:'_blank',rel:'noopener'},'PriceCharting: tüm notlar ↗')),
+    el('div',{class:'muted small',style:'margin:4px 0 8px'},'Dereceli kartın fiyatı nota göre çok değişir. "eBay satılanlar" bu kartın o notla gerçekten satılmış ilanlarını açar; "Sitede" KartBorsa\'daki en ucuz dereceli ilandır.'),
+    el('div',{class:'dergrid'},...notlar.map(sat)));}catch(e){console.warn('derBolum',e);return null;}}
 function openSifre(rec){
   if(!USER)return needLogin();
   const p1=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifre (en az 6 karakter)'}),
@@ -753,6 +767,7 @@ function openCardNow(i){
           c[8]?el('dt',{},'Çizer'):null,c[8]?el('dd',{text:c[8]}):null),
         box,
         el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
+        derBolum(c),
         ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
         ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{style:'display:flex;align-items:center;gap:8px'},maliyet(a[1]),a[0]),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))),
     marketSection(c));

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """KartBorsa: kart tarama için her kartın resminden "görsel iz" (perceptual hash) çıkarır.
 
-Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü> [cards_ja.json]
+Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü> [cards_ja.json] [cards_cp.json]
   - <site>/cards.json okunur
   - <çıktı>/izler.json varsa sadece eksik kartlar hesaplanır
 Aynı hesap index.html içindeki taraIz() fonksiyonuyla birebir aynıdır:
@@ -18,6 +18,8 @@ cat = json.load(open(os.path.join(SITE, 'cards.json'), encoding='utf-8'))
 sets = cat['sets']
 JA_YOL = sys.argv[3] if len(sys.argv) > 3 else ''
 ja = json.load(open(JA_YOL, encoding='utf-8')) if JA_YOL and os.path.exists(JA_YOL) else {'sets': [], 'cards': []}
+CP_YOL = sys.argv[4] if len(sys.argv) > 4 else ''   # Cyberpunk TCG kataloğu (cyberpunk.py yazar)
+cp = json.load(open(CP_YOL, encoding='utf-8')) if CP_YOL and os.path.exists(CP_YOL) else {'sets': [], 'cards': []}
 eski_yol = os.path.join(OUT, 'izler2.json')
 eski = {}
 if os.path.exists(eski_yol):
@@ -76,7 +78,7 @@ def isle(c):
     urls = []
     if c[13]:
         urls.append(c[13])
-    if not cid.startswith('ja-'):
+    if not cid.startswith(('ja-', 'cp-')):
         urls.append('https://images.pokemontcg.io/%s/%s.png' % (sets[c[1]][0], c[2]))
     # Scrydex'e otomatik istek atılmaz (kuralları gereği)
     urls = [u for u in urls if 'scrydex.com' not in u]
@@ -89,7 +91,7 @@ def isle(c):
     return cid, None
 
 
-kartlar = cat['cards'] + [c for c in ja['cards'] if c[13]]
+kartlar = cat['cards'] + [c for c in ja['cards'] if c[13]] + [c for c in cp['cards'] if c[13]]
 yeni = {}
 eksik = []
 for c in kartlar:

@@ -222,3 +222,11 @@ Arda "devam" yazınca bu liste tekrar gösterilir. 1 satıcı puanı + yorum + "
 - Kart tarama: `kart_izi.py` 4. argüman olarak `veri/cyberpunk/cards_cp.json`'u okur (kart-izi.yml güncellendi); izler bir sonraki kart-izi çalışmasında eklenir.
 - Kapalı ürünler (Cyberpunk): cyberpunk.py kart numarası olmayan TCGplayer ürünlerini (booster paketi/kutusu/kasası, başlangıç destesi ve display, pre-release/event kit, Alpha Kit; 22 Kasım: 18 ürün, hepsi fiyatlı) `cp_kapali.json`'a yazar (geçmiş yok, günlük fiyat). Cyberpunk ana sayfasında "📦 Kapalı ürünler" bölümü; ürün penceresinde TCGplayer piyasa ve en düşük fiyat, sitedeki kapalı ürün ilanları, "Bu üründen ilan ver" (İlan Ver'i set/tür/ad/fiyat önerisiyle doldurur). İlan Ver'de Cyberpunk seçiliyken ürün adı önerileri.
 - Not (22 Kasım): Başka bir otomatik oturumun elle başlattığı uzun fiyat işi (14:46 UTC) yayın kuyruğunu ~1,5 saat bekletti; push yayınları onun bitmesini bekler (concurrency "yayin").
+
+## 22 Kasım 2026 — günlük bakım (otomatik görev)
+- Kontrol: Actions son 24 saatte hatasız; site, Kart Al (0 aktif ilan, yedekteki 2 ilan "sold"), İlan Ver, Piyasa, dil geçişi, kart detayı çalışıyor, konsolda hata yok. Katalogda yeni set eksiği yok; logo/sembol/Japonca ad sayıları önceki günle aynı.
+- mcd14, mcd18, tk1a, tk1b, tk2b fiyatları geldi (TCGdex).
+- Sorun: Pokémon TCG API sabah çok sık 500/502 verdi; ~30 set TCGdex'e düştü, TCGdex'te fiyatı olmayan kartlar Piyasa'dan kayboldu (fiyatsız EN 95 → 149; dpp 55, bw8 12, sm6–sm11 vb.), sve/hgss2/hgss3/fut20 hiç alınamadı.
+- `fiyatlar.py`: bir kartın fiyatı o gün gelmezse son bilinen fiyatı (set dosyası + ozet) en fazla 14 gün (ESKI_GUN) korunur; kaynakta eşleşmeyen kartların kaydı/geçmişi silinmez.
+- `yayin.yml`: "Fiyatları güncelle" ve "Japonca katalog ve fiyatlar" artık elle çalıştırmada (workflow_dispatch) da çalışır. DİKKAT: ikisi birlikte çalışmalı — sadece fiyatlar.py çalışırsa ozet.json'daki Japonca Cardmarket fiyatları düşer (bugün bir kez oldu: fiyatsız JA 2.421 → 13.120, aynı gün yeniden çalıştırmayla düzeltildi).
+- Elle çalıştırma sonrası fiyatsız EN kart 149 → 36 (kalan: sve 16, me6 4, dp4 4, dpp 3, swshp 3, bwp 2, diğerleri 1'er).

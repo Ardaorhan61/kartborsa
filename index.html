@@ -2187,6 +2187,24 @@ const _un=window.updateNav;
 window.updateNav=function(){_un.apply(this,arguments);const n=tkSayi();if(n){const b=$('#navProfil');b.append(el('span',{class:'cartcount tkc',title:n+' teklif cevabı bekliyor ya da yeni',text:'💰'+n}));}};
 const _lm=window.loadMine;
 window.loadMine=async function(){await _lm.apply(this,arguments);try{await teklifleriYukle();}catch(e){console.warn('teklifler',e);}};
+
+/* ---------- e-posta bildirim ayarı, e-postadaki bağlantılar ---------- */
+const _ds=window.drawSettings;
+window.drawSettings=function(area){const r=_ds.apply(this,arguments);
+  Promise.resolve(r).then(()=>{if(!USER||!PROFILE||!area||area.querySelector('#ebKutu'))return;
+    const cb=el('input',{type:'checkbox',id:'ebKutu'});cb.checked=PROFILE.email_bildirim!==false;
+    cb.addEventListener('change',async()=>{const v=cb.checked;const x=await SB.from('profiles').update({email_bildirim:v}).eq('id',USER.id).select().single();
+      if(x.error){cb.checked=!v;toast(hata(x.error));return;}PROFILE.email_bildirim=v;toast(v?'E-posta bildirimleri açık ✓':'E-posta bildirimleri kapatıldı');});
+    area.append(el('div',{class:'card',style:'margin-top:14px'},el('h3',{style:'font-size:16px',text:'E-posta bildirimleri'}),
+      el('label',{class:'chk',style:'margin-top:8px'},cb,' Teklif ve değerlendirme bildirimlerini e-postayla al'),
+      el('div',{class:'muted small',style:'margin-top:6px',text:'Açıkken yeni teklif, karşı teklif, kabul/red ve hakkında yazılan değerlendirmeler kayıtlı e-posta adresine gelir.'})));}).catch(()=>{});
+  return r;};
+(async()=>{const s=new URLSearchParams(location.search).get('sayfa');if(!s)return;
+  try{history.replaceState(history.state,'',location.pathname);}catch(e){}
+  try{await window.__ilan;}catch(e){}for(let i=0;i<20&&!CAT;i++)await new Promise(r=>setTimeout(r,250));
+  if(!USER){go('profil');toast('Önce giriş yap');return;}
+  if(s==='teklifler'){await teklifleriYukle();profTab='teklifler';go('profil');}
+  else if(s==='degerlendirmeler'){await openSeller(USER.id);const k=$('#yorumKutu');if(k)k.scrollIntoView();}})();
 rehberKur();
 (async()=>{try{await window.__ilan;}catch(e){}
   try{await yorumlariYukle();}catch(e){console.warn(e);}

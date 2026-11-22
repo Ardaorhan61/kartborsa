@@ -52,7 +52,7 @@ jobs:
         run: python3 site/.github/scripts/fiyatlar.py veri site/cards.json
 
       - name: Japonca katalog ve fiyatlar
-        if: github.event_name == 'schedule' || hashFiles('veri/japonca/cards_ja.json') == ''
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || hashFiles('veri/japonca/cards_ja.json') == ''
         continue-on-error: true
         id: japonca
         run: python3 site/.github/scripts/japonca.py veri

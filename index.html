@@ -981,16 +981,16 @@ function taraIzRenk(d){const N=256*352,gr=new Float64Array(N),cb=new Float64Arra
   for(let i=0;i<N;i++){const R=d[i*4],G=d[i*4+1],B=d[i*4+2];gr[i]=R*0.299+G*0.587+B*0.114;cb[i]=-0.168736*R-0.331264*G+0.5*B;cr[i]=0.5*R-0.418688*G-0.081312*B;}
   return [...taraIzGri(gr),...taraPhash(taraKucult(cb),44,32),...taraPhash(taraKucult(cr),44,32)];}
 function taraPc(x){x-=(x>>>1)&0x55555555;x=(x&0x33333333)+((x>>>2)&0x33333333);return (((x+(x>>>4))&0x0F0F0F0F)*0x01010101)>>>24;}
-function taraOyunda(i){const c=CAT&&CAT.cards[i];return !!c&&(DIL==='cp')===String(c[14]).startsWith('cp-');}
+function taraOyunda(i){const c=CAT&&CAT.cards[i];const cp=TARA.oyunCp!=null?TARA.oyunCp:(DIL==='cp');return !!c&&cp===String(c[14]).startsWith('cp-');}
 async function taraIzleriYukle(){
-  const oy=DIL==='cp';if(TARA.iz&&TARA.izOyun===oy)return TARA.iz;
+  const oy=DIL==='cp';if(TARA.iz&&TARA.izOyun==='hepsi')return TARA.iz;
   let r=await fetch('tara/izler2.json',{cache:'no-cache'}).catch(()=>null);let K=8;
   if(!r||!r.ok){r=await fetch('tara/izler.json',{cache:'no-cache'});K=4;}
   if(!r.ok)throw new Error('iz yok');const j=await r.json();
   const idx=[],ids=Object.keys(j.d);const h=new Uint32Array(ids.length*K);let n=0;
-  for(const id of ids){const i=BYID[id];if(i===undefined||!taraOyunda(i))continue;const s=j.d[id];if(s.length<K*8)continue;idx.push(i);
+  for(const id of ids){const i=BYID[id];if(i===undefined)continue;const s=j.d[id];if(s.length<K*8)continue;idx.push(i);
     for(let k=0;k<K;k++)h[n*K+k]=parseInt(s.slice(k*8,k*8+8),16);n++;}
-  TARA.iz={idx,h:h.subarray(0,n*K),n,K};TARA.izOyun=oy;return TARA.iz;}
+  TARA.iz={idx,h:h.subarray(0,n*K),n,K};TARA.izOyun='hepsi';return TARA.iz;}
 function taraIzKes(src,sx,sy,sw,sh,aci){const c=document.createElement('canvas');c.width=256;c.height=352;const x=c.getContext('2d',{willReadFrequently:true});
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#808080';x.fillRect(0,0,256,352);
   x.translate(128,176);x.scale(256/sw,352/sh);if(aci)x.rotate(-aci*Math.PI/180);x.drawImage(src,-(sx+sw/2),-(sy+sh/2));
@@ -1046,7 +1046,7 @@ function taraGorsel(src,W,H,cerceve,hizli){const I=TARA.iz;if(!I)return {liste:[
   for(const k of (cerceve?[1,.95,.9,.85,.8,.75,.7]:[1,.85,.72]))for(const dx of kay)for(const dy of kay){const w=bw*k,hh=bh*k;tara([(W-w)/2+dx*W,(H-hh)/2+dy*H,w,hh,0]);}
   const iyi=kesEn.map((m,k)=>[m,k]).sort((p,q)=>p[0]-q[0]).slice(0,hizli?1:3).map(p=>kes[p[1]]);
   for(const r of iyi)ince(r);
-  const sira=Array.from({length:n},(_,i)=>i).sort((x,y)=>en[x]-en[y]).slice(0,40);
+  const sira=Array.from({length:n},(_,i)=>i).sort((x,y)=>en[x]-en[y]).slice(0,60);
   const bol=K===8?2+RW:2;
   return {liste:sira.map(j=>({i:I.idx[j],d:Math.round(en[j]/bol)})),kesim:sira.length?kes[enK[sira[0]]]:null};}
 
@@ -1096,8 +1096,12 @@ function taraEslestir(ustMetin,altMetin,tumMetin){
   return {liste:sonuc.slice(0,18),bulunanNo:nos[0]?`${nos[0][0]}/${nos[0][1]}`:null};}
 async function taraOku(kaynak,kartCercevesi,durum,ara){
   durum('Kart resmi karşılaştırılıyor…');
-  let gor={liste:[],kesim:null};
+  let gor={liste:[],kesim:null};TARA.oyunCp=null;
   try{await taraIzleriYukle();gor=taraGorsel(kaynak,kaynak.width,kaynak.height,kartCercevesi);}catch(e){}
+  /* 23 Kasım: kartın oyunu resimden anlaşılır (Pokémon / Cyberpunk); sonuçlar sadece o oyundan gelir */
+  {const cpOf=i=>String((CAT.cards[i]||[])[14]).startsWith('cp-');const simdi=DIL==='cp';const b=gor.liste[0];let oy=simdi;
+   if(b&&b.d<=30&&cpOf(b.i)!==simdi){const ayni=gor.liste.find(x=>cpOf(x.i)===simdi);if(!ayni||ayni.d-b.d>=6)oy=cpOf(b.i);}
+   TARA.oyunCp=oy;gor.liste=gor.liste.filter(x=>cpOf(x.i)===oy);if(!gor.liste.length)gor.kesim=null;}
   const birlestir=ocr=>{const m=new Map();
     for(const g of gor.liste)m.set(g.i,{i:g.i,d:g.d,ip:0,no:false,top:false});
     for(const o of (ocr?ocr.liste:[])){const x=m.get(o.i)||{i:o.i,d:99};Object.assign(x,{ip:o.ip,no:o.no,top:o.top});m.set(o.i,x);}
@@ -1118,7 +1122,9 @@ async function taraOku(kaynak,kartCercevesi,durum,ara){
     ocr=taraEslestir(ust,alt,'');
     if(!gor.liste.length&&(!ocr.liste.length||!(ocr.liste[0].ip>0))){const tum=(await w.recognize(taraBolge(src,0,0,W,H,Math.min(2,1600/Math.max(W,H))))).data.text;ocr=taraEslestir(ust,alt,tum);}
   }catch(e){if(!gor.liste.length)throw e;}
-  return birlestir(ocr);}
+  const son=birlestir(ocr);const oyu=TARA.oyunCp;TARA.oyunCp=null;
+  if(oyu!=null&&oyu!==(DIL==='cp')){if(oyu)dilDegistir('cp');else dilDegistir(store.get('kb_pdil','en')==='ja'?'ja':'en');toast(oyu?'🌆 Cyberpunk kartı algılandı, Cyberpunk\'a geçildi':'⚡ Pokémon kartı algılandı, Pokémon\'a geçildi');}
+  return son;}
 function openTara(){
   const b=$('#modalBody');b.innerHTML='';taraKamDurdur();
   const durumEl=el('div',{class:'small',style:'margin-top:8px;min-height:20px'});const durum=t=>{durumEl.style.color='';durumEl.textContent=t;};

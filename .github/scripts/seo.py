@@ -106,7 +106,8 @@ def sayfa(baslik, aciklama, yol, govde, gorsel=None, ld=None):
 {('<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + '</script>') if ld else ''}
 </head><body><header><a href="/"><span class="dot">K</span>KartBorsa</a></header><main>{govde}</main>
 <footer>KartBorsa — Pokémon ve Cyberpunk TCG kart fiyatları, ilanlar ve koleksiyon takibi. <a href="/setler/">Tüm setler</a> · <a href="/gizlilik.html">Gizlilik</a><br>
-Fiyatlar TCGplayer ve Cardmarket piyasa verilerinden günlük kurla TL'ye çevrilir; bilgi amaçlıdır.</footer></body></html>"""
+Fiyatlar TCGplayer ve Cardmarket piyasa verilerinden günlük kurla TL'ye çevrilir; bilgi amaçlıdır.<br>
+Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME FREAK'e; Cyberpunk ve kart görselleri CD PROJEKT RED ve WeirdCo'ya aittir. Bu site resmi değildir.</footer></body></html>"""
 
 
 def yaz(yol, icerik):

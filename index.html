@@ -5,6 +5,15 @@
 <script>/* güvenlik: site başka bir sitenin içine gömülemez (tıklama tuzağı koruması) */if(window.top!==window.self){try{window.top.location.replace(window.self.location.href);}catch(e){document.documentElement.style.display='none';}}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KartBorsa – Pokémon Kartları</title>
+<meta name="description" content="Pokémon (İngilizce ve Japonca) ve Cyberpunk TCG kartlarının güncel TL fiyatları, fiyat geçmişi, satış ilanları, takas ve koleksiyon takibi. Kartını tara, değerini gör, güvenle al-sat.">
+<link rel="canonical" href="https://www.kartborsa.com/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="KartBorsa"><meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="KartBorsa – Pokémon ve Cyberpunk kart fiyatları">
+<meta property="og:description" content="Kartlarının güncel TL değerini gör, koleksiyonunu takip et, ilan ver, takas yap.">
+<meta property="og:url" content="https://www.kartborsa.com/"><meta property="og:image" content="https://www.kartborsa.com/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0f1220">
+<link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="KartBorsa">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script>
 /* hız: veriler sürüm numarasıyla istenir (her yayında değişir), tarayıcı ve service worker önbelleğe alır */
@@ -2530,7 +2539,7 @@ async function kartPaylas(i){
   const v=fiyatTL(id);let mv=null;try{mv=mainValue(OZET&&OZET.c[id]);}catch(e){}
   x.fillStyle=cp?'#fcee0a':'#ffcb3d';x.font='700 56px Inter, Arial';x.fillText(v!=null?'Piyasa: '+tl(v):'Piyasa fiyatı henüz yok',60,1222);
   if(mv&&mv.prev){const p=(mv.tl-mv.prev)/mv.prev*100;if(Math.abs(p)>=0.05){x.textAlign='right';x.fillStyle=p>0?'#3fb950':'#f85149';x.font='700 40px Inter, Arial';x.fillText(`${p>0?'▲':'▼'} %${Math.abs(p).toLocaleString('tr-TR',{maximumFractionDigits:1})}`,1020,1222);x.textAlign='left';}}
-  await paylasimGoster(cv,'kartborsa-'+String(c[0]).replace(/[^\w]+/g,'-').toLowerCase()+'.png',`${c[0]} – ${v!=null?tl(v):''} · KartBorsa www.kartborsa.com`);}
+  await paylasimGoster(cv,'kartborsa-'+String(c[0]).replace(/[^\w]+/g,'-').toLowerCase()+'.png',`${c[0]} – ${v!=null?tl(v):''} · KartBorsa https://www.kartborsa.com/kart/${encodeURIComponent(c[14])}/`);}
 
 /* ---------- kart detayına eklenenler: Arıyorum, alarm, takas, paylaş ---------- */
 const _ocn3=window.openCardNow;
@@ -2845,5 +2854,6 @@ else if(r.tc&&r.url){s=el('div',{class:'muted small',style:'margin-top:8px'},'Fi
 if(s)setTimeout(()=>box.append(s),50);}catch(e){}})();
 return box;};})();
 </script>
+<footer style="max-width:980px;margin:30px auto 20px;padding:0 18px;color:#9aa1c3;font-size:13px;text-align:center"><a href="/setler/" style="color:#9aa1c3">Tüm setler ve kart fiyatları</a> · <a href="/gizlilik.html" style="color:#9aa1c3">Gizlilik</a></footer>
 </body>
 </html>

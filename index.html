@@ -2832,5 +2832,15 @@ async function desteListesi(kutu){if(!kutu)return;let hesap=[];
 }catch(e){console.warn('oz2 açılış',e);}})();
 })();
 </script>
+<script id="ek-fiyat-js">
+/* 23 Kasım 2026: elle eklenen (ek_fiyat.json) ya da tcgcsv.com'dan gelen fiyatlarda kart detayında kaynak görünür */
+(function(){const eski=window.marketSection;if(typeof eski!=='function')return;
+window.marketSection=function(c){const box=eski.apply(this,arguments);
+(async()=>{try{const sp=await setPrices(setOf(c)[0]);const r=sp&&sp.c&&sp.c[c[14]];if(!r)return;let s=null;
+if(r.ek){const d=(r.ek.d||'').split('-').reverse().join('.');s=el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',r.ek.u?el('a',{href:r.ek.u,target:'_blank',rel:'noopener',text:r.ek.k||r.ek.u}):(r.ek.k||''),' · '+d+' tarihinde kaynakta görülen fiyat (otomatik kaynakta fiyat olmadığı için elle eklendi; her gün yeniden kontrol edilir).');}
+else if(r.tc&&r.url){s=el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',el('a',{href:r.url,target:'_blank',rel:'noopener',text:'TCGplayer'}),' (tcgcsv.com günlük dökümü).');}
+if(s)setTimeout(()=>box.append(s),50);}catch(e){}})();
+return box;};})();
+</script>
 </body>
 </html>

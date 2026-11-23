@@ -421,6 +421,12 @@ jobs:
           json.dump(oz, open(oz_yol, 'w'), separators=(',', ':'))
           print('Elle eklenen fiyat uygulandı:', n)
           PY
+      - name: Google ve paylaşım sayfaları (kart/set sayfaları, site haritası, ikonlar)
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          pip install --quiet pillow || true
+          python3 site/.github/scripts/seo.py _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

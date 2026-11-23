@@ -40,7 +40,7 @@ TCGDEX_SETS = {
 }
 # Pokémon TCG API'de olan ama yeni kartları eksik setler: eksik kartların fiyatı TCGdex'ten
 TCGDEX_EK = {"svp": "svp", "mcd14": "2014xy", "mcd15": "2015xy", "mcd16": "2016xy", "mcd17": "2017sm", "mcd18": "2018sm",
-             "tk1a": "tk-ex-latia", "tk1b": "tk-ex-latio", "tk2a": "tk-ex-p", "tk2b": "tk-ex-m"}
+             "swshp": "swshp", "tk1a": "tk-ex-latia", "tk1b": "tk-ex-latio", "tk2a": "tk-ex-p", "tk2b": "tk-ex-m"}
 
 
 DEADLINE = time.time() + float(os.environ.get("FIYAT_SURE_DK", "45")) * 60
@@ -221,6 +221,18 @@ for x in site.get("cards", []):
     cid = x[-1]
     s = cid.rsplit("-", 1)[0]
     site_by_set.setdefault(s, []).append((cid, x[0], x[2]))
+# yayında eklenen elle doğrulanmış İngilizce kartlar (en_duzeltme.json; ör. SWSH299–301) de fiyatlansın
+try:
+    _ez = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "en_duzeltme.json"), encoding="utf-8"))
+    _var = {x[-1] for x in site.get("cards", [])}
+    for _liste in (_ez.get("ekle") or {}).values():
+        for _k in _liste:
+            if _k.get("id") and _k["id"] not in _var:
+                site_by_set.setdefault(_k["id"].rsplit("-", 1)[0], []).append((_k["id"], _k["ad"], _k["no"]))
+                site.setdefault("cards", []).append([_k["ad"], 0, _k["no"], _k.get("tur", ""), _k["id"]])
+                _var.add(_k["id"])
+except Exception as e:
+    print("en_duzeltme.json okunamadı:", e)
 cards, failed = [], []
 # önce hiç/en uzun süredir güncellenmemiş setler, aralarında en yeniler önce
 order = {sid: i for i, sid in enumerate(set_ids)}
@@ -363,6 +375,73 @@ for sid, lst in by_set.items():
 for cid, v in old_ozet.items():
     if cid.rsplit("-", 1)[0] in failed and cid not in ozet:
         ozet[cid] = v
+# ---- son çare: fiyatı hâlâ olmayan kartlar için TCGplayer'ın günlük dökümü (tcgcsv.com, kategori 3) ----
+# Şart: aynı set (adla), aynı kart numarası ve aynı kart adı; aynı numarada birden çok ürün varsa doldurulmaz.
+TCGCSV = "https://tcgcsv.com/tcgplayer/3"
+TCGCSV_ALT = {"Normal": "normal", "Holofoil": "holofoil", "Reverse Holofoil": "reverseHolofoil",
+              "1st Edition Holofoil": "1stEditionHolofoil", "1st Edition": "1stEditionNormal",
+              "1st Edition Normal": "1stEditionNormal", "Unlimited": "unlimited", "Unlimited Holofoil": "unlimitedHolofoil"}
+
+def ad_nn(s):
+    return nn(str(s).replace("♀", " F").replace("♂", " M").replace("é", "e").replace("É", "E"))
+
+try:
+    eksik_set = {}
+    for x in site.get("cards", []):
+        cid = x[-1]
+        if cid not in ozet:
+            eksik_set.setdefault(cid.rsplit("-", 1)[0], []).append((cid, x[0], x[2]))
+    if eksik_set:
+        gruplar = {}
+        for g in fetch(f"{TCGCSV}/groups", tries=3)["results"]:
+            gruplar.setdefault(nn(g["name"].split(":", 1)[-1]), []).append(g["groupId"])
+        tc_n = 0
+        for sid, eks in eksik_set.items():
+            gids = gruplar.get(nn(set_names.get(sid, "")), [])
+            if len(gids) != 1:
+                continue
+            gid = gids[0]
+            urunler = fetch(f"{TCGCSV}/{gid}/products", tries=3)["results"]
+            fyt = {}
+            for p in fetch(f"{TCGCSV}/{gid}/prices", tries=3)["results"]:
+                fyt.setdefault(p["productId"], []).append(p)
+            by_no = {}
+            for p in urunler:
+                no = next((e.get("value") for e in p.get("extendedData") or [] if e.get("name") == "Number"), None)
+                if no:
+                    by_no.setdefault(nnum(str(no).split("/")[0]), []).append(p)
+            path = f"{OUT}/set/{sid}.json"
+            sd = load(path, {"u": TODAY, "c": {}})
+            degisti = False
+            for cid, ad, no in eks:
+                aday = [p for p in by_no.get(nnum(no), []) if ad_nn(p.get("name", "")) == ad_nn(ad)]
+                if len(aday) != 1:
+                    continue
+                p = aday[0]
+                t = {}
+                for x in fyt.get(p["productId"], []):
+                    v = TCGCSV_ALT.get(x.get("subTypeName"))
+                    if v:
+                        t[v] = [r2(x.get("lowPrice")), r2(x.get("midPrice")), r2(x.get("highPrice")), r2(x.get("marketPrice"))]
+                main_v = next((v for v in VARIANT_ORDER if v in t and (t[v][3] or t[v][1])), None)
+                if not main_v:
+                    continue
+                usd_main = t[main_v][3] or t[main_v][1]
+                rec = sd["c"].get(cid, {})
+                hist = [h for h in rec.get("h", []) if h[0] != TODAY] + [[TODAY, usd_main, None]]
+                hist = hist[-KEEP_DAYS:]
+                sd["c"][cid] = {"h": hist, "t": t, "v": main_v, "tu": TODAY.replace("-", "/"), "tc": 1, "url": p.get("url")}
+                before = hist[-2] if len(hist) >= 2 else [None, None, None]
+                ozet[cid] = [usd_main, None, None, None, before[1], before[2], before[0]]
+                degisti = True
+                tc_n += 1
+                print(f"  tcgcsv: {cid} → {p.get('name')} ({gid}/{p['productId']}) ${usd_main}")
+            if degisti:
+                json.dump(sd, open(path, "w"), separators=(",", ":"))
+        print(f"tcgcsv.com (TCGplayer dökümü) ile fiyatlanan kart: {tc_n}")
+except Exception as e:
+    print("tcgcsv.com yedek fiyatları alınamadı:", e)
+
 json.dump({"u": TODAY, "c": ozet}, open(f"{OUT}/ozet.json", "w"), separators=(",", ":"))
 json.dump(kur, open(f"{OUT}/kur.json", "w"), separators=(",", ":"))
 print(f"Bitti: {len(cards)} kart, {len(ozet)} fiyatlı, {len(by_set)} set. Kur: {kur.get('USD')} / {kur.get('EUR')}")

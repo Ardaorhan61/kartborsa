@@ -368,6 +368,59 @@ jobs:
           git add -A
           git commit -qm "Fiyatlar + Cyberpunk $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fiyat-verisi
+      - name: Elle eklenen fiyatlar (ek_fiyat.json; kaynağı ve tarihi kayıtlı)
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          yol = 'site/.github/scripts/ek_fiyat.json'
+          oz_yol = '_site/fiyat/ozet.json'
+          if not (os.path.exists(yol) and os.path.exists(oz_yol)):
+              raise SystemExit(0)
+          ek = json.load(open(yol, encoding='utf-8')).get('kartlar', {})
+          oz = json.load(open(oz_yol))
+          bugun = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).date()
+          n = 0
+          for cid, k in ek.items():
+              try:
+                  gun = datetime.date.fromisoformat(k['tarih'])
+              except Exception:
+                  continue
+              if (bugun - gun).days > 14:
+                  print('Eski kayıt (14 günden eski), uygulanmadı:', cid)
+                  continue
+              v = oz['c'].get(cid)
+              if v and any(isinstance(x, (int, float)) and x > 0 for x in v[:4]):
+                  continue  # otomatik kaynak fiyat veriyor, o kullanılır
+              usd, eur = k.get('usd'), k.get('eur')
+              if usd is None and eur is None:
+                  continue
+              sid = cid.rsplit('-', 1)[0]
+              sp = f'_site/fiyat/set/{sid}.json'
+              sd = json.load(open(sp)) if os.path.exists(sp) else {'u': k['tarih'], 'c': {}}
+              rec = sd['c'].get(cid, {})
+              h = sorted([x for x in rec.get('h', []) if x[0] != k['tarih']] + [[k['tarih'], usd, eur]], key=lambda x: x[0])
+              rec['h'] = h
+              tarih = k['tarih'].replace('-', '/')
+              if usd is not None:
+                  var = k.get('varyant') or 'normal'
+                  rec['t'] = {var: [None, None, None, usd]}
+                  rec['v'] = var
+                  rec['tu'] = tarih
+              if eur is not None:
+                  rec['m'] = [None, None, eur, None, None, None, None]
+                  rec['mu'] = tarih
+              rec['ek'] = {'k': k.get('kaynak', ''), 'u': k.get('url', ''), 'd': k['tarih']}
+              sd['c'][cid] = rec
+              os.makedirs(os.path.dirname(sp), exist_ok=True)
+              json.dump(sd, open(sp, 'w'), separators=(',', ':'))
+              once = h[-2] if len(h) >= 2 else [None, None, None]
+              oz['c'][cid] = [usd, eur, None, None, once[1], once[2], once[0]]
+              n += 1
+              print('Elle eklenen fiyat:', cid, usd, eur, k.get('url', ''))
+          json.dump(oz, open(oz_yol, 'w'), separators=(',', ':'))
+          print('Elle eklenen fiyat uygulandı:', n)
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

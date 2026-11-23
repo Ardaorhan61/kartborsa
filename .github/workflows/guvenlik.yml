@@ -1,0 +1,29 @@
+name: Güvenlik izleme (7/24)
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"   # 15 dakikada bir
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: guvenlik
+  cancel-in-progress: false
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 60
+      - name: Güvenlik kontrolü
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: python3 .github/scripts/guvenlik.py

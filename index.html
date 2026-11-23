@@ -2854,6 +2854,140 @@ else if(r.tc&&r.url){s=el('div',{class:'muted small',style:'margin-top:8px'},'Fi
 if(s)setTimeout(()=>box.append(s),50);}catch(e){}})();
 return box;};})();
 </script>
+<style id="dekor">
+/* ===== 23 Kasım 2026: site dekoru (kış/yılbaşı, nadirlik parıltısı, set kutlaması, Cyberpunk neon, türe göre arka plan, yükleme animasyonu, açık/koyu mod) ===== */
+/* yükleme animasyonu: karıştırılan deste */
+.kbyuk{display:inline-flex;vertical-align:middle;margin-right:12px}
+.kbyuk .deste{position:relative;width:24px;height:34px;display:inline-block}
+.kbyuk .deste i{position:absolute;inset:0;border-radius:5px;border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 6px rgba(0,0,0,.35);background:linear-gradient(135deg,var(--accent),#ff8a3d)}
+.kbyuk .deste i:nth-child(2){background:linear-gradient(135deg,var(--accent2),#3d6bf0);animation:kbkar 1.2s ease-in-out infinite}
+.kbyuk .deste i:nth-child(3){background:linear-gradient(135deg,#ff7ac6,#b06ce0);animation:kbkar 1.2s ease-in-out .6s infinite}
+@keyframes kbkar{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-15px) rotate(-14deg)}50%{transform:translateX(0) rotate(0)}75%{transform:translateX(15px) rotate(12deg)}}
+
+/* nadirlik rozetleri: üst nadirlikler parlar */
+.rar.r3,.rar.r4{overflow:hidden}
+.rar.r3::after,.rar.r4::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.7) 50%,transparent 70%);transform:translateX(-130%);animation:kbparla 3.4s ease-in-out infinite;pointer-events:none}
+.rar.r4{box-shadow:0 0 10px rgba(255,122,198,.6),0 2px 6px rgba(0,0,0,.35)}
+.rar.r3{box-shadow:0 0 8px rgba(255,215,106,.45),0 2px 6px rgba(0,0,0,.35)}
+@keyframes kbparla{55%,100%{transform:translateX(130%)}}
+.ctile:has(.rar.r4) .cimg{box-shadow:0 0 0 1px rgba(255,203,61,.4),0 0 18px rgba(255,122,198,.25)}
+
+/* set tamamlama kutlaması + konfeti */
+#kbKonfeti,#kbKar{position:fixed;inset:0;pointer-events:none}
+#kbKonfeti{z-index:200}#kbKar{z-index:4}
+.kbkutla{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(5,7,15,.6);backdrop-filter:blur(3px)}
+.kbkutla .kutu{background:var(--panel);border:2px solid var(--accent);border-radius:20px;padding:26px 28px;max-width:360px;width:calc(100% - 40px);text-align:center;box-shadow:0 0 40px rgba(255,203,61,.35);animation:kbzipla .5s cubic-bezier(.2,1.6,.4,1)}
+.kbkutla .buyuk{font-size:54px;line-height:1}.kbkutla h3{margin:10px 0 4px;font-size:22px}
+.kbkutla .btn{margin:14px 4px 0}
+@keyframes kbzipla{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* kış teması: logoda bere */
+body.kis .logo .dot{position:relative;overflow:visible}
+body.kis .logo .dot::before{content:'';position:absolute;left:5px;top:-12px;width:24px;height:15px;background:linear-gradient(#e8323b,#b8222a);border-radius:16px 16px 3px 3px;transform:rotate(-16deg);box-shadow:inset 0 -4px 0 #fff;z-index:1}
+body.kis .logo .dot::after{content:'';position:absolute;left:24px;top:-15px;width:8px;height:8px;border-radius:50%;background:#fff;z-index:2;box-shadow:0 0 4px rgba(255,255,255,.8)}
+
+/* Cyberpunk neon görünümü (koyu modda) */
+body.oyun-cp:not(.acik){--bg:#0a0b14;background:
+  repeating-linear-gradient(0deg,rgba(0,229,255,.03) 0 1px,transparent 1px 4px),
+  linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px) 0 0/48px 48px,
+  linear-gradient(90deg,rgba(252,238,10,.04) 1px,transparent 1px) 0 0/48px 48px,
+  radial-gradient(ellipse at top,#1b1238 0%,#0a0b14 62%);background-attachment:fixed}
+body.oyun-cp:not(.acik) header{border-bottom:1px solid rgba(0,229,255,.35);box-shadow:0 1px 18px rgba(0,229,255,.14)}
+body.oyun-cp:not(.acik) .logo h1{text-shadow:2px 0 rgba(255,0,90,.55),-2px 0 rgba(0,229,255,.55);animation:kbglitch 7s infinite steps(1)}
+body.oyun-cp:not(.acik) h2{text-shadow:0 0 14px rgba(0,229,255,.45)}
+body.oyun-cp:not(.acik) .ctile{border:1px solid rgba(0,229,255,.16)}
+body.oyun-cp:not(.acik) .ctile:hover{border-color:rgba(252,238,10,.7);box-shadow:0 0 16px rgba(252,238,10,.28),0 0 2px rgba(0,229,255,.8) inset}
+body.oyun-cp:not(.acik) .btn:not(.sec){box-shadow:0 0 14px rgba(252,238,10,.35)}
+body.oyun-cp:not(.acik) .btn.sec{border-color:rgba(0,229,255,.55)}
+body.oyun-cp:not(.acik) .card{border-color:rgba(0,229,255,.16)}
+@keyframes kbglitch{0%,90%,100%{transform:none}91%{transform:translate(-2px,1px) skewX(-10deg)}93%{transform:translate(2px,-1px);text-shadow:-3px 0 rgba(255,0,90,.85),3px 0 rgba(0,229,255,.85)}95%{transform:translate(-1px,0) skewX(6deg)}97%{transform:none}}
+
+/* kart detayında türe göre arka plan */
+.modal>.card[data-tip]{background:radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--mc) 28%,transparent),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Water"]{background:repeating-radial-gradient(circle at 50% -60px,transparent 0 22px,rgba(130,200,255,.06) 22px 24px),radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--mc) 30%,transparent),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Fire"]{background:radial-gradient(90% 45% at 50% 0%,rgba(255,150,60,.30),transparent 70%),radial-gradient(70% 30% at 20% 100%,rgba(255,90,40,.12),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Lightning"]{background:repeating-linear-gradient(135deg,rgba(247,208,44,.05) 0 12px,transparent 12px 30px),radial-gradient(120% 60% at 50% 0%,rgba(247,208,44,.24),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Grass"]{background:radial-gradient(circle,rgba(95,189,88,.16) 2px,transparent 3px) 0 0/26px 26px,radial-gradient(120% 60% at 50% 0%,rgba(95,189,88,.26),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Psychic"]{background:radial-gradient(circle,rgba(176,108,224,.2) 1px,transparent 2px) 0 0/16px 16px,radial-gradient(120% 60% at 50% 0%,rgba(176,108,224,.30),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Fairy"]{background:radial-gradient(circle,rgba(239,140,196,.2) 1.5px,transparent 2.5px) 0 0/22px 22px,radial-gradient(120% 60% at 50% 0%,rgba(239,140,196,.28),transparent 70%),var(--panel)}
+.modal>.card[data-tip="Darkness"]{background:radial-gradient(120% 60% at 50% 0%,rgba(110,80,160,.30),transparent 70%),linear-gradient(#0c0e1a,transparent 50%),var(--panel)}
+.modal>.card[data-tip^="cp-"]{background:repeating-linear-gradient(0deg,rgba(0,229,255,.03) 0 1px,transparent 1px 4px),radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--mc) 28%,transparent),transparent 70%),var(--panel)}
+
+/* açık mod */
+body.acik{--bg:#f3f4fa;--panel:#ffffff;--panel2:#eef0f7;--line:#dcdfee;--text:#151933;--muted:#5b6286;--accent:#c98a00;--accent2:#0f8f86;color-scheme:light}
+body.acik.oyun-cp{--accent:#8a7d00;--accent2:#007f8f}
+body.acik header{background:rgba(255,255,255,.96)!important;box-shadow:0 1px 10px rgba(20,25,51,.08)}
+body.acik .ctile,body.acik .card{box-shadow:0 1px 6px rgba(20,25,51,.06)}
+body.acik .kbkutla{background:rgba(20,25,51,.35)}
+.kbtema{background:none;border:1px solid var(--line);color:var(--text);border-radius:99px;width:36px;height:36px;font-size:17px;cursor:pointer;flex:0 0 auto;display:grid;place-items:center;padding:0}
+.kbtema:hover{border-color:var(--accent)}
+.kbtemalar{display:flex;gap:6px;align-items:center;margin-left:6px}
+
+body.acik{--ok:#13883f;--danger:#c62828}
+body.acik .chg.up{color:#13883f;text-shadow:none}body.acik .chg.down{color:#c62828;text-shadow:none}
+body.acik nav button.on{color:#7a5200}
+body.acik .hero h2{background:linear-gradient(90deg,#151933,#3d2c00 60%,#a87300);-webkit-background-clip:text;background-clip:text}
+@media (max-width:760px){header .bar{position:relative}.kbtemalar{position:absolute;top:8px;right:10px;margin:0}.kbtema{width:32px;height:32px;font-size:15px}}
+@media (prefers-reduced-motion:reduce){.kbyuk .deste i,.rar::after,body.oyun-cp .logo h1{animation:none!important}}
+</style>
+<script id="dekor-js">
+/* ===== 23 Kasım 2026: site dekoru (PROJE-NOTLARI.md: "site dekoru") ===== */
+(function(){
+'use strict';
+const sakla=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}};
+const azHareket=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function temaUygula(){document.body.classList.toggle('acik',sakla('kb_tema')==='acik');const b=document.getElementById('kbTemaBtn');if(b){const a=document.body.classList.contains('acik');b.textContent=a?'🌙':'☀️';b.title=a?'Koyu moda geç':'Açık moda geç';}}
+const simdi=new Date(),ay=simdi.getMonth(),gun=simdi.getDate();
+let zorla=null;try{const p=new URLSearchParams(location.search).get('tema');if(p)sessionStorage.setItem('kb_tema_zorla',p);zorla=sessionStorage.getItem('kb_tema_zorla');}catch(e){}
+const kisMi=zorla==='kis'||zorla==='yilbasi'||ay===11||(ay===0&&gun<=7);
+const yilbasiMi=zorla==='yilbasi'||(ay===11&&gun===31)||(ay===0&&gun===1);
+let kar=null;
+function karBaslat(){if(kar||azHareket()||sakla('kb_kar')==='0')return;const cv=document.createElement('canvas');cv.id='kbKar';document.body.append(cv);const x=cv.getContext('2d');
+  let W,H;const boy=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;};boy();addEventListener('resize',boy);
+  const n=innerWidth<700?24:46,tane=[];for(let i=0;i<n;i++)tane.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2.6,v:.35+Math.random()*.9,s:Math.random()*6});
+  let son=0,id=0;const ciz=t=>{id=requestAnimationFrame(ciz);if(document.hidden||t-son<33)return;son=t;x.clearRect(0,0,W,H);x.fillStyle=document.body.classList.contains('acik')?'rgba(150,170,210,.75)':'rgba(255,255,255,.8)';
+    for(const f of tane){f.y+=f.v;f.s+=.02;f.x+=Math.sin(f.s)*.4;if(f.y>H+5){f.y=-5;f.x=Math.random()*W;}x.beginPath();x.arc(f.x,f.y,f.r,0,6.283);x.fill();}};
+  id=requestAnimationFrame(ciz);kar={dur(){cancelAnimationFrame(id);cv.remove();removeEventListener('resize',boy);kar=null;}};}
+function konfeti(sure){if(azHareket())return;let cv=document.getElementById('kbKonfeti');if(!cv){cv=document.createElement('canvas');cv.id='kbKonfeti';document.body.append(cv);}
+  const x=cv.getContext('2d'),W=cv.width=innerWidth,H=cv.height=innerHeight,renk=['#ffcb3d','#ff7ac6','#4fd1c5','#7ad8ff','#5ee08a','#f2683a','#fcee0a'];
+  const p=[];for(let i=0;i<160;i++)p.push({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,w:5+Math.random()*6,h:8+Math.random()*8,a:Math.random()*6,va:(Math.random()-.5)*.35,c:renk[i%renk.length]});
+  const bas=performance.now();const ciz=t=>{const g=t-bas;x.clearRect(0,0,W,H);for(const q of p){q.vy+=.35;q.vx*=.99;q.x+=q.vx;q.y+=q.vy;q.a+=q.va;x.save();x.translate(q.x,q.y);x.rotate(q.a);x.globalAlpha=Math.max(0,1-g/(sure||2800));x.fillStyle=q.c;x.fillRect(-q.w/2,-q.h/2,q.w,q.h);x.restore();}
+    if(g<(sure||2800))requestAnimationFrame(ciz);else cv.remove();};requestAnimationFrame(ciz);}
+window.kbKonfeti=konfeti;
+const YUK=/(yükleniyor|diziliyor|hazırlanıyor)…\s*$/i;
+function suslu(e){if(!e||e.nodeType!==1||e.querySelector('.kbyuk'))return;if(e.childElementCount>0)return;const t=e.textContent||'';if(t.length>60||!YUK.test(t))return;
+  const s=document.createElement('span');s.className='kbyuk';s.innerHTML='<span class="deste"><i></i><i></i><i></i></span>';e.prepend(s);}
+function tara(kok){if(kok.nodeType!==1)return;suslu(kok);kok.querySelectorAll&&kok.querySelectorAll('.muted,#catInfo').forEach(suslu);}
+let bekleyen=[],hedef=new Set(),planli=false;const gozcu=new MutationObserver(ms=>{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType===1)bekleyen.push(n);});if(m.target.nodeType===1)hedef.add(m.target);}
+  if(!planli){planli=true;requestAnimationFrame(()=>{planli=false;const l=bekleyen,h=hedef;bekleyen=[];hedef=new Set();for(const n of l)if(n.isConnected&&n.childElementCount<200)tara(n);h.forEach(suslu);});}});
+function rozetSar(){const t0=window.tileFor;if(typeof t0!=='function'||t0._dekor)return;const yeni=function(i){const t=t0.apply(this,arguments);try{if(t&&!t.querySelector('.rar')&&typeof rarRozet==='function'){const c=CAT.cards[i],r=rarRozet(c[3]),im=t.querySelector('.cimg');if(r&&im)im.append(r);}}catch(e){}return t;};yeni._dekor=1;window.tileFor=yeni;}
+function detaySar(){const o=window.openCardNow;if(typeof o!=='function'||o._dekor)return;const yeni=function(i){const r=o.apply(this,arguments);try{const c=CAT.cards[i],b=document.getElementById('modalBody'),k=b&&b.closest('.card');if(k){const mc=b.style.getPropertyValue('--mc');if(mc)k.style.setProperty('--mc',mc);
+  const cp=String(c[14]).startsWith('cp-');k.dataset.tip=cp?'cp-'+((c[17]&&c[17].r)||''):(c[7]||'yok');}}catch(e){}return r;};yeni._dekor=1;window.openCardNow=yeni;}
+function modalTemizle(){const m=document.getElementById('modal');if(!m)return;new MutationObserver(()=>{if(!m.classList.contains('on')){const k=m.querySelector('.card[data-tip]');if(k){delete k.dataset.tip;k.style.removeProperty('--mc');}}}).observe(m,{attributes:true,attributeFilter:['class']});}
+let SETK=null;
+function setKartlari(si){if(!SETK){SETK={};CAT.cards.forEach(c=>{(SETK[c[1]]||(SETK[c[1]]=[])).push(c[14]);});}return SETK[si]||[];}
+function setTamamMi(si){const ids=setKartlari(si);if(!ids.length||typeof COLL==='undefined'||!COLL)return false;const b=new Set(COLL.map(x=>x.card_id));return ids.every(id=>b.has(id));}
+function kutla(si){const s=CAT.sets[si]||[],n=setKartlari(si).length,url='https://www.kartborsa.com/set/'+encodeURIComponent(s[0]||'')+'/';
+  const d=document.createElement('div');d.className='kbkutla';d.innerHTML='<div class="kutu"><div class="buyuk">🏆</div><h3>Set tamamlandı!</h3><div class="muted"></div><div class="dugmeler"></div></div>';
+  d.querySelector('.muted').textContent=(s[1]||'Set')+' · '+n+'/'+n+' kart koleksiyonunda';
+  const kapat=()=>d.remove();const pay=document.createElement('button');pay.className='btn';pay.textContent='📤 Paylaş';
+  pay.onclick=async()=>{const metin='KartBorsa\'da '+(s[1]||'')+' setini tamamladım! 🏆 ('+n+'/'+n+')';try{if(navigator.share)await navigator.share({title:'Set tamamlandı',text:metin,url});else{await navigator.clipboard.writeText(metin+' '+url);if(window.toast)toast('Bağlantı kopyalandı');}}catch(e){}};
+  const kp=document.createElement('button');kp.className='btn sec';kp.textContent='Kapat';kp.onclick=kapat;d.querySelector('.dugmeler').append(pay,kp);d.addEventListener('click',e=>{if(e.target===d)kapat();});document.body.append(d);konfeti(3200);}
+window.kbSetKutla=kutla;
+function koleksiyonSar(){const a=window.addToCollection;if(typeof a!=='function'||a._dekor)return;const yeni=async function(i){let si=null,once=true;try{si=CAT.cards[i][1];once=setTamamMi(si);}catch(e){}const r=await a.apply(this,arguments);try{if(r&&si!=null&&!once&&setTamamMi(si))setTimeout(()=>kutla(si),400);}catch(e){}return r;};yeni._dekor=1;window.addToCollection=yeni;}
+function dugmeler(){const bar=document.querySelector('header .bar');if(!bar||document.getElementById('kbTemaBtn'))return;const k=document.createElement('div');k.className='kbtemalar';
+  const t=document.createElement('button');t.id='kbTemaBtn';t.className='kbtema';t.onclick=()=>{sakla('kb_tema',document.body.classList.contains('acik')?'koyu':'acik');temaUygula();};k.append(t);
+  if(kisMi&&!azHareket()){const s=document.createElement('button');s.className='kbtema';const g=()=>{s.textContent='❄️';s.style.opacity=kar?'1':'.45';s.title=kar?'Kar yağışını kapat':'Kar yağışını aç';};
+    s.onclick=()=>{if(kar){kar.dur();sakla('kb_kar','0');}else{sakla('kb_kar','1');karBaslat();}g();};g();k.append(s);}
+  bar.append(k);temaUygula();}
+function basla(){temaUygula();dugmeler();
+  if(kisMi){document.body.classList.add('kis');karBaslat();dugmeler();const s=document.querySelector('.kbtemalar .kbtema+.kbtema');if(s)s.style.opacity=kar?'1':'.45';}
+  if(yilbasiMi){const anahtar='kb_yilbasi_'+simdi.getFullYear()+'_'+ay+'_'+gun;if(!sakla(anahtar)||zorla){sakla(anahtar,'1');setTimeout(()=>{konfeti(3500);if(window.toast)toast('🎉 Mutlu yıllar! Yeni yılda bol şans ve nadir kartlar!');},1200);}}
+  tara(document.body);gozcu.observe(document.body,{childList:true,subtree:true});modalTemizle();
+  let n=0;const sar=()=>{rozetSar();detaySar();koleksiyonSar();if(++n<40&&!(window.addToCollection&&window.addToCollection._dekor&&window.openCardNow&&window.openCardNow._dekor&&window.tileFor&&window.tileFor._dekor))setTimeout(sar,250);};sar();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
+})();
+</script>
 <footer style="max-width:980px;margin:30px auto 20px;padding:0 18px;color:#9aa1c3;font-size:13px;text-align:center"><a href="/setler/" style="color:#9aa1c3">Tüm setler ve kart fiyatları</a> · <a href="/gizlilik.html" style="color:#9aa1c3">Gizlilik</a></footer>
 </body>
 </html>

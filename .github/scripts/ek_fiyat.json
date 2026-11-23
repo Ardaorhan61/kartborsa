@@ -1,0 +1,13 @@
+{
+ "aciklama": "Elle eklenen fiyatlar: otomatik kaynaklarda (Pokémon TCG API, TCGdex, tcgcsv.com) fiyatı olmayan ama bir kaynakta o kart (aynı baskı/dil) için gerçekten görünen fiyat. Yayında (yayin.yml) ozet.json ve set dosyalarına uygulanır; otomatik fiyat gelirse o kullanılır; 14 günden eski kayıt uygulanmaz (günlük kontrolde yenilenir). Alanlar: usd (TCGplayer $) / eur (Cardmarket €), varyant, kaynak, url, tarih (YYYY-AA-GG).",
+ "kartlar": {
+  "cp-24858-715226": {
+   "ad": "Satori - Sword of Saburo (Embracing Power - Retail Starter Deck, 008)",
+   "usd": 0.56,
+   "varyant": "normal",
+   "kaynak": "TCGplayer ürün sayfası – Market Price (Near Mint)",
+   "url": "https://www.tcgplayer.com/product/715226",
+   "tarih": "2026-11-23"
+  }
+ }
+}

@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
+<script>/* güvenlik: site başka bir sitenin içine gömülemez (tıklama tuzağı koruması) */if(window.top!==window.self){try{window.top.location.replace(window.self.location.href);}catch(e){document.documentElement.style.display='none';}}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KartBorsa – Pokémon Kartları</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -500,6 +501,8 @@ const SUPABASE_KEY = "sb_publishable_ODVKFrVJrw94RBakGxiDgg_QcqMG_ZW";   // herk
 (function(){const S=window.SURUM||'';if(!S||S.indexOf('__')>=0)return;const _f=window.fetch.bind(window);
   window.fetch=function(u,o){if(typeof u==='string'&&!/^[a-z]+:/i.test(u)&&/\.json$/.test(u)){u+='?v='+S;if(o&&o.cache==='no-cache'){o=Object.assign({},o);delete o.cache;}}return _f(u,o);};})();
 const $=s=>document.querySelector(s);
+const zayifSifre=p=>p.length<8?'Şifre en az 8 karakter olmalı.':(!/[A-Za-z]/.test(p)||!/[0-9]/.test(p))?'Şifre en az bir harf ve bir rakam içermeli.':null;
+const guvenliUrl=u=>/^https:\/\//i.test(String(u||''))?String(u):'#';
 const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);if(tag==='img')e.referrerPolicy='no-referrer';for(const[k,v]of Object.entries(attrs)){if(v==null)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}kids.flat().forEach(k=>k!=null&&e.append(k.nodeType?k:document.createTextNode(k)));return e;};
 const tl=n=>(n==null||isNaN(n))?'—':Number(n).toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';
 const norm=s=>(s||'').toString().toLocaleLowerCase('tr').trim().replace(/\s+/g,' ');
@@ -714,7 +717,7 @@ function listingRow(l,showCard){
   const c=CAT.cards[BYID[l.card_id]];
   return el('div',{class:'lrow'},
     showCard&&c?el('div',{style:'width:70px;flex:0 0 70px;cursor:pointer',onclick:()=>openCard(BYID[l.card_id])},cardImg(c,false,l.photo_url||null)):
-      (l.photo_url?el('a',{href:l.photo_url,target:'_blank',rel:'noopener',style:'width:70px;flex:0 0 70px'},cardImg(c,false,l.photo_url)):null),
+      (l.photo_url?el('a',{href:guvenliUrl(l.photo_url),target:'_blank',rel:'noopener',style:'width:70px;flex:0 0 70px'},cardImg(c,false,l.photo_url)):null),
     el('div',{style:'flex:1;min-width:180px'},
       showCard?el('div',{style:'font-weight:700',text:l.card_name}):null,
       showCard?el('div',{class:'muted small',text:`${l.set_name||''}${c?' · #'+c[2]:''}`}):null,
@@ -744,12 +747,12 @@ function derBolum(c){try{const s=setOf(c)||[],cp=String(c[14]).startsWith('cp-')
     el('div',{class:'dergrid'},...notlar.map(sat)));}catch(e){console.warn('derBolum',e);return null;}}
 function openSifre(rec){
   if(!USER)return needLogin();
-  const p1=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifre (en az 6 karakter)'}),
+  const p1=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifre (en az 8 karakter, harf ve rakam)'}),
     p2=el('input',{type:'password',autocomplete:'new-password',placeholder:'Yeni şifreyi tekrar yaz'}),
     show=el('input',{type:'checkbox'}),msg=el('div',{class:'small',style:'margin-top:8px'});
   show.addEventListener('change',()=>{p1.type=p2.type=show.checked?'text':'password';});
   const save=async e=>{e.preventDefault();msg.style.color='var(--danger)';
-    if(p1.value.length<6)return msg.textContent='Şifre en az 6 karakter olmalı.';
+    if(zayifSifre(p1.value))return msg.textContent=zayifSifre(p1.value);
     if(p1.value!==p2.value)return msg.textContent='İki şifre aynı değil.';
     msg.style.color='';msg.textContent='Kaydediliyor…';
     const r=await SB.auth.updateUser({password:p1.value});
@@ -1431,7 +1434,7 @@ function authForm(area){
     const msg=el('div',{class:'small',style:'margin-top:8px'}),gbox=el('div',{style:'margin-top:12px;display:flex;justify-content:center;min-height:44px'});
     setTimeout(()=>googleButton(gbox,msg),0);
     const email=el('input',{type:'email',autocomplete:'email',placeholder:'ornek@gmail.com',required:''});email.value=lastEmail;email.addEventListener('input',()=>{lastEmail=email.value;});
-    const pw=el('input',{type:'password',autocomplete:mode==='giris'?'current-password':'new-password',placeholder:'En az 6 karakter',required:''});
+    const pw=el('input',{type:'password',autocomplete:mode==='giris'?'current-password':'new-password',placeholder:mode==='giris'?'Şifren':'En az 8 karakter, harf ve rakam',required:''});
     const goster=el('label',{style:'display:flex;align-items:center;gap:6px;margin:6px 0 0;cursor:pointer'},el('input',{type:'checkbox',style:'width:auto',onchange:e=>{box.querySelectorAll('input[data-pw]').forEach(x=>x.type=e.target.checked?'text':'password');}}),'Şifreyi göster');
     pw.dataset.pw=1;
     const temizle=async()=>{const{data:cur}=await SB.auth.getSession();if(cur.session&&cur.session.user.is_anonymous)await SB.auth.signOut();};
@@ -1474,7 +1477,7 @@ function authForm(area){
       if(A.length<2)return msg.textContent='Adını yaz.';if(S.length<2)return msg.textContent='Soyadını yaz.';
       if(K.length<3)return msg.textContent='Kullanıcı adı en az 3 karakter olmalı.';if(!/^[\p{L}\p{N}_. -]+$/u.test(K))return msg.textContent='Kullanıcı adında sadece harf, rakam, boşluk, nokta, - ve _ olabilir.';
       if(!E.includes('@'))return msg.textContent='Geçerli bir e-posta yaz.';
-      if(pw.value.length<6)return msg.textContent='Şifre en az 6 karakter olmalı.';if(pw.value!==pw2.value)return msg.textContent='Şifreler aynı değil.';
+      if(zayifSifre(pw.value))return msg.textContent=zayifSifre(pw.value);if(pw.value!==pw2.value)return msg.textContent='Şifreler aynı değil.';
       if(!onay.checked)return msg.textContent='Devam etmek için gizlilik politikasını kabul etmelisin.';
       msg.style.color='';msg.textContent='Hesap oluşturuluyor…';
       try{const v=await SB.from('profiles').select('id').ilike('display_name',K.replace(/[%_\\]/g,m=>'\\'+m)).limit(1);if(v.data&&v.data.length)throw new Error('Bu kullanıcı adı alınmış, başka bir tane seç.');
@@ -1539,7 +1542,7 @@ function drawSettings(area){
   f.bio.value=p.bio||'';f.show.checked=!!p.show_collection;
   const prev=el('div',{style:'margin-top:8px'},avatarEl(p,72)),msg=el('span',{class:'small'});
   f.file.addEventListener('change',async()=>{const x=f.file.files[0];if(!x)return;try{av=await shrink(x,400,.85);prev.innerHTML='';prev.append(el('img',{src:URL.createObjectURL(av),style:'width:72px;height:72px;border-radius:50%;object-fit:cover'}));}catch(e){toast(e.message);}});
-  const pw=el('input',{type:'password',placeholder:'Yeni şifre (en az 6 karakter)',autocomplete:'new-password'}),pwMsg=el('span',{class:'small'});
+  const pw=el('input',{type:'password',placeholder:'Yeni şifre (en az 8 karakter, harf ve rakam)',autocomplete:'new-password'}),pwMsg=el('span',{class:'small'});
   area.append(el('div',{class:'cols'},
     el('div',{class:'card'},el('h3',{style:'font-size:17px',text:PROFILE?'Profil bilgilerin':'Profilini oluştur'}),
       el('form',{onsubmit:async e=>{e.preventDefault();msg.style.color='var(--danger)';
@@ -1563,7 +1566,7 @@ function drawSettings(area){
         el('div',{style:'margin-top:14px;display:flex;gap:10px;align-items:center'},el('button',{class:'btn',type:'submit'},'Kaydet'),msg))),
     el('div',{class:'card'},el('h3',{style:'font-size:17px',text:'Hesap'}),el('div',{class:'muted small',text:'E-posta: '+(USER.email||'—')}),
       el('label',{},'Şifre değiştir'),pw,el('div',{style:'margin-top:10px;display:flex;gap:10px;align-items:center'},
-        el('button',{class:'btn sec',onclick:async()=>{if(pw.value.length<6){pwMsg.textContent='En az 6 karakter.';return;}const r=await SB.auth.updateUser({password:pw.value});pwMsg.textContent=r.error?'Değiştirilemedi: '+r.error.message:'Şifre değişti ✓';pw.value='';}},'Şifreyi değiştir'),pwMsg))));
+        el('button',{class:'btn sec',onclick:async()=>{if(zayifSifre(pw.value)){pwMsg.textContent=zayifSifre(pw.value);return;}const r=await SB.auth.updateUser({password:pw.value});pwMsg.textContent=r.error?'Değiştirilemedi: '+r.error.message:'Şifre değişti ✓';pw.value='';}},'Şifreyi değiştir'),pwMsg))));
 }
 
 /* ---------- İlanlarım ---------- */

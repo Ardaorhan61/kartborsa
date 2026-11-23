@@ -287,3 +287,15 @@ Arda "devam" yazınca bu liste tekrar gösterilir. 1 satıcı puanı + yorum + "
 - `.github/scripts/seo.py` (yayin.yml'de configure-pages'ten hemen önce, `pip install pillow` ile): her kart için `/kart/<id>/` (başlık, açıklama, TL fiyatı, kaynak, set bağlantısı, önceki/sonraki kart, BreadcrumbList), her set için `/set/<id>/`, `/setler/`, `sitemap.xml` (+ sitemap-set/en/ja/cp-1.xml; ~43.500 URL), `robots.txt` (/tara/ ve /fiyat/ kapalı), `404.html`, `og.png`, ikonlar, `manifest.webmanifest` (ana ekrana ekle). Enerji kartlarına sayfa üretilmez. Resimler wsrv.nl üzerinden.
 - index.html: açıklama, canonical, Open Graph/Twitter etiketleri, ikon, manifest; altta "Tüm setler ve kart fiyatları" bağlantısı; tek kart paylaşım metni artık `https://www.kartborsa.com/kart/<id>/` bağlantısı içerir. Kart sayfasındaki düğmeler `/?kart=<id>` ile sitede kartı açar.
 - Google Search Console: https://www.kartborsa.com/ mülkü Arda'nın Google hesabında (orhanarda2007@gmail.com) HTML dosyasıyla doğrulandı — `google3835846ba19d4fb8.html` repoda, SİLME. sitemap.xml gönderildi (ilk okumada "Getirilemedi" görünmesi normal, Google tekrar dener).
+
+
+## 23 Kasım 2026 (gece) — site dekoru (index.html sonunda `<style id="dekor">` + `<script id="dekor-js">`)
+Arda holo parlaması (2) dışındaki tüm dekor önerilerini istedi:
+- **Kış/yılbaşı:** 1 Aralık – 7 Ocak arası kar yağışı (canvas #kbKar, ❄️ düğmesiyle kapatılır, localStorage kb_kar) ve logoda bere (body.kis). 31 Aralık ve 1 Ocak'ta günde bir kez konfeti + "Mutlu yıllar" bildirimi. Önizleme: `?tema=kis` / `?tema=yilbasi` (oturum boyunca kalır).
+- **Nadirlik rozetleri:** mevcut .rar rozetleri; ★★ (r3) ve ★★★ (r4) parıltı animasyonu, r4 kartlarda ışıltılı çerçeve; satıştaki kartlarda da rozet görünür (tileFor sarmalayıcı).
+- **Set tamamlama kutlaması:** addToCollection sarmalayıcı; kart eklenince set tamamlandıysa 🏆 kutusu + konfeti + Paylaş (/set/<id>/ bağlantısı). Elle deneme: `kbSetKutla(setIndex)`.
+- **Cyberpunk neon:** body.oyun-cp:not(.acik) — ızgara/tarama çizgili arka plan, logoda glitch, neon kenarlar.
+- **Türe göre arka plan:** openCardNow sarmalayıcı modal kartına data-tip (Pokémon türü ya da cp-<renk>) ve --mc koyar; Ateş, Su, Elektrik, Çimen, Psişik, Peri, Karanlık için desenler; modal kapanınca temizlenir.
+- **Yükleme animasyonu:** "…yükleniyor… / diziliyor… / hazırlanıyor…" yazılarının yanına karıştırılan üç kartlık deste (MutationObserver).
+- **Açık/koyu mod:** başlıktaki ☀️/🌙 düğmesi (localStorage kb_tema=acik|koyu, varsayılan koyu); body.acik değişkenleri; okunabilirlik denetimi yapıldı.
+- Tüm animasyonlar "hareketi azalt" ayarında kapanır. Mobilde düğmeler logonun sağında.

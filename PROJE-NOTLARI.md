@@ -279,3 +279,11 @@ Arda "devam" yazınca bu liste tekrar gösterilir. 1 satıcı puanı + yorum + "
   - DİKKAT: Supabase'de bilerek yapılan her şema/politika değişikliğinden sonra bir uyarı çıkar (beklenen); 6 saat sonra kendiliğinden temizlenir.
 - **Arda'nın kendisinin yapması gerekenler:** Google hesabında 2 adımlı doğrulama (GitHub ve Supabase girişleri Google/GitHub üzerinden), GitHub'da 2FA/passkey (şu an kapalı), Porkbun'da 2FA ve alan adı kilidi, Resend anahtarının Vault'a eklenmesi.
 - Günlük Claude görevine güvenlik adımı eklenmek istendi ama izin sistemi bu güncellemeyi reddetti; Arda onaylarsa yeniden denenecek.
+
+
+## 23 Kasım 2026 (gece) — Google'da görünürlük (SEO) ve paylaşım
+- Günlük Claude görevi artık "KartBorsa günlük site, fiyat ve güvenlik kontrolü": güvenlik adımı eklendi (guvenlik.yml, kb_guvenlik_olay, Auth ayarları); şüpheli durumda Gmail'den orhanarda2007@gmail.com'a e-posta.
+- Hesap güvenliği: Google 2 adımlı doğrulama (2021'den beri) + passkey, GitHub 2FA (doğrulama uygulaması, 23 Kasım'da Arda açtı), Porkbun 2FA (uygulama + e-posta), alan adı kilidi, giriş bildirimleri açık. Google, kayıtlı şifrelerden 44'ünün ihlal edildiğini gösteriyor; Arda değiştirecek.
+- `.github/scripts/seo.py` (yayin.yml'de configure-pages'ten hemen önce, `pip install pillow` ile): her kart için `/kart/<id>/` (başlık, açıklama, TL fiyatı, kaynak, set bağlantısı, önceki/sonraki kart, BreadcrumbList), her set için `/set/<id>/`, `/setler/`, `sitemap.xml` (+ sitemap-set/en/ja/cp-1.xml; ~43.500 URL), `robots.txt` (/tara/ ve /fiyat/ kapalı), `404.html`, `og.png`, ikonlar, `manifest.webmanifest` (ana ekrana ekle). Enerji kartlarına sayfa üretilmez. Resimler wsrv.nl üzerinden.
+- index.html: açıklama, canonical, Open Graph/Twitter etiketleri, ikon, manifest; altta "Tüm setler ve kart fiyatları" bağlantısı; tek kart paylaşım metni artık `https://www.kartborsa.com/kart/<id>/` bağlantısı içerir. Kart sayfasındaki düğmeler `/?kart=<id>` ile sitede kartı açar.
+- Google Search Console: https://www.kartborsa.com/ mülkü Arda'nın Google hesabında (orhanarda2007@gmail.com) HTML dosyasıyla doğrulandı — `google3835846ba19d4fb8.html` repoda, SİLME. sitemap.xml gönderildi (ilk okumada "Getirilemedi" görünmesi normal, Google tekrar dener).

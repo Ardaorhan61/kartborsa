@@ -21,6 +21,9 @@ EK_SETLER = {
     'svp': ('svp', 'Scarlet & Violet Black Star Promos', 'Scarlet & Violet', '2023/01/01'),
     'mee': ('mee', 'Mega Evolution Energies', 'Mega Evolution', '2025/09/25'),
     'mep': ('mep', 'MEP Black Star Promos', 'Mega Evolution', '2025/09/26'),
+    # McDonald's 2023 (Match Battle) ve 2024 (Dragon Discovery): TCGdex'te 15'er kart, resim ve logo Scrydex'te (23 Kasım 2026)
+    'mcd23': ('2023sv', "McDonald's Collection 2023", 'Other', '2023/08/01'),
+    'mcd24': ('2024sv', "McDonald's Collection 2024", 'Other', '2024/12/04'),
 }
 
 # TCGdex'te doğrulanmış nadirlikler (katalogda boş ya da hatalıydı)

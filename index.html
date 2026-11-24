@@ -3016,6 +3016,11 @@ const _dcMg=window.drawCat;window.drawCat=function(){const r=_dcMg.apply(this,ar
         const b=el('button',{class:'btn sec',style:'margin:6px 0 18px',onclick:()=>{gizli.forEach(x=>g.append(x));b.remove();}},`Bu serideki tüm setleri göster (${k.length})`);a.insertBefore(b,son);});}}}catch(e){console.warn('mg seri',e);}
   return r;};
 
+/* keskinlik: pokemontcg.io adresli kartlar (Japonca ADV/DP setleri ve bazı eski kartlar, 1.185 kart) Scrydex'in büyük resimleriyle (600–650 px) */
+const _iyPt=window.imgYol;window.imgYol=function(c,large){const s=String(c&&c[13]||'');const m=s.match(/^https:\/\/images\.pokemontcg\.io\/([^/]+)\/([^/]+?)\.png$/);
+  if(m){const b='https://images.scrydex.com/pokemon/'+m[1]+'-'+m[2];return large?{src:b+'/large',dog:s.replace(/\.png$/,'_hires.png')}:{src:b+'/small',srcset:b+'/small 243w, '+b+'/medium 365w, '+b+'/large 652w'};}
+  return _iyPt.apply(this,arguments);};
+
 /* İlan Ver arama kutusu örneği */
 const _dkMg=window.dilKur;window.dilKur=function(){const r=_dkMg.apply(this,arguments);try{const l=$('#lq');if(l){if(!l.dataset.pk)l.dataset.pk=l.placeholder;l.placeholder=DIL==='mg'?'Kart adı yaz, listeden seç (ör. Sol Ring)':l.dataset.pk;}}catch(e){}return r;};
 

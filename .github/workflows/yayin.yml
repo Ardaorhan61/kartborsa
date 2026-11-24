@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 180
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy1.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -431,5 +431,12 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+      - id: deploy1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Yayını tekrar dene (deploy-pages geçici hatası, ör. "No artifacts named github-pages")
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 60
       - id: deploy
+        if: steps.deploy1.outcome == 'failure'
         uses: actions/deploy-pages@v4

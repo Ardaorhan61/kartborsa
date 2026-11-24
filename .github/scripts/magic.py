@@ -12,6 +12,7 @@ Kullanım: python3 magic.py <magic_veri_klasörü>
 Kart kimliği: mg-<set kodu>-<koleksiyon numarası> (numaradaki harf dışı işaretler: ★→s, †→d, diğerleri _).
 """
 import datetime
+import gzip
 import json
 import os
 import re
@@ -25,7 +26,7 @@ TODAY = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).st
 GUN = 30            # set dosyalarında tutulan fiyat geçmişi (gün)
 ESKI_GUN = 7        # o gün fiyatı gelmeyen kartın son fiyatı en fazla bu kadar gün korunur
 RESIM = "https://cards.scryfall.io/normal/front/"
-TOPLU = "/tmp/scryfall_default_cards.json"
+TOPLU = "/tmp/scryfall_default_cards.dat"
 
 NADIR = {"common": "Common", "uncommon": "Uncommon", "rare": "Rare", "mythic": "Mythic Rare",
          "special": "Special", "bonus": "Bonus"}
@@ -156,20 +157,32 @@ def main():
     print(f"Scryfall: {len(setinfo)} set", flush=True)
 
     bulk = get("https://api.scryfall.com/bulk-data/default-cards")
-    print(f"Toplu veri: {bulk.get('updated_at')} ({round((bulk.get('size') or 0) / 1e6)} MB)", flush=True)
-    indir(bulk["download_uri"], TOPLU)
-    kartlar_ham = json.load(open(TOPLU, encoding="utf-8"))
-    print(f"Toplu veride {len(kartlar_ham)} kayıt", flush=True)
+    print(f"Toplu veri: {bulk.get('updated_at')} ({round((bulk.get('compressed_size') or bulk.get('size') or 0) / 1e6)} MB)", flush=True)
+    kaynak = bulk.get("jsonl_download_uri") or bulk.get("download_uri")
+    indir(kaynak, TOPLU)
+
+    def kayitlar():
+        ac = gzip.open if kaynak.endswith(".gz") else open
+        with ac(TOPLU, "rt", encoding="utf-8") as f:
+            if ".jsonl" in kaynak:
+                for satir in f:
+                    satir = satir.strip().rstrip(",")
+                    if satir and satir not in ("[", "]"):
+                        yield json.loads(satir)
+            else:
+                yield from json.load(f)
 
     set_kart = {}
-    for c in kartlar_ham:
+    say = 0
+    for c in kayitlar():
+        say += 1
         if c.get("digital"):
             continue
         games = c.get("games") or []
         if games and "paper" not in games:
             continue
         set_kart.setdefault(c["set"], []).append(c)
-    del kartlar_ham
+    print(f"Toplu veride {say} kayıt", flush=True)
 
     def set_tarih(code):
         s = setinfo.get(code, {})

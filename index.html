@@ -18,7 +18,7 @@
 <script>
 /* hız: veriler sürüm numarasıyla istenir (her yayında değişir), tarayıcı ve service worker önbelleğe alır */
 window.SURUM='__SURUM__';
-(function(){try{var kd=localStorage.getItem('kb_dil');if(window.SURUM.indexOf('__')<0){[kd==='ja'?'cards_ja.json':kd==='cp'?'cards_cp.json':'cards.json','fiyat/ozet.json'].forEach(function(u){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href=u+'?v='+window.SURUM;document.head.appendChild(l);});}}catch(e){}})();
+(function(){try{var kd=localStorage.getItem('kb_dil');if(window.SURUM.indexOf('__')<0){[kd==='ja'?'cards_ja.json':kd==='cp'?'cards_cp.json':kd==='mg'?'cards_mg.json':'cards.json','fiyat/ozet.json'].forEach(function(u){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href=u+'?v='+window.SURUM;document.head.appendChild(l);});}}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nhftbsguwnpknksqmqni.supabase.co" crossorigin>
@@ -596,12 +596,12 @@ function vitrin(){const kart=[],yuk=[];let n=0;
   if(one.length<3){one=[];for(let i=CAT.cards.length-1;i>=0&&one.length<3;i--){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&rarSeviye(c[3])>=3&&i!==g)one.push(i);}}
   const ss=CAT.sets.filter(x=>setDil(x)===DIL).length,il=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).length;
   const ara=q=>{const once=$('#cq').value;$('#cq').value=q;runCat();if(!once){try{history.pushState(Object.assign({},history.state||{kb:1},{q,v:'katalog',card:null,y:0}),'');}catch(e){}}window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
-  const oneri=DIL==='cp'?['Johnny Silverhand','Judy','Panam','Adam Smasher','Lucy','Mantis Blades']:DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
+  const oneri=DIL==='mg'?['Black Lotus','Lightning Bolt','Sol Ring','Counterspell','The One Ring','Ragavan']:DIL==='cp'?['Johnny Silverhand','Judy','Panam','Adam Smasher','Lucy','Mantis Blades']:DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
   const fan=el('div',{class:'kbfan'});[one[1],one[0],one[2]].filter(x=>x!=null).forEach(i=>fan.append(tileFor(i)));
   fan.append(el('div',{class:'lbl',text:kart.length?'💎 Katalogun en değerli kartları':'✨ Öne çıkan kartlar'}));
   const hero=el('div',{class:'kbhero'},
     el('div',{},el('h2',{},'Kartını bul, ',el('em',{},'değerini gör'),', güvenle al-sat.'),
-      el('div',{class:'muted',text:(DIL==='cp'?'Cyberpunk TCG kartları':DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
+      el('div',{class:'muted',text:(DIL==='mg'?'Magic: The Gathering kartları':DIL==='cp'?'Cyberpunk TCG kartları':DIL==='ja'?'Japonca Pokémon kartları':'Pokémon kartları')+': set set katalog, günlük piyasa fiyatları ve satıcı ilanları.'}),
       el('div',{class:'kbchips'},el('span',{class:'kbchip'},'🃏 ',el('b',{text:n.toLocaleString('tr-TR')}),' kart'),el('span',{class:'kbchip'},'📦 ',el('b',{text:String(ss)}),' set'),el('span',{class:'kbchip'},'🏷️ ',el('b',{text:String(il)}),' ilan')),
       el('div',{class:'muted small',style:'margin-bottom:6px'},'Popüler aramalar:'),
       el('div',{class:'kbara'},...oneri.map(q=>el('button',{type:'button',onclick:()=>ara(q)},q)),DIL==='ja'?el('button',{type:'button',style:'border-color:#ffc72c;color:#ffc72c',onclick:()=>ara('mcdonald')},'🍔 McDonald\'s promoları'):null)),fan);
@@ -631,7 +631,7 @@ const numKey=n=>{const m=String(n).match(/^(\D*)(\d+)(.*)$/);return m?[m[1],+m[2
 async function loadCatalog(){
   /* hız: önce seçili dilin kataloğu, diğer dil sayfa çizildikten sonra arka planda */
   const al=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const DOSYA={en:'cards.json',ja:'cards_ja.json',cp:'cards_cp.json'},ilk=DOSYA[DIL],digerleri=Object.keys(DOSYA).filter(k=>k!==DIL).map(k=>DOSYA[k]);
+  const DOSYA={en:'cards.json',ja:'cards_ja.json',cp:'cards_cp.json',mg:'cards_mg.json'},ilk=DOSYA[DIL],digerleri=Object.keys(DOSYA).filter(k=>k!==DIL&&k!=='mg').map(k=>DOSYA[k]);
   const A=await al(ilk);if(!A||!A.cards){if(DIL!=='en'){DIL='en';try{localStorage.setItem('kb_dil','en');}catch(e){}return loadCatalog();}throw new Error(ilk+' bulunamadı');}
   const ekle=D=>{if(D.pfx){const P=D.pfx,ac=u=>typeof u==='string'&&u.charCodeAt(0)===126?P[+u[1]]+u.slice(2):u;for(const c of D.cards)c[13]=ac(c[13]);for(const x of D.sets){x[5]=ac(x[5]);x[6]=ac(x[6]);}}
     const enS=new Set(),kalS=new Set();D.cards=D.cards.filter(c=>{if(c[4]==='Energy'){enS.add(c[1]);return false;}kalS.add(c[1]);return true;});
@@ -639,12 +639,13 @@ async function loadCatalog(){
   const bitir=b=>{CAT.keys=CAT.keys||[];for(let i=b;i<CAT.cards.length;i++){const c=CAT.cards[i];CAT.keys[i]=(c[0]+' '+(c[15]||'')+' '+(typeof c[12]==='string'?c[12]:'')).toLowerCase();BYID[c[14]]=i;}};
   CAT={sets:[],cards:[],keys:[],lite:A.lite,built:A.built,v:A.v};bitir(ekle(A));
   dilKur();infoLine();runCat();
+  window.__katalogEkle=async f=>{const B=await al(f);if(!B||!B.cards)return false;bitir(ekle(B));try{if(typeof rebuildStock==='function')rebuildStock();dilKur();infoLine();if($('#v-katalog').classList.contains('on'))runCat();if(LIST&&LIST.length)refreshAll();}catch(e){console.warn(e);}return true;};
   window.__ikinciDil=new Promise(res=>{const bos=window.requestIdleCallback||(f=>setTimeout(f,600));bos(()=>res(),{timeout:2500});}).then(async()=>{let yuklenen=0;for(const f of digerleri){const B=await al(f);if(B&&B.cards){bitir(ekle(B));yuklenen++;}}if(!yuklenen)return;
     try{if(typeof rebuildStock==='function')rebuildStock();infoLine();if($('#v-katalog').classList.contains('on'))runCat();if(LIST&&LIST.length)refreshAll();}catch(e){console.warn(e);}});
 }
 /* ---------- İngilizce / Japonca ---------- */
-let DIL=(()=>{try{const d=localStorage.getItem('kb_dil');return d==='ja'||d==='cp'?d:'en';}catch(e){return 'en';}})();
-const setDil=s=>s&&(s[7]==='ja'||s[7]==='cp')?s[7]:'en', dilOf=c=>setDil(CAT.sets[c[1]]);
+let DIL=(()=>{try{const d=localStorage.getItem('kb_dil');return d==='ja'||d==='cp'||d==='mg'?d:'en';}catch(e){return 'en';}})();
+const setDil=s=>s&&(s[7]==='ja'||s[7]==='cp'||s[7]==='mg')?s[7]:'en', dilOf=c=>setDil(CAT.sets[c[1]]);
 const KAPAK={};function setKapak(i){if(i in KAPAK)return KAPAK[i];let u='';for(const c of CAT.cards)if(c[1]===i&&c[13]){u=c[13];break;}return KAPAK[i]=u;}
 function dilKur(){
   const temizle=id=>{const s=$(id);if(!s)return null;const ilk=s.options[0];s.innerHTML='';if(ilk)s.append(ilk);return s;};
@@ -662,7 +663,7 @@ function dilDegistir(d){if(d===DIL)return;DIL=d;try{localStorage.setItem('kb_dil
   nav.parentNode.insertBefore(d,nav);})();
 function infoLine(){if(!CAT)return;const ss=CAT.sets.filter(s=>setDil(s)===DIL),last=ss[ss.length-1];
   const a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL);let n=0;for(const c of CAT.cards)if(dilOf(c)===DIL)n++;
-  $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':DIL==='cp'?'Cyberpunk TCG · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':DIL==='cp'?'Cyberpunk kartları hazırlanıyor; kısa süre sonra burada olacak.':'');}
+  $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':DIL==='cp'?'Cyberpunk TCG · ':DIL==='mg'?'Magic: The Gathering · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':DIL==='cp'?'Cyberpunk kartları hazırlanıyor; kısa süre sonra burada olacak.':DIL==='mg'?'Magic: The Gathering kartları yükleniyor…':'');}
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
     el('button',{class:'btn sec',onclick:()=>{$('#cSet').value='';runCat();}},'← Tüm setler'),
@@ -1852,7 +1853,7 @@ function kapaliResim(l,large){
   const si=kapaliSet(l),box=el('div',{class:'cimg kpimg'});
   const s=si!=null?CAT.sets[si]:null,u=s&&(s[5]||s[6]);
   box.append(u?pxImg(u,320,85,{alt:s[1]}):el('div',{class:'fb',text:'📦'}));return box;}
-const ilanDilUygun=l=>{if(isKapali(l)){const si=kapaliSet(l);if(si!=null)return setDil(CAT.sets[si])===DIL;if(DIL==='cp')return false;return (l.lang==='Japonca')===(DIL==='ja');}const i=BYID[l.card_id];return i!=null&&dilOf(CAT.cards[i])===DIL;};
+const ilanDilUygun=l=>{if(isKapali(l)){const si=kapaliSet(l);if(si!=null)return setDil(CAT.sets[si])===DIL;if(DIL==='cp'||DIL==='mg')return false;return (l.lang==='Japonca')===(DIL==='ja');}const i=BYID[l.card_id];return i!=null&&dilOf(CAT.cards[i])===DIL;};
 
 /* ---------- satıcı puanları ---------- */
 function revOzet(id){const a=REVS.filter(r=>r.seller===id);const n=a.length,ort=n?a.reduce((s,r)=>s+r.rating,0)/n:0;
@@ -2301,16 +2302,17 @@ const isCp=c=>!!c&&String(c[14]).startsWith('cp-');
 try{VAR_TR.foil='Foil';}catch(e){}
 function oyunKur(){if($('#oyunSec'))return;const d=$('#dilSec');if(!d)return;
   const o=el('div',{id:'oyunSec',title:'Kart oyunu'});
-  [['pk','⚡ Pokémon'],['cp','🌆 Cyberpunk']].forEach(([k,t])=>{const b=el('button',{onclick:()=>{if(k==='cp')dilDegistir('cp');else dilDegistir(store.get('kb_pdil','en')==='ja'?'ja':'en');}},t);b.dataset.o=k;o.append(b);});
+  [['pk','⚡ Pokémon'],['cp','🌆 Cyberpunk'],['mg','🧙 Magic']].forEach(([k,t])=>{const b=el('button',{onclick:()=>{if(k!=='pk')dilDegistir(k);else dilDegistir(store.get('kb_pdil','en')==='ja'?'ja':'en');}},t);b.dataset.o=k;o.append(b);});
   d.parentNode.insertBefore(o,d);}
-function oyunGuncelle(){const cp=DIL==='cp';
-  document.querySelectorAll('#oyunSec button').forEach(b=>b.classList.toggle('on',(b.dataset.o==='cp')===cp));
-  const d=$('#dilSec');if(d)d.style.display=cp?'none':'';if(!cp)store.set('kb_pdil',DIL);
-  document.body.classList.toggle('oyun-cp',cp);
-  const h=document.querySelector('#v-katalog .hero h2');if(h)h.textContent=cp?'Tüm Cyberpunk TCG kartları':DIL==='ja'?'Tüm Japonca Pokémon kartları':'Tüm Pokémon kartları';
-  const su=$('#cSup');if(su&&su.dataset.oyun!==String(cp)){const v=su.value,ops=cp?['Legend','Unit','Program','Gear']:['Pokémon','Trainer'];su.dataset.oyun=String(cp);su.innerHTML='';su.append(el('option',{value:''},'Tüm türler'),...ops.map(x=>el('option',{value:x},x)));su.value=ops.includes(v)?v:'';}
+function oyunGuncelle(){const oy=DIL==='cp'?'cp':DIL==='mg'?'mg':'pk',cp=oy==='cp';
+  document.querySelectorAll('#oyunSec button').forEach(b=>b.classList.toggle('on',b.dataset.o===oy));
+  const d=$('#dilSec');if(d)d.style.display=oy!=='pk'?'none':'';if(oy==='pk')store.set('kb_pdil',DIL);
+  document.body.classList.toggle('oyun-cp',cp);document.body.classList.toggle('oyun-mg',oy==='mg');
+  const h=document.querySelector('#v-katalog .hero h2');if(h)h.textContent=cp?'Tüm Cyberpunk TCG kartları':oy==='mg'?'Tüm Magic: The Gathering kartları':DIL==='ja'?'Tüm Japonca Pokémon kartları':'Tüm Pokémon kartları';
+  const su=$('#cSup');if(su&&su.dataset.oyun!==oy){const v=su.value,ops=cp?['Legend','Unit','Program','Gear']:oy==='mg'?['Creature','Instant','Sorcery','Enchantment','Artifact','Land','Planeswalker','Battle','Kindred','Token','Emblem','Art Card','Plane','Scheme','Vanguard','Conspiracy']:['Pokémon','Trainer'];su.dataset.oyun=oy;su.innerHTML='';su.append(el('option',{value:''},'Tüm türler'),...ops.map(x=>el('option',{value:x},x)));su.value=ops.includes(v)?v:'';}
   if(cp)$('#cq').placeholder='Kart adını yaz: ör. Johnny Silverhand, Judy Álvarez, Mantis Blades…';
-  document.title=cp?'KartBorsa – Cyberpunk TCG Kartları':'KartBorsa – Pokémon Kartları';}
+  if(oy==='mg')$('#cq').placeholder='Kart adını yaz: ör. Black Lotus, Lightning Bolt, Sol Ring…';
+  document.title=cp?'KartBorsa – Cyberpunk TCG Kartları':oy==='mg'?'KartBorsa – Magic: The Gathering Kartları':'KartBorsa – Pokémon Kartları';}
 const _dk=window.dilKur;window.dilKur=function(){const r=_dk.apply(this,arguments);try{oyunKur();oyunGuncelle();}catch(e){console.warn('oyun',e);}return r;};
 const _dd=window.dilDegistir;window.dilDegistir=function(d){const r=_dd.apply(this,arguments);try{oyunKur();oyunGuncelle();}catch(e){}return r;};
 const _ocn2=window.openCardNow;
@@ -2328,9 +2330,9 @@ const _tf2=window.tileFor;
 window.tileFor=function(i){const t=_tf2.apply(this,arguments);try{const c=CAT.cards[i];if(isCp(c)){const a=c[17]||{};if(CP_RENK[a.r])t.style.setProperty('--tc',CP_RENK[a.r]);}}catch(e){}return t;};
 function kSetDoldur(){const s=$('#kSet');if(!s||!CAT||s.dataset.n===String(CAT.sets.length)+DIL)return;const v=s.value;s.innerHTML='';
   s.append(el('option',{value:'-'},'Set yok / karışık ürün'));
-  const og={cp:el('optgroup',{label:'Cyberpunk TCG setleri'}),en:el('optgroup',{label:'Pokémon · İngilizce setler'}),ja:el('optgroup',{label:'Pokémon · Japonca setler'})};
+  const og={cp:el('optgroup',{label:'Cyberpunk TCG setleri'}),en:el('optgroup',{label:'Pokémon · İngilizce setler'}),ja:el('optgroup',{label:'Pokémon · Japonca setler'}),mg:el('optgroup',{label:'Magic: The Gathering setleri'})};
   CAT.sets.slice().sort((a,b)=>String(b[3]||'').localeCompare(String(a[3]||''))).forEach(x=>og[setDil(x)].append(el('option',{value:x[0]},x[1])));
-  const sira=DIL==='cp'?['cp','en','ja']:DIL==='ja'?['ja','en','cp']:['en','ja','cp'];sira.forEach(k=>s.append(og[k]));
+  const sira=DIL==='mg'?['mg','en','ja','cp']:DIL==='cp'?['cp','en','ja','mg']:DIL==='ja'?['ja','en','cp','mg']:['en','ja','cp','mg'];sira.forEach(k=>s.append(og[k]));
   s.value=[...s.options].some(o=>o.value===v)?v:'-';s.dataset.n=String(CAT.sets.length)+DIL;}
 
 /* ---------- Cyberpunk: kapalı ürün fiyatları (booster, kutu, deste) ---------- */
@@ -2883,6 +2885,124 @@ el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',el('a'
 ` · ${tarih} tarihinde mağazada görülen fiyat. Bu kartın TCGplayer ve Cardmarket'te fiyatı olmadığı için Japon mağazasının satış fiyatı gösteriliyor; ikinci el piyasa fiyatından yüksek olabilir. TL karşılığı: ¥ → $ (1 $ = ${Number(k.kur||0).toLocaleString('tr-TR')} ¥) → ₺. Her gün yeniden kontrol edilir.`));
 }catch(e){}})();
 return box;};})();
+</script>
+<style id="magic-css">
+/* 24 Kasım 2026: Magic: The Gathering */
+body.oyun-mg{--accent:#e8a33d;--accent2:#b07cf0}
+body.oyun-mg .logo .dot{background:#e8a33d;color:#1a1000}
+body.oyun-mg #taraBtn{display:none}
+body.oyun-mg:not(.acik) img[src*="svgs.scryfall.io/sets"]{filter:invert(1) brightness(.9)}
+.msym{width:1.05em;height:1.05em;vertical-align:-.15em;margin:0 1px;border-radius:50%;box-shadow:-1px 1px 0 rgba(0,0,0,.55)}
+.mgmetin .mgyuz+.mgyuz{margin-top:12px;padding-top:12px;border-top:1px dashed rgba(127,127,127,.35)}
+.mgmetin .small{margin-top:6px;line-height:1.55;white-space:pre-line}
+.mgmetin .mgfl{font-style:italic;opacity:.8}
+.mgmetin .mgbas{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+<script id="magic-js">
+/* 24 Kasım 2026: Magic: The Gathering (Scryfall). Üçüncü oyun: DIL='mg', setlerde s[7]='mg', kart kimliği mg-<set>-<no>.
+   Katalog cards_mg.json yalnız Magic seçilince (ya da bu cihazda daha önce Magic açıldıysa arka planda) yüklenir;
+   fiyatlar fiyat/ozet_mg.json (OZET'e eklenir) + fiyat/set/mg-*.json; kart ayrıntıları detay/mg-<set>.json. */
+const isMg=c=>!!c&&String(c[14]).startsWith('mg-');
+const MG_RENK={'Beyaz':'#e9dfb8','Mavi':'#3d9bf0','Siyah':'#9a8aa8','Kırmızı':'#f2683a','Yeşil':'#5fbd58','Çok renkli':'#d8b04a','Renksiz':'#a7b0be'};
+try{VAR_TR.etched='Etched Foil';VAR_TR.foil=VAR_TR.foil||'Foil';}catch(e){}
+let MG_OZET=null,MG_YUK=null;
+function mgVarMi(){return !!(CAT&&CAT.sets.some(s=>s[7]==='mg'));}
+function mgOzetUygula(){if(OZET&&MG_OZET&&OZET.__mg!==MG_OZET){Object.assign(OZET.c,MG_OZET.c);OZET.__mg=MG_OZET;try{labelPriceSets();}catch(e){}return true;}return false;}
+function mgYukle(){if(MG_YUK)return MG_YUK;
+  MG_YUK=(async()=>{try{localStorage.setItem('kb_mg','1');}catch(e){}
+    const oz=fetch('fiyat/ozet_mg.json').then(r=>r.ok?r.json():null).catch(()=>null);
+    for(let i=0;i<80&&!window.__katalogEkle;i++)await new Promise(r=>setTimeout(r,250));
+    if(!mgVarMi()&&window.__katalogEkle)await window.__katalogEkle('cards_mg.json');
+    MG_OZET=await oz;mgOzetUygula();return mgVarMi();})();
+  return MG_YUK;}
+setInterval(()=>{if(!mgOzetUygula())return;try{if(DIL!=='mg')return;const v=document.querySelector('.view.on');
+  if(v&&v.id==='v-katalog')drawCat();if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}}catch(e){}},700);
+(async()=>{try{const iste=DIL==='mg'||localStorage.getItem('kb_mg')==='1';if(!iste)return;
+  if(DIL!=='mg'){for(let i=0;i<80&&!window.__ikinciDil;i++)await new Promise(r=>setTimeout(r,250));try{await window.__ikinciDil;}catch(e){}}
+  mgYukle();}catch(e){}})();
+
+/* oyun değiştirme: Magic kataloğu ilk seçilişte yüklenir */
+const _ddMg=window.dilDegistir;
+window.dilDegistir=function(d){const r=_ddMg.apply(this,arguments);
+  if(d==='mg'&&!mgVarMi()){try{$('#catInfo').textContent='Magic: The Gathering kartları yükleniyor (ilk açılışta birkaç saniye sürebilir)…';}catch(e){}
+    mgYukle().then(()=>{try{if(DIL!=='mg')return;dilKur();infoLine();runCat();const v=document.querySelector('.view.on');
+      if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}if(v&&v.id==='v-al')drawAl();}catch(e){console.warn('mg',e);}});}
+  else if(d==='mg')mgYukle();
+  return r;};
+
+/* resimler: Scryfall'ın kendi boyutları (ızgarada normal 488 px, detayda large 672 px) */
+const _pxMg=window.px;window.px=function(u,w,q){if(typeof u==='string'&&/^https:\/\/(cards|svgs)\.scryfall\.io\//.test(u))return u;return _pxMg.apply(this,arguments);};
+const _isMg=window.imgSmall;window.imgSmall=function(c){if(isMg(c))return c[13]||'data:,';return _isMg.apply(this,arguments);};
+const _ilMg=window.imgLarge;window.imgLarge=function(c){if(isMg(c)){const s=String(c[13]||'');return s?s.replace('/normal/','/large/'):'data:,';}return _ilMg.apply(this,arguments);};
+const _iyMg=window.imgYol;window.imgYol=function(c,large){if(isMg(c)){const s=String(c[13]||'');if(!s)return null;return large?{src:s.replace('/normal/','/large/'),dog:s}:{src:s};}return _iyMg.apply(this,arguments);};
+
+/* nadirlik: Mythic Rare ★★, Special/Bonus ★★★ */
+const _rsMg=window.rarSeviye;window.rarSeviye=function(r){const x=String(r||'').toLowerCase().trim();if(x==='mythic rare')return 3;if(x==='special'||x==='bonus')return 4;return _rsMg.apply(this,arguments);};
+
+/* kart rengi */
+const _tfMg=window.tileFor;window.tileFor=function(i){const t=_tfMg.apply(this,arguments);try{const c=CAT.cards[i];if(isMg(c)&&MG_RENK[c[5]])t.style.setProperty('--tc',MG_RENK[c[5]]);}catch(e){}return t;};
+
+/* kart ayrıntıları (mana, tür satırı, kart metni, güç/dayanıklılık, çizer) */
+async function mgDetay(c){if(c[17])return c[17];const sid=c[14].slice(0,c[14].lastIndexOf('-'));
+  try{DETAY[sid]=DETAY[sid]||fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>r.ok?r.json():{});const d=await DETAY[sid]||{};
+    CAT.cards.forEach(x=>{if(!x[17]&&isMg(x)&&x[14].slice(0,x[14].lastIndexOf('-'))===sid&&d[x[14]]){x[17]=d[x[14]];if(x[17].a)x[8]=x[17].a;}});}catch(e){DETAY[sid]=null;}
+  if(!c[17])c[17]={};return c[17];}
+function mgMana(s){const out=[];String(s||'').split(/(\{[^}]+\})/).forEach(p=>{if(!p)return;const m=p.match(/^\{([^}]+)\}$/);
+  if(!m){out.push(document.createTextNode(p));return;}const ad=m[1].replace(/\//g,'').replace('½','HALF').replace('∞','INFINITY');
+  const im=el('img',{class:'msym',src:'https://svgs.scryfall.io/card-symbols/'+encodeURIComponent(ad)+'.svg',alt:p,title:p,loading:'lazy'});
+  im.addEventListener('error',()=>im.replaceWith(document.createTextNode(p)));out.push(im);});return out;}
+const _ocMg=window.openCard;
+window.openCard=async function(i){const c=CAT.cards[i];if(isMg(c)&&!c[17]){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await mgDetay(c);}return _ocMg.apply(this,arguments);};
+const DIL_AD={ja:'Japonca',de:'Almanca',fr:'Fransızca',it:'İtalyanca',es:'İspanyolca',pt:'Portekizce',ko:'Korece',ru:'Rusça',zhs:'Çince (basit)',zht:'Çince (geleneksel)',he:'İbranice',la:'Latince',grc:'Antik Yunanca',ar:'Arapça',sa:'Sanskritçe',ph:'Phyrexian'};
+const _ocnMg=window.openCardNow;
+window.openCardNow=function(i){const r=_ocnMg.apply(this,arguments);
+  try{const c=CAT.cards[i];if(!isMg(c))return r;
+    if(!c[17]){mgDetay(c).then(()=>{if($('#modal').classList.contains('on'))window.openCardNow(i);});return r;}
+    const a=c[17],b=$('#modalBody'),dl=b.querySelector('dl.kv');b.style.setProperty('--mc',MG_RENK[c[5]]||'var(--accent)');
+    const y=a.y||[];
+    if(dl){const dd=(k,v)=>{if(v==null||v==='')return;dl.append(el('dt',{},k),el('dd',{},...(Array.isArray(v)?v:[v])));};
+      if(y.length===1){dd('Mana',y[0].m?mgMana(y[0].m):null);dd('Tür satırı',y[0].t);
+        if(y[0].p!=null||y[0].d!=null)dd('Güç / Dayanıklılık',`${y[0].p??'—'} / ${y[0].d??'—'}`);dd('Sadakat',y[0].l);dd('Savunma',y[0].df);}
+      dd('Renk',c[5]);if(a.dil)dd('Baskı dili',DIL_AD[a.dil]||a.dil);
+      if(a.fn&&a.fn.length)dd('Baskı türleri',a.fn.map(x=>({nonfoil:'Normal',foil:'Foil',etched:'Etched Foil',glossy:'Glossy'}[x]||x)).join(' · '));}
+    const kutu=el('div',{class:'atk mgmetin'});
+    y.forEach(f=>{const yz=el('div',{class:'mgyuz'});
+      if(y.length>1)yz.append(el('div',{class:'mgbas'},el('b',{text:f.n||''}),f.m?el('span',{},...mgMana(f.m)):null),el('div',{class:'muted small',text:f.t||''}));
+      else yz.append(el('b',{text:'Kart metni'}));
+      if(f.x)f.x.split('\n').filter(Boolean).forEach(s=>yz.append(el('div',{class:'small'},...mgMana(s))));
+      if(y.length>1&&(f.p!=null||f.d!=null))yz.append(el('div',{class:'small',text:`Güç / Dayanıklılık: ${f.p??'—'} / ${f.d??'—'}`}));
+      if(y.length>1&&f.l!=null)yz.append(el('div',{class:'small',text:'Sadakat: '+f.l}));
+      if(f.fl)yz.append(el('div',{class:'small mgfl',text:f.fl}));
+      kutu.append(yz);});
+    if(kutu.childNodes.length&&(y.some(f=>f.x||f.fl)||y.length>1)){if(dl)dl.after(kutu);else b.append(kutu);}
+    if(a.b){const im=b.querySelector('.cimg img');if(im){let arka=false;const on=im.currentSrc||im.src;
+      const btn=el('button',{class:'btn sec',style:'margin-top:8px',onclick:()=>{arka=!arka;im.removeAttribute('srcset');im.src=arka?a.b:on;btn.textContent=arka?'🔄 Ön yüzü göster':'🔄 Arka yüzü göster';}},'🔄 Arka yüzü göster');
+      im.closest('.cimg').after(btn);}}
+  }catch(e){console.warn('mg detay',e);}
+  return r;};
+
+/* fiyat bağlantıları */
+const _plMg=window.priceLinks;
+window.priceLinks=function(c){if(!isMg(c))return _plMg.apply(this,arguments);const d=c[17]||{},s=setOf(c),q=encodeURIComponent(c[0]);
+  return el('div',{style:'display:flex;gap:14px;flex-wrap:wrap;margin-top:4px'},
+    el('a',{href:d.tp?'https://www.tcgplayer.com/product/'+d.tp:'https://www.tcgplayer.com/search/magic/product?q='+q,target:'_blank',rel:'noopener'},'TCGplayer ↗'),
+    el('a',{href:d.cm||'https://www.cardmarket.com/en/Magic/Products/Search?searchString='+q,target:'_blank',rel:'noopener'},'Cardmarket ↗'),
+    d.s?el('a',{href:d.s,target:'_blank',rel:'noopener'},'Scryfall ↗'):null,
+    el('a',{href:'https://www.ebay.com/sch/i.html?_nkw='+encodeURIComponent('MTG '+c[0]+' '+s[1])+'&LH_Sold=1&LH_Complete=1',target:'_blank',rel:'noopener'},'eBay satılanlar ↗'));};
+
+/* piyasa kutusu: Scryfall'da Cardmarket 1/7/30 gün ortalaması yok → boş tablo gizlenir, kaynak yazılır */
+const _msMg=window.marketSection;
+window.marketSection=function(c){const box=_msMg.apply(this,arguments);if(!isMg(c))return box;
+  let n=0;const t=setInterval(()=>{n++;try{const bas=[...box.querySelectorAll('div')].find(x=>x.textContent==='Cardmarket ortalama satış fiyatları');
+    if(bas){const tb=bas.nextElementSibling;if(tb&&tb.tagName==='TABLE')tb.remove();bas.remove();}
+    const son=[...box.children].pop();
+    if(son&&/Son güncelleme/.test(son.textContent)&&!box.querySelector('.mgkaynak')){box.append(el('div',{class:'muted small mgkaynak',style:'margin-top:6px',text:'Magic fiyatları Scryfall üzerinden günlük alınır: TCGplayer (ABD, $) ve Cardmarket (Avrupa, €).'}));clearInterval(t);}}catch(e){}
+    if(n>40)clearInterval(t);},150);
+  return box;};
+
+/* alt bilgi: kaynak ve hak sahipleri */
+try{const f=document.querySelector('footer');if(f&&!f.querySelector('.mgfoot')){const s=el('span',{class:'mgfoot'},' Magic: The Gathering kart bilgileri, görselleri ve fiyatları Scryfall\'dan (fiyatlar TCGplayer ve Cardmarket) gelir; Magic: The Gathering ve kart görselleri Wizards of the Coast\'a aittir. KartBorsa, Wizards of the Coast tarafından onaylanmamış, resmi olmayan bir hayran sitesidir (Fan Content Policy). ');
+  const g=f.querySelector('a[href="gizlilik.html"]');if(g)g.before(s);else f.append(s);}}catch(e){}
 </script>
 <style id="dekor">
 /* ===== 23 Kasım 2026: site dekoru (kış/yılbaşı, nadirlik parıltısı, set kutlaması, Cyberpunk neon, türe göre arka plan, yükleme animasyonu, açık/koyu mod) ===== */

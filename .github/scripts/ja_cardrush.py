@@ -42,7 +42,7 @@ SETLER = {
     "ja-LP": "L-P", "ja-PCGP": "PCG-P",
 }
 
-BUGUN = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).date().isoformat()
+BUGUN = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)).date().isoformat()
 
 
 def al(url, json_mu=False, deneme=3):
@@ -64,25 +64,26 @@ def nn(s):
     return re.sub(r"[\s・･'’\-‐]", "", s).lower()
 
 
-OGE = re.compile(
-    r'<li class="list_item_cell[^"]*".*?data-product-id="(\d+)".*?'
-    r'<span class="goods_name">(.*?)</span>\s*<wbr\s*/?>.*?'
-    r'<span class="figure">([\d,]+)円</span>.*?'
-    r'<p class="stock">(.*?)</p>', re.S)
-
-
 def sayfa_oku(kod, sayfa):
+    """Bir arama sayfasını okur → (ürünler, sayfadaki ham ürün sayısı) ya da hata olursa (None, 0)."""
     q = urllib.parse.urlencode({"keyword": kod, "num": 100, "page": sayfa})
     h = al(f"{SITE}/product-list?{q}")
     if h is None:
-        return None
+        return None, 0
+    parcalar = h.split('<li class="list_item_cell')[1:]
     sonuc = []
-    for pid, ad, fiyat, stok in OGE.findall(h):
-        ad = html.unescape(re.sub(r"<[^>]+>", "", ad)).strip()
-        stok = html.unescape(re.sub(r"<[^>]+>", "", stok)).strip()
-        m = re.search(r"(\d+)\s*枚", stok)
-        sonuc.append({"id": pid, "ad": ad, "y": int(fiyat.replace(",", "")), "s": int(m.group(1)) if m else 0})
-    return sonuc
+    for p in parcalar:          # her ürün ayrı okunur (stokta olmayanlarda <p class="stock soldout">×</p>)
+        pid = re.search(r'data-product-id="(\d+)"', p)
+        ad = re.search(r'<span class="goods_name">(.*?)</span>\s*<wbr', p, re.S)
+        fiyat = re.search(r'<span class="figure">([\d,]+)円', p)
+        stok = re.search(r'<p class="stock[^"]*">(.*?)</p>', p, re.S)
+        if not (pid and ad and fiyat):
+            continue
+        ad = html.unescape(re.sub(r"<[^>]+>", "", ad.group(1))).strip()
+        m = re.search(r"(\d+)\s*枚", stok.group(1)) if stok else None
+        sonuc.append({"id": pid.group(1), "ad": ad, "y": int(fiyat.group(1).replace(",", "")),
+                      "s": int(m.group(1)) if m else 0})
+    return sonuc, len(parcalar)
 
 
 def main():
@@ -116,13 +117,13 @@ def main():
             continue
         urunler = []
         for s in range(1, 80):
-            liste = sayfa_oku(kod, s)
+            liste, ham = sayfa_oku(kod, s)
             time.sleep(BEKLE)
             if liste is None:
                 print(f"  {kod} sayfa {s} okunamadı", flush=True)
                 break
             urunler += liste
-            if len(liste) < 100:
+            if ham < 100:
                 break
         desen = re.compile(r"^(.*?)【[^】]*】\{0*(\d+)/" + re.escape(kod) + r"\}$")
         no_ile = {}

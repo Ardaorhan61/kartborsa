@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """KartBorsa: kart tarama için her kartın resminden "görsel iz" (perceptual hash) çıkarır.
 
-Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü> [cards_ja.json] [cards_cp.json]
+Kullanım: python3 kart_izi.py <site klasörü> <çıktı klasörü> [cards_ja.json] [cards_cp.json] [cards_mg.json]
   - <site>/cards.json okunur
   - <çıktı>/izler.json varsa sadece eksik kartlar hesaplanır
 Aynı hesap index.html içindeki taraIz() fonksiyonuyla birebir aynıdır:
@@ -114,3 +114,52 @@ with cf.ThreadPoolExecutor(24) as ex:
 
 json.dump({'v': 2, 'n': len(yeni), 'd': yeni}, open(eski_yol, 'w', encoding='utf-8'), separators=(',', ':'))
 print('bitti:', len(yeni), 'kart izi,', hata, 'resim alınamadı,', os.path.getsize(eski_yol) // 1024, 'KB')
+
+# ---- Magic: The Gathering (ayrı dosya: izler_mg.json; Scryfall küçük resimleri) ----
+# 5. argüman: magic-verisi dalındaki cards_mg.json. İlk çalışmada ~110 bin kart var; MG_SURE saniye (varsayılan 5400)
+# dolunca o ana kadarkiler kaydedilir, kalanlar sonraki çalışmada eklenir.
+MG_YOL = sys.argv[5] if len(sys.argv) > 5 else ''
+if MG_YOL and os.path.exists(MG_YOL):
+    mg = json.load(open(MG_YOL, encoding='utf-8'))
+    mg_yol = os.path.join(OUT, 'izler_mg.json')
+    meski = {}
+    if os.path.exists(mg_yol):
+        try:
+            meski = json.load(open(mg_yol, encoding='utf-8')).get('d', {})
+        except Exception:
+            meski = {}
+    ATLA = {'Token', 'Art Card', 'Emblem', 'Card'}
+    mk = [c for c in mg['cards'] if len(c) > 14 and c[13] and c[4] not in ATLA]
+    myeni = {c[14]: meski[c[14]] for c in mk if c[14] in meski}
+    meksik = [c for c in mk if c[14] not in meski]
+    SURE = float(os.environ.get('MG_SURE', '5400'))
+    print('Magic: toplam', len(mk), 'hazır', len(myeni), 'hesaplanacak', len(meksik), flush=True)
+
+    def misle(c):
+        u = c[13].replace('/normal/', '/small/')
+        for deneme in range(2):
+            try:
+                return c[14], iz(Image.open(io.BytesIO(indir(u))))
+            except Exception:
+                time.sleep(1)
+        return c[14], None
+
+    def mkaydet():
+        json.dump({'v': 2, 'n': len(myeni), 'd': myeni}, open(mg_yol, 'w', encoding='utf-8'), separators=(',', ':'))
+
+    mbas = time.time()
+    mhata = 0
+    for i in range(0, len(meksik), 2000):
+        if time.time() - mbas > SURE:
+            print('Magic: süre doldu, kalanlar sonraki çalışmada', flush=True)
+            break
+        with cf.ThreadPoolExecutor(8) as ex:
+            for cid, h in ex.map(misle, meksik[i:i + 2000]):
+                if h:
+                    myeni[cid] = h
+                else:
+                    mhata += 1
+        mkaydet()
+        print('Magic:', min(i + 2000, len(meksik)), '/', len(meksik), int(time.time() - mbas), 'sn, hata', mhata, flush=True)
+    mkaydet()
+    print('Magic bitti:', len(myeni), 'kart izi,', mhata, 'resim alınamadı,', os.path.getsize(mg_yol) // 1024, 'KB', flush=True)

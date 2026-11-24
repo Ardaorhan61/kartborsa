@@ -2936,7 +2936,7 @@ window.dilDegistir=function(d){const r=_ddMg.apply(this,arguments);
 const _pxMg=window.px;window.px=function(u,w,q){if(typeof u==='string'&&/^https:\/\/(cards|svgs)\.scryfall\.io\//.test(u))return u;return _pxMg.apply(this,arguments);};
 const _isMg=window.imgSmall;window.imgSmall=function(c){if(isMg(c))return c[13]||'data:,';return _isMg.apply(this,arguments);};
 const _ilMg=window.imgLarge;window.imgLarge=function(c){if(isMg(c)){const s=String(c[13]||'');return s?s.replace('/normal/','/large/'):'data:,';}return _ilMg.apply(this,arguments);};
-const _iyMg=window.imgYol;window.imgYol=function(c,large){if(isMg(c)){const s=String(c[13]||'');if(!s)return null;return large?{src:s.replace('/normal/','/large/'),dog:s}:{src:s};}return _iyMg.apply(this,arguments);};
+const _iyMg=window.imgYol;window.imgYol=function(c,large){if(isMg(c)&&!/tcgplayer-cdn/.test(String(c[13]||''))){const s=String(c[13]||'');if(!s)return null;return large?{src:s.replace('/normal/','/large/'),dog:s}:{src:s};}return _iyMg.apply(this,arguments);};
 
 /* nadirlik: Mythic Rare ★★, Special/Bonus ★★★ */
 const _rsMg=window.rarSeviye;window.rarSeviye=function(r){const x=String(r||'').toLowerCase().trim();if(x==='mythic rare')return 3;if(x==='special'||x==='bonus')return 4;return _rsMg.apply(this,arguments);};

@@ -27,6 +27,7 @@ GUN = 30            # set dosyalarında tutulan fiyat geçmişi (gün)
 ESKI_GUN = 7        # o gün fiyatı gelmeyen kartın son fiyatı en fazla bu kadar gün korunur
 RESIM = "https://cards.scryfall.io/normal/front/"
 TOPLU = "/tmp/scryfall_default_cards.dat"
+TCG = "https://tcgcsv.com/tcgplayer/1"   # TCGplayer günlük dökümü (Magic); Scryfall'da resmi/fiyatı olmayan kartlar için
 
 NADIR = {"common": "Common", "uncommon": "Uncommon", "rare": "Rare", "mythic": "Mythic Rare",
          "special": "Special", "bonus": "Bonus"}
@@ -192,6 +193,7 @@ def main():
     setler, kartlar, detay = [], [], {}
     fiyatlar = {}   # cid → (t, ana, usd, eur)
     kimlikler = set()
+    ham = {}        # cid → Scryfall kaydı (TCGplayer tamamlaması için)
     for code in sirali:
         s = setinfo.get(code, {})
         ks = sorted(set_kart[code], key=lambda c: (no_sira(c.get("collector_number", "")), c.get("lang") != "en"))
@@ -211,6 +213,7 @@ def main():
                 n += 1
             cid = k
             kimlikler.add(cid)
+            ham[cid] = c
             faces = c.get("card_faces") or []
             tur, tl = ana_tur(c)
             rk, rkler = renk(c)
@@ -249,6 +252,84 @@ def main():
             fiyatlar[cid] = (t, ana, usd, round(eur, 2) if eur is not None else None)
         detay[sid] = det
 
+    # ---- Scryfall'da resmi ya da fiyatı olmayan kartlar: TCGplayer (tcgcsv.com) ----
+    # Eşleşme yalnız kesinse: kartın TCGplayer ürün numarası; yoksa aynı koleksiyon numarası + aynı ad
+    # (Art Series setlerinde ★ = "Gold-Stamped" baskı). Belirsizse yazılmaz.
+    tc_url = {}
+    eksik = {}
+    for k in kartlar:
+        f = fiyatlar[k[14]]
+        if not k[13] or (f[2] is None and f[3] is None):
+            eksik.setdefault(setler[k[1]][0], []).append(k)
+    try:
+        ad_grup = {g["name"].lower(): g["groupId"] for g in get(f"{TCG}/groups", 3)["results"]}
+    except BaseException as e:
+        print(f"tcgcsv grupları okunamadı: {e}", flush=True)
+        ad_grup = {}
+    resimli = fiyatli = 0
+    for sid, ks in eksik.items():
+        s = setinfo.get(sid[3:], {})
+        ad = s.get("name") or ""
+        sanat = ad.endswith(" Art Series")
+        gid = s.get("tcgplayer_id") or ad_grup.get(ad.lower()) or (ad_grup.get(("art series: " + ad[:-11]).lower()) if sanat else None)
+        if not gid:
+            continue
+        try:
+            urunler = get(f"{TCG}/{gid}/products", 3)["results"]
+            fyt = get(f"{TCG}/{gid}/prices", 3)["results"]
+        except BaseException:
+            continue
+        pid_urun = {p["productId"]: p for p in urunler}
+        fiy = {}
+        for x in fyt:
+            fiy.setdefault(x["productId"], {})[x.get("subTypeName")] = x
+        no_ile = {}
+        for p in urunler:
+            n = next((e.get("value") for e in p.get("extendedData") or [] if e.get("name") == "Number"), None)
+            if n:
+                no_ile.setdefault(re.sub(r"[^0-9A-Za-z]", "", str(n).split("/")[0]).lstrip("0").lower(), []).append(p)
+        for k in ks:
+            c = ham[k[14]]
+            p = pid_urun.get(c.get("tcgplayer_id"))
+            if not p:
+                no = str(c.get("collector_number", ""))
+                yildiz = "★" in no
+                anahtar = re.sub(r"[^0-9A-Za-z]", "", no).lstrip("0").lower()
+                isim = (c.get("name") or "").split(" // ")[0].strip().lower()
+                aday = []
+                for q in no_ile.get(anahtar, []):
+                    nm = q.get("name") or ""
+                    taban = re.sub(r"\s*\([^)]*\)\s*$", "", nm)
+                    taban = re.sub(r"\s+Art Card$", "", taban).strip().lower()
+                    if taban != isim:
+                        continue
+                    if sanat and (("Gold-Stamped" in nm) != yildiz):
+                        continue
+                    if not sanat and "(" in nm:
+                        continue
+                    aday.append(q)
+                if len(aday) == 1:
+                    p = aday[0]
+            if not p:
+                continue
+            if not k[13] and p.get("imageUrl"):
+                k[13] = re.sub(r"_\d+w\.jpg$", "_in_1000x1000.jpg", p["imageUrl"])
+                resimli += 1
+            t, ana, usd, eur = fiyatlar[k[14]]
+            if usd is None and eur is None:
+                satir = fiy.get(p["productId"], {})
+                t2 = {}
+                for alt, var in (("Normal", "normal"), ("Foil", "foil")):
+                    x = satir.get(alt)
+                    if x and (x.get("marketPrice") or x.get("midPrice")):
+                        t2[var] = [x.get("lowPrice"), x.get("midPrice"), x.get("highPrice"), x.get("marketPrice")]
+                ana2 = next((v for v in ("normal", "foil") if v in t2), None)
+                if ana2:
+                    fiyatlar[k[14]] = (t2, ana2, round(t2[ana2][3] or t2[ana2][1], 2), None)
+                    tc_url[k[14]] = p.get("url") or ""
+                    fiyatli += 1
+    print(f"TCGplayer tamamlaması: {resimli} resim, {fiyatli} fiyat", flush=True)
+
     # ---- katalog ----
     kat = {"sets": setler, "cards": kartlar, "built": TODAY, "v": 1, "pfx": [RESIM]}
     json.dump(kat, open(f"{MV}/cards_mg.json", "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
@@ -278,6 +359,8 @@ def main():
                 continue
             h.append([TODAY, usd, eur])
             rec = {"h": h}
+            if cid in tc_url:
+                rec["tc"], rec["url"] = 1, tc_url[cid]
             if t:
                 rec["t"], rec["v"], rec["tu"] = t, ana, TODAY.replace("-", "/")
             if eur is not None:

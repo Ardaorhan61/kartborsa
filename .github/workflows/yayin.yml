@@ -421,6 +421,47 @@ jobs:
           json.dump(oz, open(oz_yol, 'w'), separators=(',', ':'))
           print('Elle eklenen fiyat uygulandı:', n)
           PY
+      - name: Card Rush fiyatları (Japonca promolar; sadece başka kaynakta fiyatı olmayan kartlara)
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          yol = 'veri/japonca/cardrush.json'
+          oz_yol = '_site/fiyat/ozet.json'
+          if not (os.path.exists(yol) and os.path.exists(oz_yol)):
+              raise SystemExit(0)
+          cr = json.load(open(yol, encoding='utf-8'))
+          oz = json.load(open(oz_yol))
+          bugun = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).date()
+          kaynak_yol = '_site/fiyat/kaynak.json'
+          kaynak = json.load(open(kaynak_yol)) if os.path.exists(kaynak_yol) else {}
+          n = 0
+          for cid, k in cr.get('c', {}).items():
+              try:
+                  gun = datetime.date.fromisoformat(k['tarih'])
+              except Exception:
+                  continue
+              if (bugun - gun).days > 14 or not k.get('usd'):
+                  continue
+              v = oz['c'].get(cid)
+              if v and any(isinstance(x, (int, float)) and x > 0 for x in v[:4]):
+                  continue  # TCGplayer / Cardmarket fiyatı var, o kullanılır
+              sid = cid.rsplit('-', 1)[0]
+              sp = f'_site/fiyat/set/{sid}.json'
+              sd = json.load(open(sp)) if os.path.exists(sp) else {'u': k['tarih'], 'c': {}}
+              h = [[x[0], x[1], None] for x in k.get('h', [])]
+              sd['c'][cid] = {'h': h, 'cr': {'y': k['y'], 's': k.get('s', 0), 'u': k.get('url', ''), 'd': k['tarih'],
+                                             'ad': k.get('ad', ''), 'kur': cr.get('kur')}}
+              os.makedirs(os.path.dirname(sp), exist_ok=True)
+              json.dump(sd, open(sp, 'w'), ensure_ascii=False, separators=(',', ':'))
+              once = h[-2] if len(h) >= 2 else [None, None, None]
+              oz['c'][cid] = [k['usd'], None, None, None, once[1], once[2], once[0]]
+              kaynak[cid] = 'Card Rush (Japon mağazası)'
+              n += 1
+          json.dump(oz, open(oz_yol, 'w'), separators=(',', ':'))
+          json.dump(kaynak, open(kaynak_yol, 'w'), ensure_ascii=False, separators=(',', ':'))
+          print('Card Rush fiyatı uygulanan kart:', n)
+          PY
       - name: Google ve paylaşım sayfaları (kart/set sayfaları, site haritası, ikonlar)
         continue-on-error: true
         timeout-minutes: 15

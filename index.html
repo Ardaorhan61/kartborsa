@@ -2995,10 +2995,14 @@ const _msMg=window.marketSection;
 window.marketSection=function(c){const box=_msMg.apply(this,arguments);if(!isMg(c))return box;
   let n=0;const t=setInterval(()=>{n++;try{const bas=[...box.querySelectorAll('div')].find(x=>x.textContent==='Cardmarket ortalama satış fiyatları');
     if(bas){const tb=bas.nextElementSibling;if(tb&&tb.tagName==='TABLE')tb.remove();bas.remove();}
+    box.querySelectorAll('div').forEach(x=>{if(x.childElementCount===0&&/Cardmarket ortalamaları eğilimi/.test(x.textContent))x.textContent=x.textContent.replace(/ O zamana kadar yukarıdaki Cardmarket ortalamaları eğilimi gösteriyor\./,'');});
     const son=[...box.children].pop();
     if(son&&/Son güncelleme/.test(son.textContent)&&!box.querySelector('.mgkaynak')){box.append(el('div',{class:'muted small mgkaynak',style:'margin-top:6px',text:'Magic fiyatları Scryfall üzerinden günlük alınır: TCGplayer (ABD, $) ve Cardmarket (Avrupa, €).'}));clearInterval(t);}}catch(e){}
     if(n>40)clearInterval(t);},150);
   return box;};
+
+/* İlan Ver arama kutusu örneği */
+const _dkMg=window.dilKur;window.dilKur=function(){const r=_dkMg.apply(this,arguments);try{const l=$('#lq');if(l){if(!l.dataset.pk)l.dataset.pk=l.placeholder;l.placeholder=DIL==='mg'?'Kart adı yaz, listeden seç (ör. Sol Ring)':l.dataset.pk;}}catch(e){}return r;};
 
 /* alt bilgi: kaynak ve hak sahipleri */
 try{const f=document.querySelector('footer');if(f&&!f.querySelector('.mgfoot')){const s=el('span',{class:'mgfoot'},' Magic: The Gathering kart bilgileri, görselleri ve fiyatları Scryfall\'dan (fiyatlar TCGplayer ve Cardmarket) gelir; Magic: The Gathering ve kart görselleri Wizards of the Coast\'a aittir. KartBorsa, Wizards of the Coast tarafından onaylanmamış, resmi olmayan bir hayran sitesidir (Fan Content Policy). ');

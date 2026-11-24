@@ -293,8 +293,9 @@ def main():
             p = pid_urun.get(c.get("tcgplayer_id"))
             if not p:
                 no = str(c.get("collector_number", ""))
-                yildiz = "★" in no
-                anahtar = re.sub(r"[^0-9A-Za-z]", "", no).lstrip("0").lower()
+                damgali = sanat and bool(re.fullmatch(r"\d+s", no))   # Art Series: "12s" = Gold-Stamped baskı
+                yildiz = "★" in no or damgali
+                anahtar = re.sub(r"[^0-9A-Za-z]", "", no[:-1] if damgali else no).lstrip("0").lower()
                 isim = (c.get("name") or "").split(" // ")[0].strip().lower()
                 aday = []
                 for q in no_ile.get(anahtar, []):

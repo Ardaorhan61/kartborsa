@@ -39,8 +39,15 @@ jobs:
           git clone --depth 1 --branch fiyat-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" veri \
             || mkdir -p veri
 
+      - name: Magic kataloğu
+        run: |
+          git clone --depth 1 --branch magic-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" mveri \
+            || mkdir -p mveri
+
       - name: Kart izlerini hesapla
-        run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json veri/cyberpunk/cards_cp.json
+        env:
+          MG_SURE: "5400"
+        run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json veri/cyberpunk/cards_cp.json mveri/cards_mg.json
 
       - name: İzleri kaydet
         run: |

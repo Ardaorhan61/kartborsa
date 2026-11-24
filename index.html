@@ -533,8 +533,10 @@ function imgSmall(c){return c[13]||(String(c[14]).startsWith('ja-')?'data:,':`ht
 function imgLarge(c){const s=imgSmall(c);if(s.includes('pokellector.com'))return s;if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
 /* kalite + hız: resimler wsrv.nl üzerinden ekrana uygun boyutta WebP olarak gelir (2x keskin, ~4x küçük); olmazsa orijinal */
 function px(u,w,q){if(!u||typeof u!=='string'||/^data:/.test(u)||/wsrv\.nl/.test(u))return u;if(!/^https?:/.test(u))u='https://www.kartborsa.com/'+u.replace(/^\//,'');
-  /* 24 Kasım 2026: wsrv.nl Bulbagarden'dan 403 alıyor → Bulbagarden'ın kendi küçük resmi (thumb); olmazsa orijinal */
-  {const bg=u.match(/^https:\/\/archives\.bulbagarden\.net\/media\/upload\/([0-9a-f])\/([0-9a-f]{2})\/([^\/?#]+)$/);if(bg)return 'https://archives.bulbagarden.net/media/upload/thumb/'+bg[1]+'/'+bg[2]+'/'+bg[3]+'/'+Math.round(w)+'px-'+bg[3];}
+  /* 24 Kasım 2026: wsrv.nl Bulbagarden (403) ve TCGplayer resimlerini açamıyor. Bulbagarden → orijinal (küçük resimleri çoğu dosyada yok);
+     TCGplayer → kendi hazır boyutları (_200w / _400w / _in_1000x1000) */
+  if(/^https:\/\/archives\.bulbagarden\.net\//.test(u))return u;
+  if(/tcgplayer-cdn\.tcgplayer\.com\/product\/\d+/.test(u)){const b=u.replace(/_(in_\d+x\d+|\d+w)\.jpg$/,'');return b+(w<=200?'_200w.jpg':w<=400?'_400w.jpg':'_in_1000x1000.jpg');}
   return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&output=webp&q='+(q||80)+'&we';}
 function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loading:'lazy',decoding:'async'},attrs||{}));im.dataset.orj=u;
   im.addEventListener('error',()=>{const o=im.dataset.orj;if(o&&im.src!==o){delete im.dataset.orj;im.src=o;}else im.remove();});return im;}

@@ -533,9 +533,11 @@ function imgSmall(c){return c[13]||(String(c[14]).startsWith('ja-')?'data:,':`ht
 function imgLarge(c){const s=imgSmall(c);if(s.includes('pokellector.com'))return s;if(s.includes('assets.tcgdex.net'))return s.replace(/\/low\.webp$/,'/high.webp');return s.includes('scrydex.com')?s.replace(/\/small$/,'/large'):s.replace(/\.png$/,'_hires.png');}
 /* kalite + hız: resimler wsrv.nl üzerinden ekrana uygun boyutta WebP olarak gelir (2x keskin, ~4x küçük); olmazsa orijinal */
 function px(u,w,q){if(!u||typeof u!=='string'||/^data:/.test(u)||/wsrv\.nl/.test(u))return u;if(!/^https?:/.test(u))u='https://www.kartborsa.com/'+u.replace(/^\//,'');
+  /* 24 Kasım 2026: wsrv.nl Bulbagarden'dan 403 alıyor → Bulbagarden'ın kendi küçük resmi (thumb); olmazsa orijinal */
+  {const bg=u.match(/^https:\/\/archives\.bulbagarden\.net\/media\/upload\/([0-9a-f])\/([0-9a-f]{2})\/([^\/?#]+)$/);if(bg)return 'https://archives.bulbagarden.net/media/upload/thumb/'+bg[1]+'/'+bg[2]+'/'+bg[3]+'/'+Math.round(w)+'px-'+bg[3];}
   return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&output=webp&q='+(q||80)+'&we';}
 function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loading:'lazy',decoding:'async'},attrs||{}));im.dataset.orj=u;
-  im.addEventListener('error',()=>{const o=im.dataset.orj;if(o&&/wsrv\.nl/.test(im.src)){delete im.dataset.orj;im.src=o;}else im.remove();});return im;}
+  im.addEventListener('error',()=>{const o=im.dataset.orj;if(o&&im.src!==o){delete im.dataset.orj;im.src=o;}else im.remove();});return im;}
 /* hız 3: ızgarada en fazla 367 px (iPad ekranında kart başı ~80 KB; önce 734 px PNG ~400 KB seçiliyordu); detayda Scrydex büyük resmi WebP 700 px (önizleme anında); ön yükleme yalnız fareyle. hız 2 (21 Kasım): Pokellector ızgarada önce küçük resmi (.thumb.png) anında gösterir, keskin WebP üstüne gelir; detayda orijinal doğrudan. Kart resimleri kaynak CDN'nin kendi hazır boyutlarından doğrudan gelir (Scrydex small/medium/large, TCGdex low/high) — aracı yok, 3–5 kat hızlı, detayda 734 px.
    Hazır boyutu olmayan kaynaklar (Pokellector, Bulbapedia, eski pokemontcg adresleri) wsrv.nl üzerinden. Hata olursa sırayla yedek adreslere düşer. */
 const YUKLU={};
@@ -2852,6 +2854,15 @@ window.marketSection=function(c){const box=eski.apply(this,arguments);
 if(r.ek){const d=(r.ek.d||'').split('-').reverse().join('.');s=el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',r.ek.u?el('a',{href:r.ek.u,target:'_blank',rel:'noopener',text:r.ek.k||r.ek.u}):(r.ek.k||''),' · '+d+' tarihinde kaynakta görülen fiyat (otomatik kaynakta fiyat olmadığı için elle eklendi; her gün yeniden kontrol edilir).');}
 else if(r.tc&&r.url){s=el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',el('a',{href:r.url,target:'_blank',rel:'noopener',text:'TCGplayer'}),' (tcgcsv.com günlük dökümü).');}
 if(s)setTimeout(()=>box.append(s),50);}catch(e){}})();
+return box;};})();
+</script>
+<script id="duzeltme-24k">
+/* 24 Kasım 2026: Japonca kartlarda TCGplayer ve Cardmarket bağlantıları İngilizce adla (Japonca ad bu sitelerde sonuç vermiyor) */
+(function(){const _pl=window.priceLinks;if(typeof _pl!=='function')return;
+window.priceLinks=function(c){const box=_pl.apply(this,arguments);
+try{if(String(c[14]).startsWith('ja-')){const en=(typeof c[15]==='string'&&c[15])||((String(c[0]).match(/\(([^()]+)\)\s*$/)||[])[1])||c[0];
+const a=[...box.querySelectorAll('a')];const tp=a.find(x=>/tcgplayer\.com\/search\/pokemon\//.test(x.href));if(tp)tp.href='https://www.tcgplayer.com/search/pokemon-japan/product?q='+encodeURIComponent(en);
+const cm=a.find(x=>/cardmarket\.com/.test(x.href));if(cm)cm.href='https://www.cardmarket.com/en/Pokemon/Products/Search?searchString='+encodeURIComponent(en);}}catch(e){}
 return box;};})();
 </script>
 <script id="cardrush-js">

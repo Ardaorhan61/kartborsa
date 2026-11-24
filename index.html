@@ -544,12 +544,12 @@ function pxImg(u,w,q,attrs){const im=el('img',Object.assign({src:px(u,w,q),loadi
    Hazır boyutu olmayan kaynaklar (Pokellector, Bulbapedia, eski pokemontcg adresleri) wsrv.nl üzerinden. Hata olursa sırayla yedek adreslere düşer. */
 const YUKLU={};
 function imgYol(c,large){const s=imgSmall(c);let b=null;
-  if(s.includes('tcgplayer-cdn.tcgplayer.com')){b=s.replace(/_(in_\d+x\d+|\d+w)\.jpg$/,'');return large?{src:b+'_in_1000x1000.jpg'}:{src:b+'_200w.jpg',srcset:b+'_200w.jpg 200w, '+b+'_400w.jpg 400w'};}
+  if(s.includes('tcgplayer-cdn.tcgplayer.com')){b=s.replace(/_(in_\d+x\d+|\d+w)\.jpg$/,'');return large?{src:b+'_in_1000x1000.jpg'}:{src:b+'_200w.jpg',srcset:b+'_200w.jpg 200w, '+b+'_400w.jpg 400w, '+b+'_in_1000x1000.jpg 716w'};}
   if(s.includes('assets.tcgdex.net')){b=s.replace(/\/(low|high)\.webp$/,'');return large?{src:b+'/high.webp'}:{src:b+'/low.webp',srcset:b+'/low.webp 245w, '+b+'/high.webp 600w'};}
   if(s.includes('pokellector.com'))return large?{src:s}:null;
   if(s.includes('images.scrydex.com'))b=s.replace(/\/(small|medium|large)$/,'');
   else if(!c[13]&&!String(c[14]).startsWith('ja-'))b='https://images.scrydex.com/pokemon/'+c[14];
-  if(b)return large?{src:px(b+'/large',700,86),dog:b+'/large'}:{src:b+'/small',srcset:b+'/small 245w, '+b+'/medium 367w'};
+  if(b)return large?{src:b+'/large',dog:px(b+'/large',700,86)}:{src:b+'/small',srcset:b+'/small 243w, '+b+'/medium 365w, '+b+'/large 652w'};
   return null;}
 function cardImg(c,large,src){
   const box=el('div',{class:'cimg'});const fb=el('div',{class:'fb',text:c?c[0]:''});
@@ -557,9 +557,9 @@ function cardImg(c,large,src){
   if(src||!c){im=el('img',{src:src||'',alt,loading:'lazy',decoding:'async'});}
   else{const y=imgYol(c,large),kay=imgLarge(c),ok=typeof kay==='string'&&/^(https?:|img\/)/.test(kay);
     const at={alt,loading:large?'eager':'lazy',decoding:'async'};if(large)at.fetchpriority='high';
-    if(y){if(y.srcset){at.srcset=y.srcset;at.sizes='(max-width:600px) 46vw, 190px';}at.src=y.src;im=el('img',at);
+    if(y){if(y.srcset){at.srcset=y.srcset;at.sizes='(max-width:600px) 46vw, 200px';}at.src=y.src;im=el('img',at);
       if(y.dog)yedek.push(y.dog);if(ok)yedek.push(px(kay,large?800:320,large?86:80));const o=large?kay:imgSmall(c);if(o&&!/scrydex/.test(o))yedek.push(o);}
-    else if(ok){Object.assign(at,large?{srcset:px(kay,600,86)+' 600w, '+px(kay,1000,86)+' 1000w',sizes:'(max-width:680px) 92vw, 300px'}:{srcset:px(kay,240,78)+' 240w, '+px(kay,480,80)+' 480w',sizes:'(max-width:600px) 46vw, 190px'});
+    else if(ok){Object.assign(at,large?{srcset:px(kay,600,86)+' 600w, '+px(kay,1000,86)+' 1000w',sizes:'(max-width:680px) 92vw, 300px'}:{srcset:px(kay,240,78)+' 240w, '+px(kay,480,80)+' 480w',sizes:'(max-width:600px) 46vw, 200px'});
       at.src=px(kay,large?800:320,large?86:80);im=el('img',at);yedek.push(large?kay:imgSmall(c));}
     else im=el('img',Object.assign(at,{src:imgSmall(c)}));
     if(!String(c[14]).startsWith('ja-'))yedek.push('https://images.scrydex.com/pokemon/'+c[14]+'/'+(large?'large':'small'));
@@ -2918,8 +2918,7 @@ function mgYukle(){if(MG_YUK)return MG_YUK;
 setInterval(()=>{if(!mgOzetUygula())return;try{if(DIL!=='mg')return;const v=document.querySelector('.view.on');
   if(v&&v.id==='v-katalog')drawCat();if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}}catch(e){}},700);
 (async()=>{try{const m=location.search.match(/[?&]kart=(mg-[^&]+)/),urlKart=m?decodeURIComponent(m[1]):null; /* paylaşılan / Google'dan gelen Magic kart bağlantısı */
-  const iste=urlKart||DIL==='mg'||localStorage.getItem('kb_mg')==='1';if(!iste)return;
-  if(DIL!=='mg'&&!urlKart){for(let i=0;i<80&&!window.__ikinciDil;i++)await new Promise(r=>setTimeout(r,250));try{await window.__ikinciDil;}catch(e){}}
+  const iste=urlKart||DIL==='mg';if(!iste)return;
   await mgYukle();
   if(urlKart){await new Promise(r=>setTimeout(r,700));if(!$('#modal').classList.contains('on')&&BYID[urlKart]!=null)kartAc(urlKart);}}catch(e){}})();
 
@@ -2936,7 +2935,7 @@ window.dilDegistir=function(d){const r=_ddMg.apply(this,arguments);
 const _pxMg=window.px;window.px=function(u,w,q){if(typeof u==='string'&&/^https:\/\/(cards|svgs)\.scryfall\.io\//.test(u))return u;return _pxMg.apply(this,arguments);};
 const _isMg=window.imgSmall;window.imgSmall=function(c){if(isMg(c))return c[13]||'data:,';return _isMg.apply(this,arguments);};
 const _ilMg=window.imgLarge;window.imgLarge=function(c){if(isMg(c)){const s=String(c[13]||'');return s?s.replace('/normal/','/large/'):'data:,';}return _ilMg.apply(this,arguments);};
-const _iyMg=window.imgYol;window.imgYol=function(c,large){if(isMg(c)&&!/tcgplayer-cdn/.test(String(c[13]||''))){const s=String(c[13]||'');if(!s)return null;return large?{src:s.replace('/normal/','/large/'),dog:s}:{src:s};}return _iyMg.apply(this,arguments);};
+const _iyMg=window.imgYol;window.imgYol=function(c,large){if(isMg(c)&&!/tcgplayer-cdn/.test(String(c[13]||''))){const s=String(c[13]||'');if(!s)return null;return large?{src:s.replace('/normal/','/large/'),dog:s}:{src:s,srcset:s+' 488w, '+s.replace('/normal/','/large/')+' 672w'};}return _iyMg.apply(this,arguments);};
 
 /* nadirlik: Mythic Rare ★★, Special/Bonus ★★★ */
 const _rsMg=window.rarSeviye;window.rarSeviye=function(r){const x=String(r||'').toLowerCase().trim();if(x==='mythic rare')return 3;if(x==='special'||x==='bonus')return 4;return _rsMg.apply(this,arguments);};
@@ -3002,6 +3001,20 @@ window.marketSection=function(c){const box=_msMg.apply(this,arguments);if(!isMg(
     if(son&&/Son güncelleme/.test(son.textContent)&&!box.querySelector('.mgkaynak')){box.append(el('div',{class:'muted small mgkaynak',style:'margin-top:6px',text:'Magic fiyatları Scryfall üzerinden günlük alınır: TCGplayer (ABD, $) ve Cardmarket (Avrupa, €).'}));clearInterval(t);}}catch(e){}
     if(n>40)clearInterval(t);},150);
   return box;};
+
+/* hız: Magic kataloğu (20 MB) Pokémon/Cyberpunk'ta arka planda yüklenmez; profil (koleksiyon, ilanlar) açılınca,
+   bu cihazda daha önce Magic kullanıldıysa yüklenir */
+const _goMg=window.go;window.go=function(v){const r=_goMg.apply(this,arguments);
+  try{if(v==='profil'&&!mgVarMi()&&localStorage.getItem('kb_mg')==='1')mgYukle().then(()=>{const p=$('#v-profil');if(p&&p.classList.contains('on'))drawProfil();});}catch(e){}return r;};
+/* hız: Magic ana sayfasında 1.007 set var → seriler önemine göre sıralanır, her seride en yeni 18 set, gerisi "Tümünü göster" ile */
+const MG_SERI=['Ana setler','Commander setleri','Masters setleri','Draft setleri (Conspiracy, Jumpstart, Modern Horizons …)','Kutu setleri (Secret Lair, From the Vault …)','Temel setler (Core)','Promo kartları','Eternal setleri','Başlangıç ve tanıtım setleri','Duel Decks','From the Vault','Masterpiece serisi','Eğlence setleri (Un-setler, Playtest)','Token ve emblem kartları','Hatıra ve özel kartlar'];
+const _dcMg=window.drawCat;window.drawCat=function(){const r=_dcMg.apply(this,arguments);
+  try{if(DIL==='mg'&&catSet===null){const a=$('#catArea');const ciftler=[...a.querySelectorAll(':scope > .series')].map(s=>[s,s.nextElementSibling]).filter(x=>x[1]&&x[1].classList.contains('sets'));
+    if(ciftler.length){const sira=x=>{const i=MG_SERI.indexOf(x[0].textContent.trim());return i<0?99:i;};const son=ciftler[ciftler.length-1][1].nextSibling;
+      ciftler.slice().sort((x,y)=>sira(x)-sira(y)).forEach(([s,g])=>{a.insertBefore(s,son);a.insertBefore(g,son);
+        const k=[...g.children];if(k.length<=18)return;const gizli=k.slice(18);gizli.forEach(x=>x.remove());
+        const b=el('button',{class:'btn sec',style:'margin:6px 0 18px',onclick:()=>{gizli.forEach(x=>g.append(x));b.remove();}},`Bu serideki tüm setleri göster (${k.length})`);a.insertBefore(b,son);});}}}catch(e){console.warn('mg seri',e);}
+  return r;};
 
 /* İlan Ver arama kutusu örneği */
 const _dkMg=window.dilKur;window.dilKur=function(){const r=_dkMg.apply(this,arguments);try{const l=$('#lq');if(l){if(!l.dataset.pk)l.dataset.pk=l.placeholder;l.placeholder=DIL==='mg'?'Kart adı yaz, listeden seç (ör. Sol Ring)':l.dataset.pk;}}catch(e){}return r;};

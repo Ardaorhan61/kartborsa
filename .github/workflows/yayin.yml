@@ -38,6 +38,11 @@ jobs:
           git clone --depth 1 --branch kart-izi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" izi \
             || mkdir -p izi
 
+      - name: Magic verisini al (magic-verisi dalı; magic.yml her gün günceller)
+        run: |
+          git clone --depth 1 --branch magic-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" mveri \
+            || mkdir -p mveri
+
       - name: İngilizce katalog eksiklerini tamamla (TCGdex + Scrydex resimleri)
         continue-on-error: true
         timeout-minutes: 20
@@ -94,6 +99,12 @@ jobs:
           cp veri/japonca/cards_ja.json _site/ 2>/dev/null || true
           mkdir -p _site/tara && cp izi/izler*.json _site/tara/ 2>/dev/null || true
           cp -r veri/set veri/ozet.json veri/kur.json _site/fiyat/ 2>/dev/null || true
+          # Magic: The Gathering (Scryfall; magic.yml): katalog, kart ayrıntıları, set fiyatları, fiyat özeti
+          cp mveri/cards_mg.json _site/ 2>/dev/null || true
+          mkdir -p _site/detay _site/fiyat/set
+          if [ -d mveri/detay ]; then cp mveri/detay/*.json _site/detay/; fi
+          if [ -d mveri/set ]; then cp mveri/set/*.json _site/fiyat/set/; fi
+          cp mveri/ozet_mg.json _site/fiyat/ 2>/dev/null || true
           ls -la _site _site/fiyat | head -20
 
       - name: Kart dosyasını küçült (ayrıntılar ayrı dosyaya)

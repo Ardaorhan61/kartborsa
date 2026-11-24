@@ -124,6 +124,7 @@ def breadcrumb(ogeler):
 
 oz = (oku("fiyat/ozet.json") or {}).get("c", {})
 kur = oku("fiyat/kur.json") or {}
+KAYNAK = oku("fiyat/kaynak.json") or {}   # kart → fiyat kaynağı adı (ör. Card Rush); yoksa TCGplayer
 USD, EUR = kur.get("USD"), kur.get("EUR")
 
 
@@ -132,7 +133,7 @@ def fiyat(cid):
     if not o or not USD:
         return None, None
     if isinstance(o[0], (int, float)) and o[0] > 0:
-        return o[0] * USD, "TCGplayer"
+        return o[0] * USD, KAYNAK.get(cid, "TCGplayer")
     if len(o) > 1 and isinstance(o[1], (int, float)) and o[1] > 0 and EUR:
         return o[1] * EUR, "Cardmarket"
     return None, None

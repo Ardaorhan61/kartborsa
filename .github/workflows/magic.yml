@@ -1,0 +1,42 @@
+name: Magic kataloğu ve fiyatları (Scryfall)
+
+# Her gün fiyat yayınından (06:41 TR) önce çalışır: Scryfall'ın günlük toplu verisinden tüm kağıt Magic: The Gathering
+# setleri ve kartları + TCGplayer/Cardmarket fiyatları → magic-verisi dalı. yayin.yml bu dalı siteye kopyalar.
+on:
+  schedule:
+    - cron: "23 2 * * *"   # 05:23 (Türkiye saati)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: magic
+  cancel-in-progress: false
+
+jobs:
+  magic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+      - name: Magic verisini al
+        run: git clone --depth 1 --branch magic-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" mveri || mkdir -p mveri
+      - name: Scryfall'dan katalog ve fiyatlar
+        id: mg
+        timeout-minutes: 45
+        run: python3 site/.github/scripts/magic.py mveri
+      - name: Kaydet (magic-verisi dalı)
+        if: steps.mg.outcome == 'success'
+        run: |
+          cd mveri
+          du -sh . cards_mg.json detay set ozet_mg.json || true
+          rm -rf .git
+          git init -q -b magic-verisi
+          git config user.name "KartBorsa fiyat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Magic $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" magic-verisi

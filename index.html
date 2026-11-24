@@ -2917,9 +2917,11 @@ function mgYukle(){if(MG_YUK)return MG_YUK;
   return MG_YUK;}
 setInterval(()=>{if(!mgOzetUygula())return;try{if(DIL!=='mg')return;const v=document.querySelector('.view.on');
   if(v&&v.id==='v-katalog')drawCat();if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}}catch(e){}},700);
-(async()=>{try{const iste=DIL==='mg'||localStorage.getItem('kb_mg')==='1';if(!iste)return;
-  if(DIL!=='mg'){for(let i=0;i<80&&!window.__ikinciDil;i++)await new Promise(r=>setTimeout(r,250));try{await window.__ikinciDil;}catch(e){}}
-  mgYukle();}catch(e){}})();
+(async()=>{try{const m=location.search.match(/[?&]kart=(mg-[^&]+)/),urlKart=m?decodeURIComponent(m[1]):null; /* paylaşılan / Google'dan gelen Magic kart bağlantısı */
+  const iste=urlKart||DIL==='mg'||localStorage.getItem('kb_mg')==='1';if(!iste)return;
+  if(DIL!=='mg'&&!urlKart){for(let i=0;i<80&&!window.__ikinciDil;i++)await new Promise(r=>setTimeout(r,250));try{await window.__ikinciDil;}catch(e){}}
+  await mgYukle();
+  if(urlKart){await new Promise(r=>setTimeout(r,700));if(!$('#modal').classList.contains('on')&&BYID[urlKart]!=null)kartAc(urlKart);}}catch(e){}})();
 
 /* oyun değiştirme: Magic kataloğu ilk seçilişte yüklenir */
 const _ddMg=window.dilDegistir;

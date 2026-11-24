@@ -74,6 +74,11 @@ def resim(c, setid, pfx, buyuk=True):
 def wsrv(u, w):
     if not u:
         return None
+    if "tcgplayer-cdn.tcgplayer.com" in u:   # wsrv.nl TCGplayer resimlerini açamıyor → TCGplayer'ın kendi boyutları
+        b = re.sub(r"_(in_\d+x\d+|\d+w)\.jpg$", "", u)
+        return b + ("_200w.jpg" if w <= 220 else "_400w.jpg" if w <= 400 else "_in_1000x1000.jpg")
+    if "archives.bulbagarden.net" in u:      # wsrv.nl Bulbagarden'dan 403 alıyor → doğrudan (referrer'sız, yaz() ekler)
+        return u
     return "https://wsrv.nl/?url=" + urllib.parse.quote(u, safe="") + f"&w={w}&output=jpg&q=82"
 
 
@@ -113,6 +118,7 @@ Pokémon ve kart görselleri The Pokémon Company, Nintendo, Creatures ve GAME F
 def yaz(yol, icerik):
     tam = os.path.join(SITE, yol.strip("/"), "index.html") if yol.endswith("/") else os.path.join(SITE, yol.lstrip("/"))
     os.makedirs(os.path.dirname(tam), exist_ok=True)
+    icerik = icerik.replace("<img ", '<img referrerpolicy="no-referrer" ')   # Bulbagarden resimleri referrer'sız açılır
     with open(tam, "w", encoding="utf-8") as f:
         f.write(icerik)
 

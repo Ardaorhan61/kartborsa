@@ -2854,6 +2854,23 @@ else if(r.tc&&r.url){s=el('div',{class:'muted small',style:'margin-top:8px'},'Fi
 if(s)setTimeout(()=>box.append(s),50);}catch(e){}})();
 return box;};})();
 </script>
+<script id="cardrush-js">
+/* 24 Kasım 2026: TCGplayer / Cardmarket'te fiyatı olmayan Japonca promolar için Card Rush (Japon mağazası) satış fiyatı */
+(function(){const eski=window.marketSection;if(typeof eski!=='function')return;
+window.marketSection=function(c){const box=eski.apply(this,arguments);
+(async()=>{try{const sp=await setPrices(setOf(c)[0]);const r=sp&&sp.c&&sp.c[c[14]];if(!r||!r.cr||r.t||r.m)return;const k=r.cr;
+await new Promise(res=>setTimeout(res,150));
+const h=r.h||[];const usd=h.length?h[h.length-1][1]:(k.kur?k.y/k.kur:null);const prev=h.length>1?h[h.length-2][1]:null;
+const tarih=(k.d||'').split('-').reverse().join('.');
+box.innerHTML='';
+box.append(el('h3',{text:'Piyasa değeri'}),
+el('div',{class:'mtiles'},el('div',{class:'mtile'},el('div',{class:'muted small',text:'Card Rush (Japonya) mağaza satış fiyatı'}),el('div',{class:'big',text:tlx(usdTL(usd))}),
+el('div',{class:'small'},el('span',{class:'muted',text:`¥${Number(k.y).toLocaleString('tr-TR')} (vergi dahil)${k.s>0?' · mağazada '+k.s+' adet':' · mağazada şu an stok yok'} · dünden `}),chg(prev!=null&&usd!=null?pct(usd,prev):null)))),
+el('div',{class:'muted small',style:'margin-top:8px'},'Fiyat kaynağı: ',el('a',{href:k.u,target:'_blank',rel:'noopener',text:'Card Rush – '+(k.ad||'ürün sayfası')}),
+` · ${tarih} tarihinde mağazada görülen fiyat. Bu kartın TCGplayer ve Cardmarket'te fiyatı olmadığı için Japon mağazasının satış fiyatı gösteriliyor; ikinci el piyasa fiyatından yüksek olabilir. TL karşılığı: ¥ → $ (1 $ = ${Number(k.kur||0).toLocaleString('tr-TR')} ¥) → ₺. Her gün yeniden kontrol edilir.`));
+}catch(e){}})();
+return box;};})();
+</script>
 <style id="dekor">
 /* ===== 23 Kasım 2026: site dekoru (kış/yılbaşı, nadirlik parıltısı, set kutlaması, Cyberpunk neon, türe göre arka plan, yükleme animasyonu, açık/koyu mod) ===== */
 /* yükleme animasyonu: karıştırılan deste */

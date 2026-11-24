@@ -77,6 +77,8 @@ def wsrv(u, w):
     if "tcgplayer-cdn.tcgplayer.com" in u:   # wsrv.nl TCGplayer resimlerini açamıyor → TCGplayer'ın kendi boyutları
         b = re.sub(r"_(in_\d+x\d+|\d+w)\.jpg$", "", u)
         return b + ("_200w.jpg" if w <= 220 else "_400w.jpg" if w <= 400 else "_in_1000x1000.jpg")
+    if "scryfall.io" in u:                   # Scryfall: kendi boyutları (small 146 px, normal 488 px)
+        return u.replace("/normal/", "/small/") if w <= 220 else u
     if "archives.bulbagarden.net" in u:      # wsrv.nl Bulbagarden'dan 403 alıyor → doğrudan (referrer'sız, yaz() ekler)
         return u
     return "https://wsrv.nl/?url=" + urllib.parse.quote(u, safe="") + f"&w={w}&output=jpg&q=82"
@@ -129,6 +131,7 @@ def breadcrumb(ogeler):
 
 
 oz = (oku("fiyat/ozet.json") or {}).get("c", {})
+oz.update((oku("fiyat/ozet_mg.json") or {}).get("c", {}))
 kur = oku("fiyat/kur.json") or {}
 KAYNAK = oku("fiyat/kaynak.json") or {}   # kart → fiyat kaynağı adı (ör. Card Rush); yoksa TCGplayer
 USD, EUR = kur.get("USD"), kur.get("EUR")
@@ -145,12 +148,13 @@ def fiyat(cid):
     return None, None
 
 
-OYUN = {"en": ("Pokémon TCG", "İngilizce"), "ja": ("Pokémon TCG", "Japonca"), "cp": ("Cyberpunk TCG", "İngilizce")}
-url_listesi = {"set": [], "en": [], "ja": [], "cp": []}
+OYUN = {"en": ("Pokémon TCG", "İngilizce"), "ja": ("Pokémon TCG", "Japonca"), "cp": ("Cyberpunk TCG", "İngilizce"),
+        "mg": ("Magic: The Gathering", "İngilizce")}
+url_listesi = {"set": [], "en": [], "ja": [], "cp": [], "mg": []}
 setler_ozet = []
 toplam = 0
 
-for dosya, dil in (("cards.json", "en"), ("cards_ja.json", "ja"), ("cards_cp.json", "cp")):
+for dosya, dil in (("cards.json", "en"), ("cards_ja.json", "ja"), ("cards_cp.json", "cp"), ("cards_mg.json", "mg")):
     kat = oku(dosya)
     if not kat:
         continue
@@ -179,7 +183,7 @@ for dosya, dil in (("cards.json", "en"), ("cards_ja.json", "ja"), ("cards_cp.jso
         for i, c in enumerate(kartlar):
             cid = str(c[14])
             ad = c[0]
-            k_yol = f"/kart/{cid}/"
+            k_yol = f"/kart/{cid}/" if dil != "mg" else f"/?kart={urllib.parse.quote(cid)}"
             v, kaynak = fiyat(cid)
             if v:
                 deger += v
@@ -187,6 +191,8 @@ for dosya, dil in (("cards.json", "en"), ("cards_ja.json", "ja"), ("cards_cp.jso
             kucuk = wsrv(resim(c, sid, pfx, False), 220)
             lis.append(f'<li><a href="{k_yol}">{f"<img src={chr(34)}{e(kucuk)}{chr(34)} alt={chr(34)}{e(ad)}{chr(34)} loading=lazy>" if kucuk else ""}'
                        f'<div>{e(ad)}</div><div class="k">#{e(c[2])}{" · " + e(tl(v)) if v else ""}</div></a></li>')
+            if dil == "mg":
+                continue   # Magic: kart başına sayfa üretilmez (111 bin sayfa Pages boyut sınırını zorlar); set sayfası kartları siteye bağlar
             onceki = kartlar[i - 1] if i > 0 else None
             sonraki = kartlar[i + 1] if i + 1 < len(kartlar) else None
             nadir = c[3] if len(c) > 3 else ""
@@ -226,13 +232,13 @@ for dosya, dil in (("cards.json", "en"), ("cards_ja.json", "ja"), ("cards_cp.jso
 
 # tüm setler
 bolumler = []
-for dil, baslik in (("en", "Pokémon (İngilizce)"), ("ja", "Pokémon (Japonca)"), ("cp", "Cyberpunk TCG")):
+for dil, baslik in (("en", "Pokémon (İngilizce)"), ("ja", "Pokémon (Japonca)"), ("cp", "Cyberpunk TCG"), ("mg", "Magic: The Gathering")):
     ss = sorted([x for x in setler_ozet if x[0] == dil], key=lambda x: x[2], reverse=True)
     if ss:
         bolumler.append(f"<h2>{baslik}</h2><div class='s'>" + "".join(
             f'<a href="/set/{x[3]}/">{e(x[4])} <span class="k">({x[5]} kart, {e(x[2][:4])})</span></a>' for x in ss) + "</div>")
-yaz("/setler/", sayfa("Tüm Pokémon ve Cyberpunk TCG Setleri ve Kart Fiyatları | KartBorsa",
-                      f"{len(setler_ozet)} Pokémon (İngilizce ve Japonca) ve Cyberpunk TCG setinin kart listeleri ve güncel TL fiyatları.",
+yaz("/setler/", sayfa("Tüm Pokémon, Cyberpunk TCG ve Magic: The Gathering Setleri ve Kart Fiyatları | KartBorsa",
+                      f"{len(setler_ozet)} Pokémon (İngilizce ve Japonca), Cyberpunk TCG ve Magic: The Gathering setinin kart listeleri ve güncel TL fiyatları.",
                       "/setler/", '<h1>Tüm setler</h1>' + "".join(bolumler)))
 url_listesi["set"].insert(0, "/setler/")
 

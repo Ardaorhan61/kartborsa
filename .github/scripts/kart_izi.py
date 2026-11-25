@@ -128,15 +128,21 @@ if MG_YOL and os.path.exists(MG_YOL):
             meski = json.load(open(mg_yol, encoding='utf-8')).get('d', {})
         except Exception:
             meski = {}
-    ATLA = {'Token', 'Art Card', 'Emblem', 'Card'}
-    mk = [c for c in mg['cards'] if len(c) > 14 and c[13] and c[4] not in ATLA]
+    onekler = mg.get('pfx') or []
+    mk = [c for c in mg['cards'] if len(c) > 14 and c[13]]
     myeni = {c[14]: meski[c[14]] for c in mk if c[14] in meski}
     meksik = [c for c in mk if c[14] not in meski]
     SURE = float(os.environ.get('MG_SURE', '5400'))
     print('Magic: toplam', len(mk), 'hazır', len(myeni), 'hesaplanacak', len(meksik), flush=True)
 
     def misle(c):
-        u = c[13].replace('/normal/', '/small/')
+        u = c[13]
+        if u.startswith('~'):
+            if len(u) < 3 or not u[1].isascii() or not u[1].isdigit() or int(u[1]) >= len(onekler):
+                return c[14], None
+            u = onekler[int(u[1])] + u[2:]
+        if u.startswith('https://cards.scryfall.io/normal/'):
+            u = u.replace('/normal/', '/small/', 1)
         for deneme in range(2):
             try:
                 return c[14], iz(Image.open(io.BytesIO(indir(u))))

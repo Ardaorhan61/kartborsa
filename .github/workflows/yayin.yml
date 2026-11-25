@@ -503,6 +503,23 @@ jobs:
         run: |
           pip install --quiet pillow || true
           python3 site/.github/scripts/seo.py _site
+      - name: Katalog ve piyasa verilerini içeriğine göre sürümle
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          site = Path('_site')
+          paths = (*site.glob('cards*.json'), *site.glob('tara/*.json'), *site.glob('fiyat/ozet*.json'))
+          versions = {p.relative_to(site).as_posix(): 'h' + hashlib.sha256(p.read_bytes()).hexdigest()[:20]
+                      for p in sorted(paths)}
+          html = site / 'index.html'
+          marker = '/*__VERI_SURUMLERI__*/{}'
+          text = html.read_text(encoding='utf-8')
+          if text.count(marker) != 1:
+              raise SystemExit('Veri sürümü işareti bulunamadı')
+          html.write_text(text.replace(marker, json.dumps(versions, separators=(',', ':'))), encoding='utf-8')
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

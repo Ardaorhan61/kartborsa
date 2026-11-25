@@ -1,6 +1,6 @@
 /* KartBorsa service worker: veriler ve yazı tipleri cihazda saklanır.
    - Sayfa (index.html): önce internet, internet yoksa saklanan.
-   - Sürümlü veri (.json?v=...): saklanan varsa anında o; yoksa indir ve sakla. Her yayında sürüm değişir, eski sürümler silinir.
+   - Sürümlü veri (.json?v=...): saklanan varsa anında o; yoksa indir ve sakla. Değişen dosyaların sürümü yenilenir; eski sürümler temizlenir.
    - Yazı tipleri ve Supabase kütüphanesi: saklanan varsa o. */
 const VERI='kb-veri-1',KABUK='kb-kabuk-1';
 self.addEventListener('install',e=>self.skipWaiting());
@@ -19,10 +19,15 @@ self.addEventListener('fetch',e=>{
         if(!k||!response.ok)return {response};
         const cacheWrite=k.put(q,response.clone()).then(async()=>{
           const keys=await k.keys();
-          await Promise.all(keys.filter(key=>{
+          const versions=keys.filter(key=>{
             const old=new URL(key.url);
-            return old.pathname===u.pathname&&Number(old.searchParams.get('v'))<Number(v);
-          }).map(key=>k.delete(key)));
+            return old.pathname===u.pathname&&old.searchParams.has('v');
+          });
+          const obsolete=v.startsWith('h')
+            ? versions.filter(key=>!new URL(key.url).searchParams.get('v').startsWith('h'))
+                .concat(versions.filter(key=>new URL(key.url).searchParams.get('v').startsWith('h')).slice(0,-2))
+            : versions.filter(key=>Number(new URL(key.url).searchParams.get('v'))<Number(v));
+          await Promise.all(obsolete.map(key=>k.delete(key)));
         }).catch(()=>{});
         return {response,cacheWrite};
       });

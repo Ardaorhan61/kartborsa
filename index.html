@@ -1143,6 +1143,7 @@ function taraKelimeler(s){
 }
 function taraMetniOku(ust,alt,tum,oyun,gorsel){
   const satirlar=(ust.trim()||tum.split(/\r?\n/).slice(0,5).join('\n')).split(/\r?\n/).map(taraKelimeler).filter(Boolean);
+  alt=alt.normalize('NFKC');
   const numaralar=new Map();
   for(const m of alt.matchAll(/\b([A-Z]{0,4}\s*\d{1,4}[A-Z]?)\s*[/|\\]\s*(?:[A-Z]{0,4}\s*)?(\d{2,4})\b/gi)){
     numaralar.set(taraNo(m[1]),Number(m[2]));
@@ -1150,14 +1151,21 @@ function taraMetniOku(ust,alt,tum,oyun,gorsel){
   if(oyun==='mg'){
     for(const m of alt.matchAll(/^\s*[CURMSL]\s+(\d{2,4}[a-z]?)\b/gim))numaralar.set(taraNo(m[1]),null);
   }
+  if(oyun==='cp'){
+    for(const m of alt.matchAll(/\b([A-Z]\s*\d{3}[A-Z]?)\b/gi))numaralar.set(taraNo(m[1]),null);
+  }
   const altKodlar=new Set(taraKelimeler(alt).split(' ').filter(k=>/^[a-z][a-z0-9]{2,5}$/.test(k)));
   const gorselId=new Set(gorsel.map(x=>x.i));
   const kayitlar=[];
   let enUzun=0;
   CAT.cards.forEach((c,i)=>{
     if(!taraOyunda(i,oyun))return;
-    const adlar=[...String(c[0]).split(' // '),c[15]].filter(Boolean);
-    const adUzunlugu=adlar.reduce((n,ad)=>{
+    const ad=String(c[0]);
+    const adlar=[...ad.split(' // '),c[15]];
+    if(oyun==='cp')adlar.push(ad.split(/\s+[-–—]\s+/)[0]);
+    if(oyun==='pk'&&String(c[14]).startsWith('ja-'))adlar.push(ad.replace(/\s+\([^()]+\)\s*$/,''));
+
+    const adUzunlugu=adlar.filter(Boolean).reduce((n,ad)=>{
       const a=taraKelimeler(ad);
       return a&&satirlar.some(s=>s===a||s.startsWith(a+' '))?Math.max(n,a.length):n;
     },0);
@@ -1354,7 +1362,7 @@ const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
 function mainValue(o){if(!o||!KUR)return null;
   if(Number.isFinite(o[0])&&o[0]>0)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
-  const eur=[o[1],o[2],o[3]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
+  const eur=[o[1],o[2],o[3]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[1]===eur&&o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
 const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
 function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
   const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});

@@ -57,6 +57,16 @@ if os.path.exists(eski_yol):
         eski = {}
 
 
+# Daha önce kaynak görselinden doğrulanan izleri, erişimin geçici olarak kesildiği çalışmalarda koru.
+ek_yol = os.path.join(SITE, '.github', 'data', 'kart_izi_ek.json')
+if os.path.isfile(ek_yol):
+    with open(ek_yol, encoding='utf-8') as dosya:
+        ek_izler = json.load(dosya)
+    for cid, iz_degeri in ek_izler.items():
+        if isinstance(iz_degeri, str) and re.fullmatch(r'[0-9a-f]{64}', iz_degeri):
+            eski.setdefault(cid, iz_degeri)
+
+
 def dct_mat(n, k=8):
     x = np.arange(n)
     return np.array([np.cos(np.pi * (2 * x + 1) * u / (2 * n)) for u in range(k)])

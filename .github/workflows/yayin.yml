@@ -478,6 +478,23 @@ jobs:
           json.dump(kaynak, open(kaynak_yol, 'w'), ensure_ascii=False, separators=(',', ':'))
           print('Card Rush fiyatı uygulanan kart:', n)
           PY
+      - name: Doğrulanmış Japonca kart görsellerini uygula
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          catalog = Path('_site/cards_ja.json')
+          if catalog.is_file():
+              data = json.loads(catalog.read_bytes())
+              images = json.loads(Path('site/.github/data/kart_resim_ek.json').read_bytes())
+              restored = 0
+              for card in data['cards']:
+                  if card[14] in images:
+                      card[13] = images[card[14]]
+                      restored += 1
+              catalog.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+              print(f'{restored} Japonca kart gorseli guncellendi')
+          PY
       - name: Set kayıtlarından eksik piyasa fiyatlarını tamamla
         run: python3 site/.github/scripts/piyasa_ozet_tamamla.py _site
       - name: Google ve paylaşım sayfaları (kart/set sayfaları, site haritası, ikonlar)

@@ -805,14 +805,31 @@ function closeModal(){$('#modal').classList.remove('on');}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 const DETAY={};
-async function kartDetay(c){
-  if(Array.isArray(c[9]))return;
-  const sid=c[14].slice(0,c[14].lastIndexOf('-'));
-  try{DETAY[sid]=DETAY[sid]||fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>r.ok?r.json():{});const d=await DETAY[sid];
-    CAT.cards.forEach(x=>{const v=d[x[14]];if(v&&x[14].slice(0,x[14].lastIndexOf('-'))===sid){x[9]=v[0]||[];x[10]=v[1]||[];x[11]=v[2]||[];}});}catch(e){DETAY[sid]=null;}
-  if(!Array.isArray(c[9])){c[9]=[];c[10]=[];if(!Array.isArray(c[11]))c[11]=[];}
+function setDetay(sid){
+  return DETAY[sid] ||= fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>{
+    if(!r.ok)throw new Error('Kart ayrıntısı alınamadı');
+    return r.json();
+  }).catch(e=>{delete DETAY[sid];throw e;});
 }
-async function openCard(i){const c=CAT.cards[i];if(!Array.isArray(c[9])){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await kartDetay(c);}openCardNow(i);}
+async function kartDetay(c){
+  const detay=await setDetay(setOf(c)[0]);
+  const v=detay[c[14]];
+  c[9]=v?.[0]||[];
+  c[10]=v?.[1]||[];
+  c[11]=v?.[2]||[];
+}
+function kartYetenekleri(c){
+  const b=el('div');
+  const ekle=()=>{
+    b.replaceChildren(
+      ...(c[10]||[]).map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
+      ...(c[9]||[]).map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{style:'display:flex;align-items:center;gap:8px'},maliyet(a[1]),a[0]),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)));
+  };
+  if(Array.isArray(c[9]))ekle();
+  else kartDetay(c).then(ekle).catch(()=>{b.textContent='Kart metni şu anda alınamadı.';b.className='small muted';});
+  return b;
+}
+function openCard(i){if(CAT?.cards[i])return openCardNow(i);}
 function openCardNow(i){
   const c=CAT.cards[i],s=setOf(c),st=stockOf(c[14]);
   const b=$('#modalBody');b.innerHTML='';b.style.setProperty('--mc',c[7]&&TIP_TR[c[7]]?'var(--t-'+c[7]+')':'var(--accent)');
@@ -841,8 +858,7 @@ function openCardNow(i){
         box,
         el('div',{style:'margin-top:12px'},el('div',{class:'muted small'},'Piyasa fiyatlarını karşılaştır'),priceLinks(c)),
         derBolum(c),
-        ...c[10].map(a=>el('div',{class:'atk'},el('b',{text:'Yetenek: '+a[0]}),el('div',{class:'small muted',text:a[1]}))),
-        ...c[9].map(a=>el('div',{class:'atk'},el('div',{style:'display:flex;justify-content:space-between'},el('b',{style:'display:flex;align-items:center;gap:8px'},maliyet(a[1]),a[0]),el('b',{text:a[2]})),a[3]?el('div',{class:'small muted',text:a[3]}):null)))),
+        kartYetenekleri(c))),
     marketSection(c));
   $('#modal').classList.add('on');
 }
@@ -999,7 +1015,7 @@ async function drawOdemeHesabi(area){
   ['pointerup','pointercancel','scroll'].forEach(t=>document.addEventListener(t,e=>{if(t==='scroll'||e.pointerType!=='mouse')birak();},{passive:true,capture:true}));
 })();
 /* ---------- kamerayla kart tarama ---------- */
-let TARA={worker:null,stream:null,timer:null};let TARA_RENK=2;
+let TARA={workers:new Map(),script:null,stream:null,timer:null};let TARA_RENK=2;
 function taraDct(n){const m=[];for(let u=0;u<8;u++){const r=new Float64Array(n);for(let x=0;x<n;x++)r[x]=Math.cos(Math.PI*(2*x+1)*u/(2*n));m.push(r);}return m;}
 const TARA_DCT={};
 function taraPhash(g,h,w){const k=h+'x'+w;const [dy,dx]=TARA_DCT[k]||(TARA_DCT[k]=[taraDct(h),taraDct(w)]);
@@ -1102,13 +1118,22 @@ function taraGorsel(I,src,W,H,cerceve,hizli){if(!I?.n)return {liste:[],kesim:nul
   return {liste:sira.map(j=>({i:I.idx[j],d:Math.round(en[j]/bol)})),kesim:sira.length?kes[enK[sira[0]]]:null};}
 
 function taraNo(s){s=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return s.replace(/^([A-Z]*)0+(\d)/,'$1$2');}
-async function taraMotor(durum){
-  if(TARA.worker)return TARA.worker;
-  if(!window.Tesseract){durum('Tarayıcı hazırlanıyor (ilk seferde biraz sürebilir)…');
-    await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=()=>no(new Error('Tarama aracı yüklenemedi, internet bağlantını kontrol et.'));document.head.append(s);});}
-  durum('Okuma motoru açılıyor…');
-  TARA.worker=await Tesseract.createWorker('eng');
-  return TARA.worker;}
+async function taraMotor(durum,dil){
+  const dilPaketi=dil==='ja'?'eng+jpn':'eng';
+  if(!TARA.workers.has(dilPaketi)){
+    const motor=(async()=>{
+      if(!window.Tesseract){
+        durum('Tarayıcı hazırlanıyor…');
+        TARA.script ||= new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=()=>no(new Error('Tarama aracı yüklenemedi.'));document.head.append(s);}).catch(e=>{TARA.script=null;throw e;});
+        await TARA.script;
+      }
+      durum('Okuma motoru açılıyor…');
+      return Tesseract.createWorker(dilPaketi);
+    })().catch(e=>{TARA.workers.delete(dilPaketi);throw e;});
+    TARA.workers.set(dilPaketi,motor);
+  }
+  return TARA.workers.get(dilPaketi);
+}
 function taraKamDurdur(){if(TARA.stream){TARA.stream.getTracks().forEach(t=>t.stop());TARA.stream=null;}if(TARA.timer){clearInterval(TARA.timer);TARA.timer=null;}}
 function taraBolge(src,x,y,w,h,olcek){
   const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*olcek));c.height=Math.max(1,Math.round(h*olcek));
@@ -1168,14 +1193,15 @@ function taraSonuclari(gorsel,metin,oyun){
     ilk.ad&&ilk.no&&(ilk.kod||ilk.top||ilk.d<=28)||
     ilk.ad&&ilk.d<=15&&!metin?.noVar&&(!ikinci||ikinci.d-ilk.d>=9)
   );
-  return {liste:adaylar.slice(0,12),emin};
+  const birebir=!!ilk&&ilk.d<=3&&(!ikinci||ikinci.d>=ilk.d+10);
+  return emin||birebir?ilk.i:null;
 }
-async function taraOku(kaynak,kartCercevesi,durum,oyun,dizin){
+async function taraOku(kaynak,kartCercevesi,durum,oyun,dizin,dil){
   durum('Kart resmi karşılaştırılıyor…');
   const gor=taraGorsel(await dizin,kaynak,kaynak.width,kaynak.height,kartCercevesi);
   gor.liste=gor.liste.filter(x=>x.d<=38&&taraOyunda(x.i,oyun));
   let metin=null;
-  try{const w=await taraMotor(durum);durum(gor.liste.length?'Kart numarası kontrol ediliyor…':'Kart okunuyor…');
+  try{const w=await taraMotor(durum,dil);durum(gor.liste.length?'Kart numarası kontrol ediliyor…':'Kart okunuyor…');
     let src=kaynak,cer=kartCercevesi;
     if(gor.kesim&&gor.liste[0].d<=34){const [x,y,ww,hh,a]=gor.kesim;const c=document.createElement('canvas');c.width=630;c.height=880;const g=c.getContext('2d');g.translate(315,440);g.scale(630/ww,880/hh);if(a)g.rotate(-a*Math.PI/180);g.drawImage(kaynak,-(x+ww/2),-(y+hh/2));src=c;cer=true;}
     const W=src.width,H=src.height;let ust='',alt='';
@@ -1193,7 +1219,7 @@ async function taraOku(kaynak,kartCercevesi,durum,oyun,dizin){
   return taraSonuclari(gor.liste,metin,oyun);}
 function openTara(){
   const b=$('#modalBody');b.innerHTML='';taraKamDurdur();
-  const oyun=taraSimdi(),oyunAdi={pk:'Pokémon',cp:'Cyberpunk TCG',mg:'Magic: The Gathering'}[oyun];
+  const dil=DIL,oyun=taraSimdi(),oyunAdi={pk:'Pokémon',cp:'Cyberpunk TCG',mg:'Magic: The Gathering'}[oyun];
   let iz=null;
   const dizin=taraIzleriYukle(oyun).then(i=>iz=i).catch(()=>null);
   const durumEl=el('div',{class:'small',style:'margin-top:8px;min-height:20px'});const durum=t=>{durumEl.style.color='';durumEl.textContent=t;};
@@ -1205,27 +1231,22 @@ function openTara(){
     el('div',{style:'position:absolute;inset:4%;border:2px dashed rgba(255,214,90,.9);border-radius:10px;pointer-events:none'}),
     el('div',{style:'position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none',text:'Kartı çerçevenin içine sığdır'}));
   const dosya=el('input',{type:'file',accept:'image/*',capture:'environment',style:'display:none'});
-  const goster=r=>{if(!document.body.contains(sonucEl)||taraSimdi()!==oyun)return;
-    r={...r,liste:r.liste.filter(x=>taraOyunda(x.i,oyun))};sonucEl.innerHTML='';
-    if(!r.liste.length){hata(oyunAdi+' kataloğunda güvenilir eşleşme bulunamadı. Kartın adını ve alt köşesini daha net çek.');return;}
-    durum(r.emin?'Güçlü eşleşme ✓ Seti ve kart numarasını kontrol et.':'Baskı doğrulanamadı. Aşağıdaki olası eşleşmelerin setini ve kart numarasını kontrol et.');
-    sonucEl.append(el('div',{style:'display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px'},
-      ...r.liste.map(x=>{const c=CAT.cards[x.i],s=CAT.sets[c[1]]||[];
-        return el('div',{class:'card',style:'padding:8px'+(x===r.liste[0]&&r.emin?';outline:2px solid var(--accent)':'')},
-          el('div',{style:'cursor:pointer',onclick:()=>{taraKamDurdur();openCard(x.i);}},cardImg(c,false)),
-          el('div',{class:'small',style:'margin-top:6px;font-weight:600',text:c[0]}),
-          el('div',{class:'muted small',text:`${s[1]||''} · #${c[2]}`}),
-          el('div',{style:'display:flex;flex-direction:column;gap:6px;margin-top:8px'},
-            el('button',{class:'btn sec',style:'padding:6px 8px;font-size:13px',onclick:()=>{taraKamDurdur();openCard(x.i);}},'Detaylar'),
-            el('button',{class:'btn',style:'padding:6px 8px;font-size:13px',onclick:async e=>{const bt=e.currentTarget;bt.disabled=true;if(await addToCollection(x.i)){bt.textContent='✓ Koleksiyonda';}else bt.disabled=false;}},'+ Koleksiyona ekle')));})));};
+  function sonucuAc(i){
+    if(i==null||!taraOyunda(i,oyun)){
+      hata('Kart doğrulanamadı. Kartın tamamını düz çek, adını ve alt köşesini net göster.');
+      return;
+    }
+    taraKamDurdur();
+    openCard(i);
+  }
   let taramaSurumu=0;
   const isle=async(kaynak,cerceve)=>{
     const surum=++taramaSurumu;
     const guncel=()=>surum===taramaSurumu&&document.body.contains(sonucEl)&&taraSimdi()===oyun;
     sonucEl.innerHTML='';
     try{
-      const sonuc=await taraOku(kaynak,cerceve,t=>{if(guncel())durum(t);},oyun,dizin);
-      if(guncel())goster(sonuc);
+      const sonuc=await taraOku(kaynak,cerceve,t=>{if(guncel())durum(t);},oyun,dizin,dil);
+      if(guncel())sonucuAc(sonuc);
     }catch(e){if(guncel())hata(e.message||String(e));}
   };
   const kare=()=>{const vw=video.videoWidth,vh=video.videoHeight,cw=kutu.clientWidth,ch=kutu.clientHeight,sc=Math.max(cw/vw,ch/vh);
@@ -1332,8 +1353,8 @@ async function setPrices(sid){if(SETPRICE[sid])return SETPRICE[sid];const r=awai
 const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
 function mainValue(o){if(!o||!KUR)return null;
-  if(o[0]!=null)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
-  if(o[1]!=null)return{tl:eurTL(o[1]),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
+  if(Number.isFinite(o[0])&&o[0]>0)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
+  const eur=[o[1],o[2],o[3]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
 const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
 function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
   const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});
@@ -2973,10 +2994,9 @@ function mgOzetUygula(){if(OZET&&MG_OZET&&OZET.__mg!==MG_OZET){Object.assign(OZE
 function mgYukle(){if(MG_YUK)return MG_YUK;
   MG_YUK=(async()=>{try{localStorage.setItem('kb_mg','1');}catch(e){}
     const cdn=document.createElement('link');cdn.rel='preconnect';cdn.href='https://cards.scryfall.io';document.head.append(cdn);
-    const oz=fetch('fiyat/ozet_mg.json').then(r=>r.ok?r.json():null).catch(()=>null);
     for(let i=0;i<80&&!window.__katalogEkle;i++)await new Promise(r=>setTimeout(r,250));
     if(!mgVarMi()&&window.__katalogEkle)await window.__katalogEkle('cards_mg.json');
-    MG_OZET=await oz;mgOzetUygula();return mgVarMi();})();
+    MG_OZET=await fetch('fiyat/ozet_mg.json').then(r=>r.ok?r.json():null).catch(()=>null);mgOzetUygula();return mgVarMi();})();
   return MG_YUK;}
 setInterval(()=>{if(!mgOzetUygula())return;try{if(DIL!=='mg')return;const v=document.querySelector('.view.on');
   if(v&&v.id==='v-katalog')drawCat();if(v&&v.id==='v-piyasa'){pzShown=100;drawPiyasa();}}catch(e){}},700);
@@ -3007,21 +3027,22 @@ const _rsMg=window.rarSeviye;window.rarSeviye=function(r){const x=String(r||'').
 const _tfMg=window.tileFor;window.tileFor=function(i){const t=_tfMg.apply(this,arguments);try{const c=CAT.cards[i];if(isMg(c)&&MG_RENK[c[5]])t.style.setProperty('--tc',MG_RENK[c[5]]);}catch(e){}return t;};
 
 /* kart ayrıntıları (mana, tür satırı, kart metni, güç/dayanıklılık, çizer) */
-async function mgDetay(c){if(c[17])return c[17];const sid=c[14].slice(0,c[14].lastIndexOf('-'));
-  try{DETAY[sid]=DETAY[sid]||fetch('detay/'+encodeURIComponent(sid)+'.json').then(r=>r.ok?r.json():{});const d=await DETAY[sid]||{};
-    CAT.cards.forEach(x=>{if(!x[17]&&isMg(x)&&x[14].slice(0,x[14].lastIndexOf('-'))===sid&&d[x[14]]){x[17]=d[x[14]];if(x[17].a)x[8]=x[17].a;}});}catch(e){DETAY[sid]=null;}
-  if(!c[17])c[17]={};return c[17];}
+async function mgDetay(c){
+  if(c[17])return c[17];
+  const d=await setDetay(setOf(c)[0]);
+  c[17]=d[c[14]]||{};
+  if(c[17].a)c[8]=c[17].a;
+  return c[17];
+}
 function mgMana(s){const out=[];String(s||'').split(/(\{[^}]+\})/).forEach(p=>{if(!p)return;const m=p.match(/^\{([^}]+)\}$/);
   if(!m){out.push(document.createTextNode(p));return;}const ad=m[1].replace(/\//g,'').replace('½','HALF').replace('∞','INFINITY');
   const im=el('img',{class:'msym',src:'https://svgs.scryfall.io/card-symbols/'+encodeURIComponent(ad)+'.svg',alt:p,title:p,loading:'lazy'});
   im.addEventListener('error',()=>im.replaceWith(document.createTextNode(p)));out.push(im);});return out;}
-const _ocMg=window.openCard;
-window.openCard=async function(i){const c=CAT.cards[i];if(isMg(c)&&!c[17]){$('#modalBody').innerHTML='<div class="muted">Yükleniyor…</div>';$('#modal').classList.add('on');await mgDetay(c);}return _ocMg.apply(this,arguments);};
 const DIL_AD={ja:'Japonca',de:'Almanca',fr:'Fransızca',it:'İtalyanca',es:'İspanyolca',pt:'Portekizce',ko:'Korece',ru:'Rusça',zhs:'Çince (basit)',zht:'Çince (geleneksel)',he:'İbranice',la:'Latince',grc:'Antik Yunanca',ar:'Arapça',sa:'Sanskritçe',ph:'Phyrexian'};
 const _ocnMg=window.openCardNow;
 window.openCardNow=function(i){const r=_ocnMg.apply(this,arguments);
   try{const c=CAT.cards[i];if(!isMg(c))return r;
-    if(!c[17]){mgDetay(c).then(()=>{if($('#modal').classList.contains('on'))window.openCardNow(i);});return r;}
+    if(!c[17]){const mevcut=$('#modalBody .detail');mgDetay(c).then(()=>{if(mevcut?.isConnected&&$('#modal').classList.contains('on'))window.openCardNow(i);}).catch(()=>{});return r;}
     const a=c[17],b=$('#modalBody'),dl=b.querySelector('dl.kv');b.style.setProperty('--mc',MG_RENK[c[5]]||'var(--accent)');
     const y=a.y||[];
     if(dl){const dd=(k,v)=>{if(v==null||v==='')return;dl.append(el('dt',{},k),el('dd',{},...(Array.isArray(v)?v:[v])));};

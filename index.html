@@ -999,7 +999,7 @@ async function drawOdemeHesabi(area){
   ['pointerup','pointercancel','scroll'].forEach(t=>document.addEventListener(t,e=>{if(t==='scroll'||e.pointerType!=='mouse')birak();},{passive:true,capture:true}));
 })();
 /* ---------- kamerayla kart tarama ---------- */
-let TARA={worker:null,stream:null,timer:null,isimler:null,iz:null};let TARA_RENK=2;
+let TARA={worker:null,stream:null,timer:null};let TARA_RENK=2;
 function taraDct(n){const m=[];for(let u=0;u<8;u++){const r=new Float64Array(n);for(let x=0;x<n;x++)r[x]=Math.cos(Math.PI*(2*x+1)*u/(2*n));m.push(r);}return m;}
 const TARA_DCT={};
 function taraPhash(g,h,w){const k=h+'x'+w;const [dy,dx]=TARA_DCT[k]||(TARA_DCT[k]=[taraDct(h),taraDct(w)]);
@@ -1016,19 +1016,32 @@ function taraIzRenk(d){const N=256*352,gr=new Float64Array(N),cb=new Float64Arra
   for(let i=0;i<N;i++){const R=d[i*4],G=d[i*4+1],B=d[i*4+2];gr[i]=R*0.299+G*0.587+B*0.114;cb[i]=-0.168736*R-0.331264*G+0.5*B;cr[i]=0.5*R-0.418688*G-0.081312*B;}
   return [...taraIzGri(gr),...taraPhash(taraKucult(cb),44,32),...taraPhash(taraKucult(cr),44,32)];}
 function taraPc(x){x-=(x>>>1)&0x55555555;x=(x&0x33333333)+((x>>>2)&0x33333333);return (((x+(x>>>4))&0x0F0F0F0F)*0x01010101)>>>24;}
-function taraOyunOf(i){const s=String((CAT.cards[i]||[])[14]);return s.startsWith('cp-')?'cp':s.startsWith('mg-')?'mg':'pk';}
 function taraSimdi(){return DIL==='cp'?'cp':DIL==='mg'?'mg':'pk';}
-function taraOyunda(i){const c=CAT&&CAT.cards[i];if(!c)return false;return taraOyunOf(i)===(TARA.oyunCp!=null?TARA.oyunCp:taraSimdi());}
-async function taraIzleriYukle(){
-  const mgV=CAT.cards.some(isMg),anah=mgV?'hepsi+mg':'hepsi';if(TARA.iz&&TARA.izOyun===anah)return TARA.iz;
-  let r=await fetch('tara/izler2.json',{cache:'no-cache'}).catch(()=>null);let K=8;
-  if(!r||!r.ok){r=await fetch('tara/izler.json',{cache:'no-cache'});K=4;}
-  if(!r.ok)throw new Error('iz yok');const j=await r.json();
-  if(mgV&&K===8){try{const r2=await fetch('tara/izler_mg.json',{cache:'no-cache'});if(r2.ok){const j2=await r2.json();if(j2&&j2.d)Object.assign(j.d,j2.d);}}catch(e){}}
-  const idx=[],ids=Object.keys(j.d);const h=new Uint32Array(ids.length*K);let n=0;
-  for(const id of ids){const i=BYID[id];if(i===undefined)continue;const s=j.d[id];if(s.length<K*8)continue;idx.push(i);
-    for(let k=0;k<K;k++)h[n*K+k]=parseInt(s.slice(k*8,k*8+8),16);n++;}
-  TARA.iz={idx,h:h.subarray(0,n*K),n,K};TARA.izOyun=anah;return TARA.iz;}
+function taraOyunOf(id){return id.startsWith('cp-')?'cp':id.startsWith('mg-')?'mg':'pk';}
+function taraOyunda(i,oyun){const c=CAT?.cards[i];return !!c&&taraOyunOf(String(c[14]))===oyun;}
+function taraDizin(j,K,oyun){
+  const idx=[],izler=[];
+  for(const [id,s] of Object.entries(j.d||{})){
+    if(taraOyunOf(id)!==oyun||BYID[id]===undefined||typeof s!=='string'||s.length!==K*8||!/^[0-9a-f]+$/i.test(s))continue;
+    idx.push(BYID[id]);
+    for(let k=0;k<K;k++)izler.push(parseInt(s.slice(k*8,k*8+8),16));
+  }
+  return {idx,h:Uint32Array.from(izler),n:idx.length,K};
+}
+async function taraIzleriYukle(oyun){
+  const al=async yol=>{const r=await fetch(yol,{cache:'no-cache'});return r.ok?r.json():null;};
+  if(oyun==='mg'){
+    if(!mgVarMi()&&!await mgYukle())return null;
+    const j=await al('tara/izler_mg.json');
+    return j?taraDizin(j,8,oyun):null;
+  }
+  await window.__katalog;
+  await window.__ikinciDil;
+  const j=await al('tara/izler2.json').catch(()=>null);
+  if(j)return taraDizin(j,8,oyun);
+  const eski=await al('tara/izler.json');
+  return eski?taraDizin(eski,4,oyun):null;
+}
 function taraIzKes(src,sx,sy,sw,sh,aci){const c=document.createElement('canvas');c.width=256;c.height=352;const x=c.getContext('2d',{willReadFrequently:true});
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#808080';x.fillRect(0,0,256,352);
   x.translate(128,176);x.scale(256/sw,352/sh);if(aci)x.rotate(-aci*Math.PI/180);x.drawImage(src,-(sx+sw/2),-(sy+sh/2));
@@ -1068,7 +1081,7 @@ function taraKartBul(src,W,H){
     if(sec.some(z=>Math.hypot(z.cx-cx,z.cy-cy)<cw*0.04&&Math.abs(z.cw/cw-1)<0.06))continue;
     sec.push({cx,cy,cw,r:[cx-cw/2,cy-ch/2,cw,ch,e.ad],puan:e.puan});if(sec.length>=6)break;}
   return sec;}
-function taraGorsel(src,W,H,cerceve,hizli){const I=TARA.iz;if(!I)return {liste:[],kesim:null};
+function taraGorsel(I,src,W,H,cerceve,hizli){if(!I?.n)return {liste:[],kesim:null};
   const n=I.n,h=I.h,K=I.K,RW=TARA_RENK,en=new Uint16Array(n).fill(65535),enK=new Uint16Array(n),kes=[],kesEn=[];
   const tara=r=>{const k=kes.length;kes.push(r);const [a,b,c,d,e,f,g2,h2]=taraIzKes(src,...r);let m=65535;
     for(let i=0;i<n;i++){const o=i*K;let t=(taraPc(h[o]^a)+taraPc(h[o+1]^b)+taraPc(h[o+2]^c)+taraPc(h[o+3]^d))*2;
@@ -1110,7 +1123,7 @@ function taraIsimPuani(ad,metin){
   if(ad.length<4)return 0;let en=0;const L=ad.length;
   for(let i=0;i<=Math.max(0,metin.length-L+2);i++){const p=taraBenzer(ad,metin.slice(i,i+L));if(p>en)en=p;}
   return en>=0.62?en*0.95:0;}
-function taraEslestir(ustMetin,altMetin,tumMetin){
+function taraEslestir(ustMetin,altMetin,tumMetin,oyun){
   const ust=taraNorm(ustMetin)||taraNorm(tumMetin),tum=taraNorm(tumMetin+' '+ustMetin).slice(0,700);
   const nos=[];const re=/([A-Za-z]{0,3}\s?\d{1,3})\s*[\/|\\]\s*([A-Za-z]{0,3}\s?\d{2,3})/g;let m;
   for(const t of [altMetin,tumMetin])while((m=re.exec(t||''))){const top=parseInt(String(m[2]).replace(/\D/g,''),10),n=taraNo(m[1]);
@@ -1119,34 +1132,47 @@ function taraEslestir(ustMetin,altMetin,tumMetin){
   const re2=/[T1Il]?G\s?(\d{2})\W{0,2}[NT1Il]?G\s?(\d{2})/g;
   for(const t of [altMetin,tumMetin])while((m=re2.exec(t||''))){const a=String(+m[1]).padStart(2,'0');nos.push(['TG'+a,+m[2]],['GG'+a,+m[2]]);}
   const isimMetni=(ust+' '+tum).slice(0,700);
-  let aday=[];
-  if(nos.length){const set=new Set(nos.map(x=>x[0]));aday=CAT.cards.map((c,i)=>i).filter(i=>set.has(taraNo(CAT.cards[i][2])));}
-  if(!aday.some(i=>taraIsimPuani(taraNorm(CAT.cards[i][0]),isimMetni)>0)){
-    if(!TARA.isimler||TARA.isimlerN!==CAT.cards.length){TARA.isimlerN=CAT.cards.length;TARA.isimler=new Map();CAT.cards.forEach((c,i)=>{const k=taraNorm(c[0]);if(!TARA.isimler.has(k))TARA.isimler.set(k,[]);TARA.isimler.get(k).push(i);});}
-    const ek=[];for(const [k,ids] of TARA.isimler)if(k.length>=4&&taraIsimPuani(k,isimMetni)>0)ek.push(...ids);
-    aday=[...new Set([...aday,...ek])];}
-  aday=aday.filter(taraOyunda);
-  const sonuc=aday.map(i=>{const c=CAT.cards[i],s=CAT.sets[c[1]]||[];const ad=taraNorm(c[0]);
-    const ip=Math.max(taraIsimPuani(ad,ust),taraIsimPuani(ad,tum)*0.9);
+  const kelimeler=t=>String(t||'').normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+  const ustKelimeler=' '+kelimeler(ustMetin)+' ';
+  const tumKelimeler=' '+kelimeler(tumMetin)+' ';
+  const adlar=c=>[...String(c[0]).split(' // '),c[15]].filter(Boolean);
+  const noSet=new Set(nos.map(x=>x[0]));
+  const aday=[];
+  CAT.cards.forEach((c,i)=>{
+    if(!taraOyunda(i,oyun))return;
+    const ad=adlar(c);
+    const tam=ad.some(a=>{const k=kelimeler(a);return k&&(ustKelimeler.includes(' '+k+' ')||k.length>=5&&tumKelimeler.includes(' '+k+' '));});
+    const no=noSet.has(taraNo(c[2]));
+    if(tam||no)aday.push({i,tam,ad});
+  });
+  const sonuc=aday.map(({i,tam,ad})=>{const c=CAT.cards[i],s=CAT.sets[c[1]]||[];
+    const isimler=ad.map(taraNorm);
+    const ip=tam?1:Math.max(0,...isimler.map(k=>taraIsimPuani(k,isimMetni)));
+    const adUzunlugu=Math.max(0,...isimler.map(k=>k.length));
     const no=nos.find(x=>x[0]===taraNo(c[2]));const top=no&&s[4]&&no[1]===s[4];const topVar=!!s[4]&&nos.some(x=>x[1]===s[4]);
-    return {i,p:ip*10+(ip>0?ad.length/10:0)+(no?5:0)+(top?4:(topVar&&ip>0?3:0))+1.5*c[1]/CAT.sets.length,ip,no:!!no,top};})
-    .filter(x=>x.ip>0||(x.no&&x.top)).sort((a,b)=>b.p-a.p);
+    return {i,p:ip*10+(ip>0?adUzunlugu/10:0)+(no?5:0)+(top?4:(topVar&&ip>0?3:0))+1.5*c[1]/CAT.sets.length,ip,no:!!no,top,tam};})
+    .filter(x=>x.tam||(x.no&&x.top)).sort((a,b)=>b.p-a.p);
   return {liste:sonuc.slice(0,18),bulunanNo:nos[0]?`${nos[0][0]}/${nos[0][1]}`:null};}
-async function taraOku(kaynak,kartCercevesi,durum,ara){
+function taraSonuclari(gorsel,ocr,oyun){
+  const m=new Map();
+  for(const g of gorsel)if(g.d<=38&&taraOyunda(g.i,oyun))m.set(g.i,{i:g.i,d:g.d,ip:0,no:false,top:false});
+  for(const o of ocr?.liste||[]){
+    if(!taraOyunda(o.i,oyun))continue;
+    const x=m.get(o.i);
+    if(x)Object.assign(x,{ip:o.ip,no:o.no,top:o.top});
+    else if(o.tam)m.set(o.i,{i:o.i,d:99,ip:o.ip,no:o.no,top:o.top});
+  }
+  const l=[...m.values()].map(x=>({...x,p:Math.max(0,52-x.d)+(x.no?10:0)+(x.top?6:0)+x.ip*8}));
+  l.sort((a,b)=>b.p-a.p);
+  const [ilk,ikinci]=l;
+  const emin=!!ilk&&(ilk.d<=22||(ilk.no&&ilk.top&&ilk.d<=38))&&(!ikinci||ilk.p-ikinci.p>=5);
+  return {liste:l.slice(0,12),bulunanNo:ocr?.bulunanNo,emin};
+}
+async function taraOku(kaynak,kartCercevesi,durum,ara,oyun,dizin){
   durum('Kart resmi karşılaştırılıyor…');
-  let gor={liste:[],kesim:null};TARA.oyunCp=null;
-  try{await taraIzleriYukle();gor=taraGorsel(kaynak,kaynak.width,kaynak.height,kartCercevesi);}catch(e){}
-  /* 23 Kasım: kartın oyunu resimden anlaşılır (Pokémon / Cyberpunk); sonuçlar sadece o oyundan gelir */
-  {const cpOf=taraOyunOf;const simdi=taraSimdi();const b=gor.liste[0];let oy=simdi;
-   if(b&&b.d<=30&&cpOf(b.i)!==simdi){const ayni=gor.liste.find(x=>cpOf(x.i)===simdi);if(!ayni||ayni.d-b.d>=6)oy=cpOf(b.i);}
-   TARA.oyunCp=oy;gor.liste=gor.liste.filter(x=>cpOf(x.i)===oy);if(!gor.liste.length)gor.kesim=null;}
-  const birlestir=ocr=>{const m=new Map();
-    for(const g of gor.liste)m.set(g.i,{i:g.i,d:g.d,ip:0,no:false,top:false});
-    for(const o of (ocr?ocr.liste:[])){const x=m.get(o.i)||{i:o.i,d:99};Object.assign(x,{ip:o.ip,no:o.no,top:o.top});m.set(o.i,x);}
-    const l=[...m.values()].filter(x=>taraOyunda(x.i)).map(x=>({...x,p:Math.max(0,52-x.d)+(x.no?10:0)+(x.top?6:0)+x.ip*8}));
-    l.sort((a,b)=>b.p-a.p);const b0=l[0],b1=l[1];
-    const emin=!!b0&&(b0.d<=22||(b0.no&&b0.top&&b0.d<=40)||(b0.d<=32&&(!b1||b1.d-b0.d>=8)));
-    return {liste:l.slice(0,12),bulunanNo:ocr&&ocr.bulunanNo,emin};};
+  const gor=taraGorsel(await dizin,kaynak,kaynak.width,kaynak.height,kartCercevesi);
+  gor.liste=gor.liste.filter(x=>x.d<=38&&taraOyunda(x.i,oyun));
+  const birlestir=ocr=>taraSonuclari(gor.liste,ocr,oyun);
   if(gor.liste.length&&ara)ara(birlestir(null));
   let ocr=null;
   try{const w=await taraMotor(durum);durum(gor.liste.length?'Kart numarası kontrol ediliyor…':'Kart okunuyor…');
@@ -1157,14 +1183,15 @@ async function taraOku(kaynak,kartCercevesi,durum,ara){
       alt=(await w.recognize(taraBolge(src,0,H*0.86,W,H*0.14,2.4))).data.text;
       const ham=document.createElement('canvas');ham.width=Math.round(W*2.4);ham.height=Math.round(H*0.14*2.4);ham.getContext('2d').drawImage(src,0,H*0.86,W,H*0.14,0,0,ham.width,ham.height);
       alt+='\n'+(await w.recognize(ham)).data.text;}
-    ocr=taraEslestir(ust,alt,'');
-    if(!gor.liste.length&&(!ocr.liste.length||!(ocr.liste[0].ip>0))){const tum=(await w.recognize(taraBolge(src,0,0,W,H,Math.min(2,1600/Math.max(W,H))))).data.text;ocr=taraEslestir(ust,alt,tum);}
+    ocr=taraEslestir(ust,alt,'',oyun);
+    if(!gor.liste.length&&(!ocr.liste.length||!(ocr.liste[0].ip>0))){const tum=(await w.recognize(taraBolge(src,0,0,W,H,Math.min(2,1600/Math.max(W,H))))).data.text;ocr=taraEslestir(ust,alt,tum,oyun);}
   }catch(e){if(!gor.liste.length)throw e;}
-  const son=birlestir(ocr);const oyu=TARA.oyunCp;TARA.oyunCp=null;
-  if(oyu!=null&&oyu!==taraSimdi()){const ob=document.querySelector('#oyunSec button[data-o="'+oyu+'"]');if(oyu==='mg'&&ob)ob.click();else if(oyu==='cp')dilDegistir('cp');else if(oyu==='pk')dilDegistir(store.get('kb_pdil','en')==='ja'?'ja':'en');toast(oyu==='cp'?'🌆 Cyberpunk kartı algılandı, Cyberpunk\'a geçildi':oyu==='mg'?'🧙 Magic kartı algılandı, Magic\'e geçildi':'⚡ Pokémon kartı algılandı, Pokémon\'a geçildi');}
-  return son;}
+  return birlestir(ocr);}
 function openTara(){
   const b=$('#modalBody');b.innerHTML='';taraKamDurdur();
+  const oyun=taraSimdi(),oyunAdi={pk:'Pokémon',cp:'Cyberpunk TCG',mg:'Magic: The Gathering'}[oyun];
+  let iz=null;
+  const dizin=taraIzleriYukle(oyun).then(i=>iz=i).catch(()=>null);
   const durumEl=el('div',{class:'small',style:'margin-top:8px;min-height:20px'});const durum=t=>{durumEl.style.color='';durumEl.textContent=t;};
   const hata=t=>{durumEl.style.color='var(--danger)';durumEl.textContent=t;};
   const sonucEl=el('div',{style:'margin-top:12px'});
@@ -1174,8 +1201,9 @@ function openTara(){
     el('div',{style:'position:absolute;inset:4%;border:2px dashed rgba(255,214,90,.9);border-radius:10px;pointer-events:none'}),
     el('div',{style:'position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none',text:'Kartı çerçevenin içine sığdır'}));
   const dosya=el('input',{type:'file',accept:'image/*',capture:'environment',style:'display:none'});
-  const goster=(r,araSonuc)=>{sonucEl.innerHTML='';
-    if(!r.liste.length){hata('Kart tanınamadı. Kartı düz tut, ışığı artır, kartın adı ve alttaki numarası (ör. 56/102) net görünsün. İstersen arama kutusuna adını yazabilirsin.');return;}
+  const goster=(r,araSonuc)=>{if(!document.body.contains(sonucEl)||taraSimdi()!==oyun)return;
+    r={...r,liste:r.liste.filter(x=>taraOyunda(x.i,oyun))};sonucEl.innerHTML='';
+    if(!r.liste.length){if(!araSonuc)hata(oyunAdi+' kataloğunda eşleşme bulunamadı. Kartı düz tut ve adının net göründüğünden emin ol.');return;}
     if(!araSonuc)durum(r.emin?'Kart bulundu ✓ İlk sıradaki kart büyük ihtimalle seninki; değilse aşağıdan doğrusunu seç.':'Emin olamadım; aşağıdaki kartlardan doğrusunu seç. Kartı çerçeveyi dolduracak şekilde, düz ve iyi ışıkta tutarsan daha iyi bulur.');
     sonucEl.append(el('div',{style:'display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px'},
       ...r.liste.map(x=>{const c=CAT.cards[x.i],s=CAT.sets[c[1]]||[];
@@ -1186,15 +1214,15 @@ function openTara(){
           el('div',{style:'display:flex;flex-direction:column;gap:6px;margin-top:8px'},
             el('button',{class:'btn sec',style:'padding:6px 8px;font-size:13px',onclick:()=>{taraKamDurdur();openCard(x.i);}},'Detaylar'),
             el('button',{class:'btn',style:'padding:6px 8px;font-size:13px',onclick:async e=>{const bt=e.currentTarget;bt.disabled=true;if(await addToCollection(x.i)){bt.textContent='✓ Koleksiyonda';}else bt.disabled=false;}},'+ Koleksiyona ekle')));})));};
-  const isle=async(kaynak,cerceve)=>{sonucEl.innerHTML='';try{goster(await taraOku(kaynak,cerceve,durum,ara=>{goster(ara,true);}));}catch(e){hata(e.message||String(e));}};
+  const isle=async(kaynak,cerceve)=>{sonucEl.innerHTML='';try{goster(await taraOku(kaynak,cerceve,durum,ara=>{goster(ara,true);},oyun,dizin));}catch(e){hata(e.message||String(e));}};
   const kare=()=>{const vw=video.videoWidth,vh=video.videoHeight,cw=kutu.clientWidth,ch=kutu.clientHeight,sc=Math.max(cw/vw,ch/vh);
     const sw=cw/sc,sh=ch/sc,sx=(vw-sw)/2,sy=(vh-sh)/2,ic=0.02;
     const cv=document.createElement('canvas');cv.width=630;cv.height=880;
     cv.getContext('2d').drawImage(video,sx+sw*ic,sy+sh*ic,sw*(1-2*ic),sh*(1-2*ic),0,0,630,880);return cv;};
   let oto=null,mesgul=false,kilit=false,gecmis=[];
   const otoDur=()=>{if(oto){clearInterval(oto);oto=null;}};
-  const otoAdim=async()=>{if(mesgul||kilit)return;if(!document.body.contains(video)){otoDur();return;}if(!video.videoWidth||!TARA.iz)return;
-    mesgul=true;try{const cv=kare();const g=taraGorsel(cv,630,880,true,true);const b=g.liste[0];
+  const otoAdim=async()=>{if(mesgul||kilit)return;if(!document.body.contains(video)){otoDur();return;}if(!video.videoWidth||!iz?.n||taraSimdi()!==oyun)return;
+    mesgul=true;try{const cv=kare();const g=taraGorsel(iz,cv,630,880,true,true);const b=g.liste[0];
       gecmis.push(b&&b.d<=32?b.i:-1);if(gecmis.length>5)gecmis.shift();
       const say=b?gecmis.filter(x=>x===b.i).length:0;
       if(b&&b.d<=32){durum(`Kart tanınıyor… ${'●'.repeat(Math.min(3,say))}${'○'.repeat(Math.max(0,3-say))}`);}
@@ -1210,7 +1238,7 @@ function openTara(){
       cv.width=Math.round(bm.width*k);cv.height=Math.round(bm.height*k);cv.getContext('2d').drawImage(bm,0,0,cv.width,cv.height);
       const oran=cv.width/cv.height;await isle(cv,oran>0.62&&oran<0.82);}catch(e){hata('Fotoğraf açılamadı.');}});
   b.append(el('div',{style:'display:flex;justify-content:space-between;gap:10px;margin-bottom:12px'},el('h2',{text:'📷 Kart tara'}),el('button',{class:'btn sec',onclick:()=>{taraKamDurdur();closeModal();}},'Kapat')),
-    el('div',{class:'muted small',style:'margin-bottom:10px',text:'Kartını kameraya göster; site kartı resminden tanır, alttaki numarayla da kontrol eder. Düz tut, parlamayı önlemek için hafif eğ.'}),
+    el('div',{class:'muted small',style:'margin-bottom:10px',text:'Taranan oyun: '+oyunAdi+'. Kartı düz tut, adı ve numarası net görünsün.'}),
     kutu,
     el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px'},
       el('button',{class:'btn sec',onclick:cek},'📸 Şimdi tara'),yeniden,
@@ -1224,7 +1252,7 @@ function openTara(){
       .then(s=>{if(!document.body.contains(video)){s.getTracks().forEach(t=>t.stop());return;}TARA.stream=s;video.srcObject=s;video.play().catch(()=>{});durum('Kartı sarı çerçeveye sığdır; kendiliğinden tanıyacak.');otoBasla();})
       .catch(()=>{kutu.style.display='none';durum('Kamera açılamadı. "🖼️ Fotoğraf çek / seç" ile kartın fotoğrafını çekebilirsin.');});
   }else{kutu.style.display='none';durum('"🖼️ Fotoğraf çek / seç" ile kartın fotoğrafını çek.');}
-  taraIzleriYukle().catch(()=>{});taraMotor(()=>{}).catch(()=>{});}
+}
 function taraDugmesiEkle(){const q=$('#cq');if(!q||$('#taraBtn'))return;
   const sar=el('div',{style:'display:flex;gap:8px;align-items:stretch'});q.replaceWith(sar);q.style.flex='1';q.style.minWidth='0';
   sar.append(q,el('button',{id:'taraBtn',class:'btn',style:'white-space:nowrap;padding:0 16px;font-size:15px',onclick:openTara},'📷 Kart tara'));}

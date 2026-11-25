@@ -1,6 +1,11 @@
 name: Kart izleri (kart tarama için)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/kart_izi.py'
+      - '.github/workflows/kart-izi.yml'
   workflow_dispatch: {}
   schedule:
     - cron: "17 2 * * 1"   # her pazartesi 05:17 (Türkiye saati): yeni kartların izleri eklenir

@@ -301,6 +301,9 @@ def main():
                 for q in no_ile.get(anahtar, []):
                     nm = q.get("name") or ""
                     taban = re.sub(r"\s*\([^)]*\)\s*$", "", nm)
+                    if sanat:
+                        # Imzali urun adinda hem koleksiyon no hem imza ibaresi bulunabilir.
+                        taban = re.sub(r"\s*\(\d+\s*/\s*\d+\)\s*$", "", taban)
                     taban = re.sub(r"\s+Art Card$", "", taban).strip().lower()
                     if taban != isim:
                         continue
@@ -313,6 +316,7 @@ def main():
                     p = aday[0]
             if not p:
                 continue
+            detay[sid][k[14]].setdefault('tp', p['productId'])
             if not k[13] and p.get("imageUrl"):
                 k[13] = re.sub(r"_\d+w\.jpg$", "_in_1000x1000.jpg", p["imageUrl"])
                 resimli += 1

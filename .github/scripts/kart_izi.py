@@ -14,12 +14,38 @@ from PIL import Image
 
 SITE, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
-cat = json.load(open(os.path.join(SITE, 'cards.json'), encoding='utf-8'))
-sets = cat['sets']
+def katalog(*yollar):
+    en_son = {'sets': [], 'cards': []}
+    for yol in yollar:
+        if not yol or not os.path.isfile(yol):
+            continue
+        try:
+            with open(yol, encoding='utf-8') as dosya:
+                veri = json.load(dosya)
+            if veri.get('cards') and veri.get('sets'):
+                return veri
+        except (OSError, ValueError):
+            continue
+    return en_son
+
+
+def resim_adresi(adres, onekler):
+    if not adres.startswith('~'):
+        return adres
+    if len(adres) > 2 and adres[1] in '0123456789':
+        i = int(adres[1])
+        if i < len(onekler):
+            return onekler[i] + adres[2:]
+    return ''
+
+
+cat = katalog(os.environ.get('KARTLAR_EN'), os.path.join(SITE, 'cards.json'))
+if not cat['cards']:
+    raise SystemExit('Ingilizce katalog okunamadi')
 JA_YOL = sys.argv[3] if len(sys.argv) > 3 else ''
-ja = json.load(open(JA_YOL, encoding='utf-8')) if JA_YOL and os.path.exists(JA_YOL) else {'sets': [], 'cards': []}
-CP_YOL = sys.argv[4] if len(sys.argv) > 4 else ''   # Cyberpunk TCG kataloğu (cyberpunk.py yazar)
-cp = json.load(open(CP_YOL, encoding='utf-8')) if CP_YOL and os.path.exists(CP_YOL) else {'sets': [], 'cards': []}
+ja = katalog(os.environ.get('KARTLAR_JA'), JA_YOL)
+CP_YOL = sys.argv[4] if len(sys.argv) > 4 else ''
+cp = katalog(CP_YOL)
 eski_yol = os.path.join(OUT, 'izler2.json')
 eski = {}
 if os.path.exists(eski_yol):
@@ -73,13 +99,15 @@ def indir(url):
         return r.read()
 
 
-def isle(c):
+def isle(islem):
+    c, veri = islem
     cid = c[14]
     urls = []
-    if c[13]:
-        urls.append(c[13])
-    if not cid.startswith(('ja-', 'cp-')):
-        urls.append('https://images.pokemontcg.io/%s/%s.png' % (sets[c[1]][0], c[2]))
+    adres = resim_adresi(c[13] or '', veri.get('pfx') or [])
+    if adres:
+        urls.append(adres)
+    if veri is cat:
+        urls.append('https://images.pokemontcg.io/%s/%s.png' % (veri['sets'][c[1]][0], c[2]))
     # Scrydex'e otomatik istek atılmaz (kuralları gereği)
     urls = [u for u in urls if 'scrydex.com' not in u]
     for u in urls:
@@ -91,14 +119,14 @@ def isle(c):
     return cid, None
 
 
-kartlar = cat['cards'] + [c for c in ja['cards'] if c[13]] + [c for c in cp['cards'] if c[13]]
+kartlar = [(c, veri) for veri in (cat, ja, cp) for c in veri['cards'] if (veri is cat or c[13])]
 yeni = {}
 eksik = []
-for c in kartlar:
+for c, veri in kartlar:
     if c[14] in eski:
         yeni[c[14]] = eski[c[14]]
     else:
-        eksik.append(c)
+        eksik.append((c, veri))
 print('toplam', len(kartlar), 'hazır', len(yeni), 'hesaplanacak', len(eksik), flush=True)
 
 bas = time.time()
@@ -136,11 +164,9 @@ if MG_YOL and os.path.exists(MG_YOL):
     print('Magic: toplam', len(mk), 'hazır', len(myeni), 'hesaplanacak', len(meksik), flush=True)
 
     def misle(c):
-        u = c[13]
-        if u.startswith('~'):
-            if len(u) < 3 or not u[1].isascii() or not u[1].isdigit() or int(u[1]) >= len(onekler):
-                return c[14], None
-            u = onekler[int(u[1])] + u[2:]
+        u = resim_adresi(c[13], onekler)
+        if not u:
+            return c[14], None
         if u.startswith('https://cards.scryfall.io/normal/'):
             u = u.replace('/normal/', '/small/', 1)
         for deneme in range(2):

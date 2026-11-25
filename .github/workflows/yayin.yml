@@ -5,7 +5,12 @@ on:
     - cron: "41 3 * * *"   # her gün 06:41 (Türkiye saati), fiyatlar güncellendikten sonra
   push:
     branches: [main]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      yalniz_yayin:
+        description: Mevcut kaynak verilerini kullanarak siteyi yayinla
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,7 +54,7 @@ jobs:
         run: python3 site/.github/scripts/en_ek.py site/cards.json
 
       - name: Fiyatları güncelle
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || hashFiles('veri/ozet.json') == ''
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.yalniz_yayin) || hashFiles('veri/ozet.json') == ''
         continue-on-error: true
         id: fiyat
         env:
@@ -57,13 +62,13 @@ jobs:
         run: python3 site/.github/scripts/fiyatlar.py veri site/cards.json
 
       - name: Japonca katalog ve fiyatlar
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || hashFiles('veri/japonca/cards_ja.json') == ''
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.yalniz_yayin) || hashFiles('veri/japonca/cards_ja.json') == ''
         continue-on-error: true
         id: japonca
         run: python3 site/.github/scripts/japonca.py veri
 
       - name: Japonca eksikleri tamamla (Pokellector)
-        if: steps.japonca.outcome == 'success' || github.event_name == 'workflow_dispatch' || hashFiles('veri/japonca/ek.json') == ''
+        if: steps.japonca.outcome == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.yalniz_yayin) || hashFiles('veri/japonca/ek.json') == ''
         continue-on-error: true
         id: ek
         timeout-minutes: 30
@@ -473,6 +478,8 @@ jobs:
           json.dump(kaynak, open(kaynak_yol, 'w'), ensure_ascii=False, separators=(',', ':'))
           print('Card Rush fiyatı uygulanan kart:', n)
           PY
+      - name: Set kayıtlarından eksik piyasa fiyatlarını tamamla
+        run: python3 site/.github/scripts/piyasa_ozet_tamamla.py _site
       - name: Google ve paylaşım sayfaları (kart/set sayfaları, site haritası, ikonlar)
         continue-on-error: true
         timeout-minutes: 15

@@ -3,12 +3,18 @@ name: Magic kataloğu ve fiyatları (Scryfall)
 # Her gün fiyat yayınından (06:41 TR) önce çalışır: Scryfall'ın günlük toplu verisinden tüm kağıt Magic: The Gathering
 # setleri ve kartları + TCGplayer/Cardmarket fiyatları → magic-verisi dalı. yayin.yml bu dalı siteye kopyalar.
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/magic.py'
+      - '.github/workflows/magic.yml'
   schedule:
     - cron: "23 2 * * *"   # 05:23 (Türkiye saati)
   workflow_dispatch: {}
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: magic
@@ -40,3 +46,8 @@ jobs:
           git add -A
           git commit -qm "Magic $(TZ=Europe/Istanbul date '+%d.%m.%Y')"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" magic-verisi
+      - name: Yeni Magic görsellerini tarama dizinine ekle
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run kart-izi.yml --repo "${{ github.repository }}" --ref main

@@ -590,12 +590,21 @@ function rarRozet(r){if(!r)return null;const v=rarSeviye(r);return el('span',{cl
 function gunKarti(){const ad=new Date().toISOString().slice(0,10)+DIL;let h=0;for(const ch of ad)h=(h*31+ch.charCodeAt(0))>>>0;
   const aday=[];for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&!/placeholder/.test(c[13])&&rarSeviye(c[3])>=3)aday.push(i);}
   return aday.length?aday[h%aday.length]:null;}
-function vitrin(){const kart=[],yuk=[];let n=0;
+const VITRIN_VERI=new Map();
+function vitrinVeri(){
+  const kayit=VITRIN_VERI.get(DIL),bugun=new Date().toISOString().slice(0,10);
+  if(kayit?.uzunluk===CAT.cards.length&&kayit.ozet===OZET&&kayit.magic===OZET?.__mg&&kayit.gun===bugun)return kayit;
+  const kart=[],yuk=[];let n=0;
+  const sirayaEkle=(liste,kayit,sinir)=>{if(liste.length===sinir&&kayit[0]<=liste.at(-1)[0])return;
+    const i=liste.findIndex(x=>x[0]<kayit[0]);if(i===-1)liste.push(kayit);else liste.splice(i,0,kayit);if(liste.length>sinir)liste.pop();};
   for(let i=0;i<CAT.cards.length;i++){const c=CAT.cards[i];if(dilOf(c)!==DIL)continue;n++;
-    const mv=OZET?mainValue(OZET.c[c[14]]):null;if(!mv||!c[13])continue;kart.push([mv.tl,i]);const p=pct(mv.tl,mv.prev);if(p!=null&&p>0.5&&mv.tl>=50)yuk.push([p,i,mv.tl]);}
-  kart.sort((a,b)=>b[0]-a[0]);yuk.sort((a,b)=>b[0]-a[0]);
+    const mv=OZET?mainValue(OZET.c[c[14]]):null;if(!mv||!c[13])continue;sirayaEkle(kart,[mv.tl,i],9);const p=pct(mv.tl,mv.prev);if(p!=null&&p>0.5&&mv.tl>=50)sirayaEkle(yuk,[p,i,mv.tl],6);}
   const g=gunKarti();let one=kart.slice(0,3).map(x=>x[1]);
   if(one.length<3){one=[];for(let i=CAT.cards.length-1;i>=0&&one.length<3;i--){const c=CAT.cards[i];if(dilOf(c)===DIL&&c[13]&&rarSeviye(c[3])>=3&&i!==g)one.push(i);}}
+  const v={kart,yuk,g,one,n,uzunluk:CAT.cards.length,ozet:OZET,magic:OZET?.__mg,gun:bugun};VITRIN_VERI.set(DIL,v);return v;
+}
+function vitrin(){
+  const {kart,yuk,g,one,n}=vitrinVeri();
   const ss=CAT.sets.filter(x=>setDil(x)===DIL).length,il=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL).length;
   const ara=q=>{const once=$('#cq').value;$('#cq').value=q;runCat();if(!once){try{history.pushState(Object.assign({},history.state||{kb:1},{q,v:'katalog',card:null,y:0}),'');}catch(e){}}window.scrollTo({top:$('#cq').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});};
   const oneri=DIL==='mg'?['Black Lotus','Lightning Bolt','Sol Ring','Counterspell','The One Ring','Ragavan']:DIL==='cp'?['Johnny Silverhand','Judy','Panam','Adam Smasher','Lucy','Mantis Blades']:DIL==='ja'?['リザードン','ピカチュウ','ミュウツー','ブラッキー','ゲンガー','イーブイ']:['Charizard','Pikachu','Mewtwo','Umbreon','Gengar','Eevee'];
@@ -675,7 +684,7 @@ function dilDegistir(d){if(d===DIL)return;DIL=d;try{localStorage.setItem('kb_dil
   const d=el('div',{id:'dilSec'});[['en','🇬🇧 İngilizce'],['ja','🇯🇵 Japonca']].forEach(([k,t])=>{const b=el('button',{onclick:()=>dilDegistir(k)},t);b.dataset.d=k;if(k===DIL)b.classList.add('on');d.append(b);});
   nav.parentNode.insertBefore(d,nav);})();
 function infoLine(){if(!CAT)return;const ss=CAT.sets.filter(s=>setDil(s)===DIL),last=ss[ss.length-1];
-  const a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL);let n=0;for(const c of CAT.cards)if(dilOf(c)===DIL)n++;
+  const a=active().filter(l=>BYID[l.card_id]!=null&&dilOf(CAT.cards[BYID[l.card_id]])===DIL);const n=CAT.setKartlari.reduce((top,k,i)=>top+(setDil(CAT.sets[i])===DIL?k.kartlar.length:0),0);
   $('#catInfo').textContent=last?`${DIL==='ja'?'Japonca · ':DIL==='cp'?'Cyberpunk TCG · ':DIL==='mg'?'Magic: The Gathering · ':''}${n.toLocaleString('tr-TR')} kart · ${ss.length} set · en yeni: ${last[1]} (${fmtDate(last[3])}) · satışta ${a.reduce((s,l)=>s+l.qty,0)} kart, ${a.length} ilan`:(DIL==='ja'?'Japonca kartlar hazırlanıyor; kısa süre sonra burada olacak.':DIL==='cp'?'Cyberpunk kartları hazırlanıyor; kısa süre sonra burada olacak.':DIL==='mg'?'Magic: The Gathering kartları yükleniyor…':'');}
 function crumb(){const b=$('#catCrumb');b.innerHTML='';if(catSet===null)return;const s=CAT.sets[catSet];
   b.append(el('div',{style:'display:flex;align-items:center;gap:16px;flex-wrap:wrap'},
@@ -1357,12 +1366,12 @@ async function loadPrices(){
 let PRICED={};
 function labelPriceSets(){if(!CAT||!OZET)return;PRICED={};for(const id of Object.keys(OZET.c)){const i=BYID[id];if(i!=null){const s=CAT.cards[i][1];PRICED[s]=(PRICED[s]||0)+1;}}
   [...$('#pzSet').options].forEach(o=>{if(o.value==='')return;const s=CAT.sets[+o.value],n=PRICED[+o.value]||0;o.textContent=`${s[1]} (${(s[3]||'').slice(0,4)})`+(n?` · ${n} kart`:' · fiyat yok');});}
-async function setPrices(sid){if(SETPRICE[sid])return SETPRICE[sid];const r=await fetch(`fiyat/set/${sid}.json`);if(!r.ok)throw new Error('yok');return SETPRICE[sid]=await r.json();}
+function setPrices(sid){return SETPRICE[sid] ||= fetch(`fiyat/set/${encodeURIComponent(sid)}.json`).then(r=>{if(!r.ok)throw new Error('yok');return r.json();}).catch(e=>{delete SETPRICE[sid];throw e;});}
 const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
 function mainValue(o){if(!o||!KUR)return null;
   if(Number.isFinite(o[0])&&o[0]>0)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
-  const eur=[o[1],o[2],o[3]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[1]===eur&&o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
+  const eur=[o[1],o[2],o[3],o[7]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[1]===eur&&o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
 const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
 function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
   const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});

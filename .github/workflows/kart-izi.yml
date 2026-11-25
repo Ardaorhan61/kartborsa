@@ -49,9 +49,20 @@ jobs:
           git clone --depth 1 --branch magic-verisi "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" mveri \
             || mkdir -p mveri
 
+      - name: Yayındaki Pokémon kataloglarını al
+        run: |
+          mkdir -p yayin
+          for dosya in cards.json cards_ja.json; do
+            if curl -fsSL --retry 2 --max-time 45 "https://www.kartborsa.com/$dosya" -o "yayin/$dosya.tmp"; then
+              mv "yayin/$dosya.tmp" "yayin/$dosya"
+            fi
+          done
+
       - name: Kart izlerini hesapla
         env:
           MG_SURE: "5400"
+          KARTLAR_EN: yayin/cards.json
+          KARTLAR_JA: yayin/cards_ja.json
         run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json veri/cyberpunk/cards_cp.json mveri/cards_mg.json
 
       - name: İzleri kaydet
@@ -68,4 +79,4 @@ jobs:
       - name: Siteyi yeniden yayınla
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run yayin.yml --repo "${{ github.repository }}" --ref main
+        run: gh workflow run yayin.yml --repo "${{ github.repository }}" --ref main -f yalniz_yayin=true

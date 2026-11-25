@@ -731,7 +731,7 @@ function runCat(){
 function tileFor(i,ilkSira=false){const c=CAT.cards[i],s=setOf(c),st=STOCKMAP[c[14]];
   const im=cardImg(c,false,null,ilkSira);{const rr=rarRozet(c[3]);if(rr&&!st)im.append(rr);}if(st){im.append(el('span',{class:'badge',text:tl(st.min)}),el('span',{class:'badge qtyb',text:st.qty+' adet'}));}
   const mv=OZET?mainValue(OZET.c[c[14]]):null;
-  return el('div',{class:'ctile',style:c[7]&&TIP_TR[c[7]]?'--tc:var(--t-'+c[7]+')':'',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset'},tipDot(c[7]),`${s[1]} · #${c[2]}`),mv?el('div',{class:'cval'},el('span',{text:'Piyasa ≈ '+tlx(mv.tl)+' '}),chg(pct(mv.tl,mv.prev),true)):null);}
+  return el('div',{class:'ctile',style:c[7]&&TIP_TR[c[7]]?'--tc:var(--t-'+c[7]+')':'',onclick:()=>openCard(i)},im,el('div',{class:'cname',text:c[0]}),el('div',{class:'cset'},tipDot(c[7]),`${s[1]} · #${c[2]}`),mv?el('div',{class:'cval'},el('span',{text:(OZET.c[c[14]]?.[8]||'Piyasa')+' ≈ '+tlx(mv.tl)+' '}),chg(pct(mv.tl,mv.prev),true)):null);}
 function drawCat(){
   const area=$('#catArea');area.innerHTML='';crumb();
   const filtering=catSet!==null||$('#cq').value.trim()||$('#cRar').value||$('#cSup').value||$('#cStock').checked;
@@ -1427,6 +1427,7 @@ function marketSection(c){
     let rec=null,noFile=false;try{const sp=await setPrices(setOf(c)[0]);rec=sp.c[c[14]];}catch{noFile=true;}
     box.lastChild.remove();
     if(rec?.ek_mg){
+      box.firstChild.textContent='Kaynak fiyatı';
       const f=rec.ek_mg,eur=f.para==='EUR',tlFiyat=eur?eurTL(f.t):usdTL(f.t);
       const baski={normal:'Normal',foil:'Foil',etched:'Etched Foil'}[f.f]||f.f;
       box.append(el('div',{class:'mtiles'},el('div',{class:'mtile'},
@@ -1495,10 +1496,10 @@ function drawPiyasa(){const area=$('#pzArea');area.innerHTML='';if(!CAT||!OZET){
   const tb=el('tbody');rows.slice(0,pzShown).forEach((r,n)=>{const s=setOf(r.c);
     tb.append(el('tr',{class:'click',onclick:()=>openCard(r.i)},el('td',{class:'muted',text:n+1}),el('td',{},el('img',{class:'mini',src:imgSmall(r.c),alt:'',loading:'lazy'})),
       el('td',{},el('b',{text:r.c[0]}),el('div',{class:'muted small',text:`${s[1]} · #${r.c[2]} · ${r.c[3]||''}`})),
-      el('td',{style:'font-weight:700;white-space:nowrap',text:tlx(r.v)}),el('td',{},chg(r.d1,true)),el('td',{},chg(r.d7,true)),el('td',{},chg(r.d30,true))));});
+      el('td',{style:'font-weight:700'},tlx(r.v),r.o[8]?el('div',{class:'muted small',text:r.src}):null),el('td',{},chg(r.d1,true)),el('td',{},chg(r.d7,true)),el('td',{},chg(r.d30,true))));});
   area.append(el('div',{class:'card',style:'padding:4px 12px;overflow-x:auto'},el('table',{},el('thead',{},el('tr',{},el('th',{},'#'),el('th',{}),el('th',{},'Kart'),el('th',{},'Piyasa değeri'),el('th',{},'Dünden'),el('th',{},'7 gün ort.'),el('th',{},'30 gün ort.'))),tb)),
     rows.length>pzShown?el('div',{style:'text-align:center;margin-top:12px'},el('button',{class:'btn sec',onclick:()=>{pzShown+=100;drawPiyasa();}},'Daha fazla göster')):'',
-    el('p',{class:'muted small',text:'Piyasa değeri: varsa TCGplayer (ABD) piyasa fiyatı, yoksa Cardmarket (Avrupa) trend fiyatı, günlük kurla TL. "Dünden" bir önceki günün fiyatına göre değişimdir. "7 gün ort." ve "30 gün ort." Cardmarket trend fiyatının o dönemin ortalama satış fiyatına göre farkıdır.'}));}
+    el('p',{class:'muted small',text:'Piyasa değeri: varsa TCGplayer (ABD) piyasa fiyatı veya Cardmarket (Avrupa) trend fiyatı, günlük kurla TL. Magic’te ek kaynak kullanıldığında fiyatın yanında gösterilir. "Dünden" bir önceki günün fiyatına göre değişimdir. "7 gün ort." ve "30 gün ort." Cardmarket trend fiyatının o dönemin ortalama satış fiyatına göre farkıdır.'}));}
 
 let pzT;$('#pzq').addEventListener('input',()=>{clearTimeout(pzT);pzT=setTimeout(()=>{pzShown=100;drawPiyasa();},200);});
 ['#pzSet','#pzSort'].forEach(s=>$(s).addEventListener('change',()=>{pzShown=100;drawPiyasa();}));

@@ -1400,8 +1400,8 @@ function setPrices(sid){return SETPRICE[sid] ||= fetch(`fiyat/set/${encodeURICom
 const usdTL=x=>x==null?null:x*KUR.USD, eurTL=x=>x==null?null:x*KUR.EUR;
 // özet: [usd, eurTrend, eurAvg7, eurAvg30, usdPrev, eurPrev, prevDate]
 function mainValue(o){if(!o||!KUR)return null;
-  if(Number.isFinite(o[0])&&o[0]>0)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:'TCGplayer'};
-  const eur=[o[1],o[2],o[3],o[7]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[1]===eur&&o[5]!=null?eurTL(o[5]):null,src:'Cardmarket'};return null;}
+  if(Number.isFinite(o[0])&&o[0]>0)return{tl:usdTL(o[0]),prev:o[4]!=null?usdTL(o[4]):null,src:o[8]||'TCGplayer'};
+  const eur=[o[1],o[2],o[3],o[7]].find(x=>Number.isFinite(x)&&x>0);if(eur!=null)return{tl:eurTL(eur),prev:o[1]===eur&&o[5]!=null?eurTL(o[5]):null,src:o[8]||'Cardmarket'};return null;}
 const pct=(a,b)=>(a==null||b==null||!b)?null:(a-b)/b*100;
 function chg(p,small){if(p==null||!isFinite(p))return el('span',{class:'chg flat',text:small?'':'—'});
   const r=Math.round(p*10)/10;if(Math.abs(r)<0.05)return el('span',{class:'chg flat',text:'= %0'});
@@ -1426,6 +1426,16 @@ function marketSection(c){
   (async()=>{
     let rec=null,noFile=false;try{const sp=await setPrices(setOf(c)[0]);rec=sp.c[c[14]];}catch{noFile=true;}
     box.lastChild.remove();
+    if(rec?.ek_mg){
+      const f=rec.ek_mg,eur=f.para==='EUR',tlFiyat=eur?eurTL(f.t):usdTL(f.t);
+      const baski={normal:'Normal',foil:'Foil',etched:'Etched Foil'}[f.f]||f.f;
+      box.append(el('div',{class:'mtiles'},el('div',{class:'mtile'},
+        el('div',{class:'muted small',text:f.k+' · '+baski}),
+        el('div',{class:'big',text:tlx(tlFiyat)}),
+        el('div',{class:'small',text:f.t.toLocaleString('tr-TR')+' '+f.para+' · '+fmtDate(f.g.replace(/-/g,'/'))}))));
+      if(f.veri==='MTGJSON')box.append(el('a',{class:'small',href:'https://mtgjson.com/downloads/all-files/',target:'_blank',rel:'noopener'},'Veri kaynağı: MTGJSON'));
+      return;
+    }
     if(!rec||(!rec.t&&!rec.m)){box.append(el('div',{class:'muted small',text:noFile?'Bu kartın setinin fiyatları henüz çekilemedi; her gün yeniden deneniyor.':'Fiyat kaynağında bu kart için henüz fiyat yok (çok yeni ya da nadiren satılan bir kart olabilir). Yayınlandığında burada kendiliğinden görünecek.'}));return;}
     const h=rec.h||[],prev=h.length>1?h[h.length-2]:null,cur=h[h.length-1];
     const kurDay=d=>(KUR.gecmis&&KUR.gecmis[d])||[KUR.USD,KUR.EUR];

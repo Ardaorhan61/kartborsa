@@ -497,6 +497,8 @@ jobs:
           PY
       - name: Set kayıtlarından eksik piyasa fiyatlarını tamamla
         run: python3 site/.github/scripts/piyasa_ozet_tamamla.py _site
+      - name: Aynı baskıya ait ek Magic fiyatlarını uygula
+        run: python3 site/.github/scripts/magic_ek_fiyat.py _site site/.github/data/magic_fiyat_ek.json
       - name: Google ve paylaşım sayfaları (kart/set sayfaları, site haritası, ikonlar)
         continue-on-error: true
         timeout-minutes: 15

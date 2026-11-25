@@ -79,4 +79,11 @@ jobs:
       - name: Siteyi yeniden yayınla
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run yayin.yml --repo "${{ github.repository }}" --ref main -f yalniz_yayin=true
+        run: |
+          for bekleme in 5 15 30; do
+            if gh workflow run yayin.yml --repo "${{ github.repository }}" --ref main -f yalniz_yayin=true; then
+              exit 0
+            fi
+            sleep "$bekleme"
+          done
+          exit 1

@@ -8,7 +8,9 @@ Aynı hesap index.html içindeki taraIz() fonksiyonuyla birebir aynıdır:
   resim -> 256x352 (gri) -> 8x8 blok ortalaması -> 32x44 -> DCT 8x8 -> 64 bit
   A: tüm kart, B: resim bölgesi (satır 4..22, sütun 3..29), C/D: renk (Cb, Cr) tüm kart
 """
-import io, json, os, sys, time, concurrent.futures as cf, urllib.request
+import io, json, os, re, sys, time, concurrent.futures as cf, urllib.request
+from functools import lru_cache
+from urllib.parse import quote, urlsplit, urlunsplit
 import numpy as np
 from PIL import Image
 
@@ -94,9 +96,30 @@ def iz(img):
 def indir(url):
     if not url.startswith('http'):
         return open(os.path.join(SITE, url), 'rb').read()
-    req = urllib.request.Request(url, headers={'User-Agent': 'KartBorsa-kart-izi/1.0'})
+    parca = urlsplit(url)
+    url = urlunsplit(parca._replace(path=quote(parca.path, safe="/%:@!    req = urllib.request.Request(url, headers={'User-Agent': 'KartBorsa-kart-izi/1.0'})'()*+,;=")))
+    req = urllib.request.Request(url, headers={'User-Agent': 'KartBorsa/1.0 (+https://www.kartborsa.com)'})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read()
+
+
+@lru_cache(maxsize=512)
+def set_fiyatlari(sid):
+    dizin = os.environ.get('KART_FIYAT_SETLERI')
+    if not dizin:
+        return {}
+    try:
+        with open(os.path.join(dizin, sid + '.json'), encoding='utf-8') as dosya:
+            return json.load(dosya).get('c', {})
+    except (OSError, ValueError):
+        return {}
+
+
+def tcg_resmi(c, veri):
+    sid = veri['sets'][c[1]][0]
+    kart = set_fiyatlari(sid).get(c[14]) or {}
+    m = re.match(r'https://(?:www\.)?tcgplayer\.com/product/(\d+)(?:[/?#]|$)', kart.get('url') or '')
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/' + m[1] + '_400w.jpg' if m else ''
 
 
 def isle(islem):
@@ -110,6 +133,9 @@ def isle(islem):
         urls.append('https://images.pokemontcg.io/%s/%s.png' % (veri['sets'][c[1]][0], c[2]))
     # Scrydex'e otomatik istek atılmaz (kuralları gereği)
     urls = [u for u in urls if 'scrydex.com' not in u]
+    yedek = tcg_resmi(c, veri)
+    if yedek and yedek not in urls:
+        urls.append(yedek)
     for u in urls:
         for deneme in range(2):
             try:

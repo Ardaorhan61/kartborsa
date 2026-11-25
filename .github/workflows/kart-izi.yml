@@ -63,6 +63,7 @@ jobs:
           MG_SURE: "5400"
           KARTLAR_EN: yayin/cards.json
           KARTLAR_JA: yayin/cards_ja.json
+          KART_FIYAT_SETLERI: veri/set
         run: python site/.github/scripts/kart_izi.py site izi veri/japonca/cards_ja.json veri/cyberpunk/cards_cp.json mveri/cards_mg.json
 
       - name: İzleri kaydet
